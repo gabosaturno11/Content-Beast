@@ -677,7 +677,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   </button>
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v6.5</span>
+    <span class="ver">v7.0</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -1193,7 +1193,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v6.5 — by Saturno Movement</span>
+  <span>CONTENT BEAST v7.0 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -2093,8 +2093,14 @@ function setMode(mode) {
   document.getElementById('pdf-ctrl').style.display = mode === 'pdf' ? '' : 'none';
   document.getElementById('cap-ctrl').style.display = mode === 'caption' ? '' : 'none';
   document.getElementById('atom-ctrl').style.display = mode === 'atomizer' ? '' : 'none';
+  document.getElementById('cv-ctrl').style.display = mode === 'canvas' ? '' : 'none';
   document.getElementById('pdf-wrap').style.display = mode === 'pdf' ? '' : 'none';
   document.getElementById('atom-preview').style.display = mode === 'atomizer' ? '' : 'none';
+  // Canvas mode: swap preview-body for canvas surface
+  document.getElementById('preview-body').style.display = mode === 'canvas' ? 'none' : '';
+  document.getElementById('cv-container').style.display = mode === 'canvas' ? 'flex' : 'none';
+  document.getElementById('wc-bar').style.display = mode === 'canvas' ? 'none' : '';
+  if (mode === 'canvas') cvRender();
   // Caption mode has sub-modes
   if (mode === 'caption') {
     setCapSub(capSubMode);
@@ -2102,8 +2108,8 @@ function setMode(mode) {
     document.getElementById('cap-output').style.display = 'none';
     document.getElementById('cl-preview').style.display = 'none';
   }
-  const titles = {pdf:'PDF Controls',caption:'Captions',atomizer:'Document Atomizer'};
-  const ptitles = {pdf:'Live Preview',caption:capSubMode==='library'?'Caption Preview':'Variants',atomizer:'Atom Preview'};
+  const titles = {pdf:'PDF Controls',caption:'Captions',atomizer:'Document Atomizer',canvas:'Canvas'};
+  const ptitles = {pdf:'Live Preview',caption:capSubMode==='library'?'Caption Preview':'Variants',atomizer:'Atom Preview',canvas:'Canvas Workspace'};
   document.getElementById('ctrl-title').textContent = titles[mode] || '';
   document.getElementById('preview-title').textContent = ptitles[mode] || '';
   document.getElementById('preview-toolbar').style.display = mode === 'pdf' ? '' : 'none';
@@ -2721,6 +2727,14 @@ const CMD_ACTIONS = [
   { icon: 'CL', text: 'Export All Captions (Markdown)', desc: 'Library as MD', fn: () => clExportAll('md') },
   { icon: 'CL', text: 'Import Seeds to Library', desc: 'Add built-in quotes to library', fn: () => importSeedsToLibrary() },
   { icon: 'CL', text: 'Seed Full Content Library', desc: 'Load all manifesto, quotes, and poems', fn: () => { setMode('caption'); setCapSub('library'); seedGaboCaptions(); } },
+  { icon: 'CV', text: 'Open Canvas', desc: 'Whiteboard workspace', fn: () => setMode('canvas') },
+  { icon: 'CV', text: 'Canvas: Add Text Node', desc: 'Add text to canvas', fn: () => { setMode('canvas'); cvAddTextNode(); } },
+  { icon: 'CV', text: 'Canvas: Add Image', desc: 'Upload image to canvas', fn: () => { setMode('canvas'); document.getElementById('cv-img-input').click(); } },
+  { icon: 'CV', text: 'Canvas: Export JSON', desc: 'Export canvas graph', fn: () => cvExportJSON() },
+  { icon: 'CV', text: 'Canvas: Fit View', desc: 'Zoom to fit all nodes', fn: () => { setMode('canvas'); cvFitView(); } },
+  { icon: 'CV', text: 'Canvas: Social Calendar', desc: 'Load social media calendar template', fn: () => { setMode('canvas'); cvLoadTemplate('social-calendar'); } },
+  { icon: 'CV', text: 'Canvas: Carousel', desc: 'Load carousel slides template', fn: () => { setMode('canvas'); cvLoadTemplate('carousel'); } },
+  { icon: 'CV', text: 'Canvas: Infographic', desc: 'Load infographic template', fn: () => { setMode('canvas'); cvLoadTemplate('infographic'); } },
   { icon: 'CL', text: 'Add Caption', desc: 'Add manually', fn: () => { setMode('caption'); setCapSub('library'); addCaptionManual(); } },
   { icon: 'T', text: 'Toggle Library Panel', desc: 'Show/hide sidebar', fn: () => togglePanel('lib') },
   { icon: 'T', text: 'Toggle Toolbar', desc: 'Show/hide formatting bar', fn: () => togglePanel('toolbar') }
@@ -3401,8 +3415,9 @@ function clearAtoms() {
 // CAPTION LIBRARY — IndexedDB Storage
 // ============================================================
 const CL_DB_NAME = 'ContentBeastCaptions';
-const CL_DB_VER = 1;
+const CL_DB_VER = 2;
 const CL_STORE = 'captions';
+const CV_STORE = 'canvasState';
 let clDB = null;
 let clCaptions = [];
 let clFilter = 'all';
@@ -3419,6 +3434,9 @@ function openCaptionDB() {
         store.createIndex('voice', 'voice', { unique: false });
         store.createIndex('platform', 'platform', { unique: false, multiEntry: true });
         store.createIndex('created', 'created', { unique: false });
+      }
+      if (!db.objectStoreNames.contains(CV_STORE)) {
+        db.createObjectStore(CV_STORE, { keyPath: 'id' });
       }
     };
     req.onsuccess = function(e) { clDB = e.target.result; resolve(clDB); };
@@ -3530,7 +3548,8 @@ function renderCaptionLibrary() {
     '</div>' +
     '<div class="cl-actions">' +
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clPreview(\'' + c.id + '\')" style="color:var(--cyan)">View</button>' +
-    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clToCanvas(\'' + c.id + '\')">Canvas</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clToCanvas(\'' + c.id + '\')">PDF</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();cvAddCaptionToCanvas(\'' + c.id + '\')" style="color:var(--accent)">Board</button>' +
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clToSeed(\'' + c.id + '\')">Seed</button>' +
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clCopy(\'' + c.id + '\')">Copy</button>' +
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clEdit(\'' + c.id + '\')">Edit</button>' +
@@ -3909,6 +3928,508 @@ async function seedGaboCaptions() {
 }
 
 // ============================================================
+// CANVAS WHITEBOARD ENGINE
+// ============================================================
+let cvNodes = [];
+let cvViewport = { x: 0, y: 0, zoom: 1 };
+let cvSelectedIds = new Set();
+let cvDragNodeId = null;
+let cvDragStartNodeX = 0;
+let cvDragStartNodeY = 0;
+let cvPanning = false;
+let cvStartX = 0, cvStartY = 0;
+let cvStartVX = 0, cvStartVY = 0;
+let cvSaveTimer = null;
+
+function cvMakeId() { return 'cn_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5); }
+
+function cvAddNode(type, data) {
+  const node = {
+    id: cvMakeId(),
+    type: type,
+    x: data.x || 200 + Math.random() * 200,
+    y: data.y || 150 + Math.random() * 200,
+    text: data.text || '',
+    theme: data.theme || '',
+    captionId: data.captionId || null,
+    imgSrc: data.imgSrc || null,
+    created: new Date().toISOString()
+  };
+  cvNodes.push(node);
+  cvRender();
+  cvScheduleSave();
+  toast('Node added to canvas');
+  return node;
+}
+
+function cvDeleteNode(id) {
+  cvNodes = cvNodes.filter(n => n.id !== id);
+  cvSelectedIds.delete(id);
+  cvRender();
+  cvScheduleSave();
+}
+
+function cvDuplicateNode(id) {
+  const src = cvNodes.find(n => n.id === id);
+  if (!src) return;
+  cvAddNode(src.type, {
+    x: src.x + 30,
+    y: src.y + 30,
+    text: src.text,
+    theme: src.theme,
+    captionId: src.captionId,
+    imgSrc: src.imgSrc
+  });
+}
+
+function cvEditNode(id) {
+  const n = cvNodes.find(x => x.id === id);
+  if (!n) return;
+  if (n.type === 'image') return;
+  const newText = prompt('Edit node text:', n.text);
+  if (newText === null) return;
+  n.text = newText;
+  cvRender();
+  cvScheduleSave();
+}
+
+function cvAddTextNode() {
+  const text = prompt('Enter text for new node:', '');
+  if (!text || !text.trim()) return;
+  const container = document.getElementById('cv-container');
+  const rect = container.getBoundingClientRect();
+  const cx = (rect.width / 2 - cvViewport.x) / cvViewport.zoom;
+  const cy = (rect.height / 2 - cvViewport.y) / cvViewport.zoom;
+  cvAddNode('text', { text: text.trim(), x: cx - 80, y: cy - 30 });
+}
+
+function cvHandleImages(files) {
+  if (!files || !files.length) return;
+  const container = document.getElementById('cv-container');
+  const rect = container.getBoundingClientRect();
+  let offsetX = 0;
+  Array.from(files).forEach(function(file) {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const cx = (rect.width / 2 - cvViewport.x) / cvViewport.zoom + offsetX;
+      const cy = (rect.height / 2 - cvViewport.y) / cvViewport.zoom;
+      cvAddNode('image', { imgSrc: ev.target.result, x: cx - 60, y: cy - 60 });
+      offsetX += 40;
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('cv-img-input').value = '';
+}
+
+function cvAddCaptionToCanvas(id) {
+  const c = clCaptions.find(x => x.id === id);
+  if (!c) return;
+  const container = document.getElementById('cv-container');
+  const rect = container.getBoundingClientRect();
+  const cx = (rect.width / 2 - cvViewport.x) / cvViewport.zoom;
+  const cy = (rect.height / 2 - cvViewport.y) / cvViewport.zoom;
+  cvAddNode('caption', { text: c.text, theme: c.theme || '', captionId: c.id, x: cx - 80 + Math.random() * 60, y: cy - 30 + Math.random() * 60 });
+  setMode('canvas');
+}
+
+function cvClearAll() {
+  if (!confirm('Clear all canvas nodes?')) return;
+  cvNodes = [];
+  cvSelectedIds.clear();
+  cvRender();
+  cvScheduleSave();
+  toast('Canvas cleared');
+}
+
+function cvExportJSON() {
+  if (!cvNodes.length) { toast('Canvas is empty'); return; }
+  const data = JSON.stringify({ nodes: cvNodes, viewport: cvViewport, exported: new Date().toISOString() }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'canvas-export-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Canvas exported as JSON');
+}
+
+// === RENDER ===
+function cvRender() {
+  const surface = document.getElementById('cv-surface');
+  if (!surface) return;
+  surface.style.transform = 'translate(' + cvViewport.x + 'px,' + cvViewport.y + 'px) scale(' + cvViewport.zoom + ')';
+  // Remove old nodes
+  surface.querySelectorAll('.cv-node').forEach(function(n) { n.remove(); });
+  // Empty state
+  var emptyEl = document.getElementById('cv-empty');
+  if (emptyEl) emptyEl.style.display = cvNodes.length === 0 ? '' : 'none';
+  // Render each node
+  cvNodes.forEach(function(n) {
+    var el = document.createElement('div');
+    el.className = 'cv-node' + (n.type === 'image' ? ' cn-image' : '') + (cvSelectedIds.has(n.id) ? ' selected' : '');
+    el.dataset.id = n.id;
+    el.style.left = n.x + 'px';
+    el.style.top = n.y + 'px';
+    var html = '<div class="cn-actions">';
+    html += '<button onclick="event.stopPropagation();cvDuplicateNode(\'' + n.id + '\')" title="Duplicate">D</button>';
+    html += '<button onclick="event.stopPropagation();cvEditNode(\'' + n.id + '\')" title="Edit">E</button>';
+    html += '<button class="cn-del" onclick="event.stopPropagation();cvDeleteNode(\'' + n.id + '\')" title="Delete">x</button>';
+    html += '</div>';
+    if (n.type === 'image' && n.imgSrc) {
+      html += '<img src="' + n.imgSrc + '" alt="" draggable="false">';
+    } else {
+      html += '<div class="cn-text">' + esc(n.text) + '</div>';
+      html += '<div class="cn-meta">';
+      if (n.theme) html += '<span class="cn-theme">' + esc(n.theme) + '</span>';
+      html += '<span>' + (n.text ? n.text.split(/\s+/).length : 0) + 'w</span>';
+      if (n.type === 'caption') html += '<span>caption</span>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+    surface.appendChild(el);
+    // Node mouse drag
+    el.addEventListener('mousedown', function(e) {
+      if (e.target.closest('.cn-actions')) return;
+      e.stopPropagation();
+      cvDragNodeId = n.id;
+      cvStartX = e.clientX;
+      cvStartY = e.clientY;
+      cvDragStartNodeX = n.x;
+      cvDragStartNodeY = n.y;
+      el.classList.add('dragging');
+      if (!e.shiftKey && !cvSelectedIds.has(n.id)) {
+        cvSelectedIds.clear();
+      }
+      cvSelectedIds.add(n.id);
+      cvRender();
+    });
+    // Node touch drag
+    el.addEventListener('touchstart', function(e) {
+      if (e.target.closest('.cn-actions')) return;
+      e.stopPropagation();
+      var touch = e.touches[0];
+      cvDragNodeId = n.id;
+      cvStartX = touch.clientX;
+      cvStartY = touch.clientY;
+      cvDragStartNodeX = n.x;
+      cvDragStartNodeY = n.y;
+      el.classList.add('dragging');
+      cvSelectedIds.clear();
+      cvSelectedIds.add(n.id);
+      cvRender();
+    }, { passive: true });
+  });
+  // Stats
+  var countEl = document.getElementById('cv-node-count');
+  if (countEl) countEl.textContent = cvNodes.length + ' node' + (cvNodes.length !== 1 ? 's' : '');
+  var statsEl = document.getElementById('cv-stats');
+  if (statsEl) statsEl.textContent = cvNodes.length + ' nodes' + (cvSelectedIds.size > 0 ? ' / ' + cvSelectedIds.size + ' selected' : '');
+}
+
+// === ZOOM ===
+function cvZoomBy(delta) {
+  cvViewport.zoom = Math.min(3, Math.max(0.15, cvViewport.zoom + delta));
+  document.getElementById('cv-surface').style.transform =
+    'translate(' + cvViewport.x + 'px,' + cvViewport.y + 'px) scale(' + cvViewport.zoom + ')';
+  document.getElementById('cv-zoom-val').textContent = Math.round(cvViewport.zoom * 100) + '%';
+  cvScheduleSave();
+}
+
+function cvFitView() {
+  if (!cvNodes.length) {
+    cvViewport = { x: 0, y: 0, zoom: 1 };
+  } else {
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    cvNodes.forEach(function(n) {
+      if (n.x < minX) minX = n.x;
+      if (n.y < minY) minY = n.y;
+      if (n.x + 200 > maxX) maxX = n.x + 200;
+      if (n.y + 100 > maxY) maxY = n.y + 100;
+    });
+    var container = document.getElementById('cv-container');
+    var rect = container.getBoundingClientRect();
+    var pw = rect.width - 60, ph = rect.height - 60;
+    var cw = maxX - minX, ch = maxY - minY;
+    var zoom = Math.min(pw / cw, ph / ch, 2);
+    zoom = Math.max(0.2, Math.min(2, zoom));
+    cvViewport.zoom = zoom;
+    cvViewport.x = (rect.width - cw * zoom) / 2 - minX * zoom;
+    cvViewport.y = (rect.height - ch * zoom) / 2 - minY * zoom;
+  }
+  cvRender();
+  cvScheduleSave();
+}
+
+// === PERSISTENCE ===
+function cvScheduleSave() {
+  clearTimeout(cvSaveTimer);
+  cvSaveTimer = setTimeout(cvSave, 400);
+}
+
+function cvSave() {
+  if (!clDB) return;
+  try {
+    var state = {
+      id: 'main',
+      nodes: cvNodes,
+      vx: cvViewport.x,
+      vy: cvViewport.y,
+      vz: cvViewport.zoom,
+      updated: new Date().toISOString()
+    };
+    var tx = clDB.transaction(CV_STORE, 'readwrite');
+    tx.objectStore(CV_STORE).put(state);
+  } catch(e) { console.warn('Canvas save error:', e); }
+}
+
+function cvLoad() {
+  return new Promise(function(resolve) {
+    if (!clDB) { resolve(); return; }
+    try {
+      var tx = clDB.transaction(CV_STORE, 'readonly');
+      var req = tx.objectStore(CV_STORE).get('main');
+      req.onsuccess = function() {
+        if (req.result) {
+          cvNodes = req.result.nodes || [];
+          cvViewport.x = req.result.vx || 0;
+          cvViewport.y = req.result.vy || 0;
+          cvViewport.zoom = req.result.vz || 1;
+        }
+        resolve();
+      };
+      req.onerror = function() { resolve(); };
+    } catch(e) { resolve(); }
+  });
+}
+
+// === CANVAS EVENTS ===
+function cvInitEvents() {
+  var container = document.getElementById('cv-container');
+  if (!container) return;
+  // Pan on empty space
+  container.addEventListener('mousedown', function(e) {
+    if (e.target.closest('.cv-node') || e.target.closest('.cv-toolbar') || e.target.closest('.cn-actions')) return;
+    cvPanning = true;
+    cvStartX = e.clientX;
+    cvStartY = e.clientY;
+    cvStartVX = cvViewport.x;
+    cvStartVY = cvViewport.y;
+    container.style.cursor = 'grabbing';
+    if (!e.shiftKey) { cvSelectedIds.clear(); cvRender(); }
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (cvPanning) {
+      cvViewport.x = cvStartVX + (e.clientX - cvStartX);
+      cvViewport.y = cvStartVY + (e.clientY - cvStartY);
+      document.getElementById('cv-surface').style.transform =
+        'translate(' + cvViewport.x + 'px,' + cvViewport.y + 'px) scale(' + cvViewport.zoom + ')';
+    }
+    if (cvDragNodeId) {
+      var dx = (e.clientX - cvStartX) / cvViewport.zoom;
+      var dy = (e.clientY - cvStartY) / cvViewport.zoom;
+      var node = cvNodes.find(function(n) { return n.id === cvDragNodeId; });
+      if (node) {
+        node.x = cvDragStartNodeX + dx;
+        node.y = cvDragStartNodeY + dy;
+        var el = document.querySelector('.cv-node[data-id="' + cvDragNodeId + '"]');
+        if (el) { el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; }
+      }
+    }
+  });
+  document.addEventListener('mouseup', function() {
+    if (cvPanning) {
+      cvPanning = false;
+      var c = document.getElementById('cv-container');
+      if (c) c.style.cursor = 'grab';
+      cvScheduleSave();
+    }
+    if (cvDragNodeId) {
+      var el = document.querySelector('.cv-node[data-id="' + cvDragNodeId + '"]');
+      if (el) el.classList.remove('dragging');
+      cvDragNodeId = null;
+      cvScheduleSave();
+    }
+  });
+  // Zoom (wheel)
+  container.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    var delta = e.deltaY > 0 ? -0.05 : 0.05;
+    cvZoomBy(delta);
+  }, { passive: false });
+  // Touch pan + pinch zoom
+  var tStartX = 0, tStartY = 0, tStartVX = 0, tStartVY = 0;
+  var tStartDist = 0, tStartZoom = 1;
+  container.addEventListener('touchstart', function(e) {
+    if (e.target.closest('.cv-node') || e.target.closest('.cv-toolbar')) return;
+    if (e.touches.length === 1) {
+      cvPanning = true;
+      tStartX = e.touches[0].clientX; tStartY = e.touches[0].clientY;
+      tStartVX = cvViewport.x; tStartVY = cvViewport.y;
+    }
+    if (e.touches.length === 2) {
+      cvPanning = false;
+      tStartDist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
+      tStartZoom = cvViewport.zoom;
+    }
+  }, { passive: true });
+  container.addEventListener('touchmove', function(e) {
+    if (cvDragNodeId && e.touches.length === 1) {
+      var dx = (e.touches[0].clientX - cvStartX) / cvViewport.zoom;
+      var dy = (e.touches[0].clientY - cvStartY) / cvViewport.zoom;
+      var node = cvNodes.find(function(n) { return n.id === cvDragNodeId; });
+      if (node) {
+        node.x = cvDragStartNodeX + dx;
+        node.y = cvDragStartNodeY + dy;
+        var el = document.querySelector('.cv-node[data-id="' + cvDragNodeId + '"]');
+        if (el) { el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; }
+      }
+      return;
+    }
+    if (cvPanning && e.touches.length === 1) {
+      cvViewport.x = tStartVX + (e.touches[0].clientX - tStartX);
+      cvViewport.y = tStartVY + (e.touches[0].clientY - tStartY);
+      document.getElementById('cv-surface').style.transform =
+        'translate(' + cvViewport.x + 'px,' + cvViewport.y + 'px) scale(' + cvViewport.zoom + ')';
+    }
+    if (e.touches.length === 2) {
+      var dist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY);
+      cvViewport.zoom = Math.min(3, Math.max(0.15, tStartZoom * (dist / tStartDist)));
+      document.getElementById('cv-surface').style.transform =
+        'translate(' + cvViewport.x + 'px,' + cvViewport.y + 'px) scale(' + cvViewport.zoom + ')';
+      document.getElementById('cv-zoom-val').textContent = Math.round(cvViewport.zoom * 100) + '%';
+    }
+  }, { passive: true });
+  container.addEventListener('touchend', function() {
+    if (cvDragNodeId) {
+      var el = document.querySelector('.cv-node[data-id="' + cvDragNodeId + '"]');
+      if (el) el.classList.remove('dragging');
+      cvDragNodeId = null;
+    }
+    cvPanning = false;
+    cvScheduleSave();
+  });
+  // Keyboard (delete, select all)
+  container.addEventListener('keydown', function(e) {
+    if ((e.key === 'Delete' || e.key === 'Backspace') && cvSelectedIds.size > 0) {
+      e.preventDefault();
+      cvSelectedIds.forEach(function(id) { cvDeleteNode(id); });
+      cvSelectedIds.clear();
+      cvRender();
+    }
+    if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      cvNodes.forEach(function(n) { cvSelectedIds.add(n.id); });
+      cvRender();
+    }
+  });
+  // HTML5 drop from caption library
+  container.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    container.classList.add('cv-drop-hover');
+  });
+  container.addEventListener('dragleave', function() {
+    container.classList.remove('cv-drop-hover');
+  });
+  container.addEventListener('drop', function(e) {
+    e.preventDefault();
+    container.classList.remove('cv-drop-hover');
+    var rect = container.getBoundingClientRect();
+    var x = (e.clientX - rect.left - cvViewport.x) / cvViewport.zoom;
+    var y = (e.clientY - rect.top - cvViewport.y) / cvViewport.zoom;
+    var cbText = e.dataTransfer.getData('application/x-cb-caption');
+    if (cbText) {
+      try {
+        var cap = JSON.parse(cbText);
+        cvAddNode('caption', { text: cap.text, theme: cap.theme || '', captionId: cap.id, x: x, y: y });
+        return;
+      } catch(err) {}
+    }
+    var text = e.dataTransfer.getData('text/plain');
+    if (text && text.trim()) {
+      cvAddNode('text', { text: text.trim(), x: x, y: y });
+      return;
+    }
+    if (e.dataTransfer.files.length) {
+      var file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) {
+        var reader = new FileReader();
+        reader.onload = function(ev) { cvAddNode('image', { imgSrc: ev.target.result, x: x, y: y }); };
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+  // Paste image
+  container.addEventListener('paste', function(e) {
+    var items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        var blob = items[i].getAsFile();
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          var rect = container.getBoundingClientRect();
+          var cx = (rect.width / 2 - cvViewport.x) / cvViewport.zoom;
+          var cy = (rect.height / 2 - cvViewport.y) / cvViewport.zoom;
+          cvAddNode('image', { imgSrc: ev.target.result, x: cx - 60, y: cy - 60 });
+        };
+        reader.readAsDataURL(blob);
+        e.preventDefault();
+        break;
+      }
+    }
+  });
+}
+
+// === TEMPLATES ===
+function cvLoadTemplate(tpl) {
+  if (cvNodes.length > 0 && !confirm('This will replace current canvas. Continue?')) return;
+  cvNodes = [];
+  cvSelectedIds.clear();
+  var gap = 40, col = 0, row = 0, w = 200;
+  if (tpl === 'social-calendar') {
+    var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    days.forEach(function(d, i) {
+      cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + i * (w + gap), y: 60, text: d.toUpperCase(), theme: 'header', captionId: null, imgSrc: null, created: new Date().toISOString() });
+      for (var r = 0; r < 4; r++) {
+        cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + i * (w + gap), y: 160 + r * 120, text: 'Week ' + (r+1) + ' - ' + d + '\nAdd content here...', theme: 'calendar', captionId: null, imgSrc: null, created: new Date().toISOString() });
+      }
+    });
+  } else if (tpl === 'carousel') {
+    for (var s = 0; s < 10; s++) {
+      cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + s * (w + gap), y: 100, text: 'Slide ' + (s+1) + '\n\nAdd your content here.\nDrag captions from the library.', theme: 'slide', captionId: null, imgSrc: null, created: new Date().toISOString() });
+    }
+  } else if (tpl === 'mood-board') {
+    var positions = [[100,80],[340,80],[580,80],[100,300],[340,300],[580,300],[220,520],[460,520]];
+    positions.forEach(function(p, i) {
+      cvNodes.push({ id: cvMakeId(), type: 'text', x: p[0], y: p[1], text: 'Mood ' + (i+1) + '\nDrop an image or caption here', theme: 'mood', captionId: null, imgSrc: null, created: new Date().toISOString() });
+    });
+  } else if (tpl === 'infographic') {
+    var sections = ['Title / Hook','Problem','Solution','Data Point 1','Data Point 2','Data Point 3','Call to Action'];
+    sections.forEach(function(s, i) {
+      cvNodes.push({ id: cvMakeId(), type: 'text', x: 200, y: 60 + i * 130, text: s + '\n\nAdd detail here...', theme: 'infographic', captionId: null, imgSrc: null, created: new Date().toISOString() });
+    });
+  } else if (tpl === 'quote-grid') {
+    for (var r2 = 0; r2 < 3; r2++) {
+      for (var c2 = 0; c2 < 3; c2++) {
+        cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + c2 * (w + gap), y: 80 + r2 * 160, text: 'Quote ' + (r2*3+c2+1) + '\nDrag a caption here', theme: 'quote', captionId: null, imgSrc: null, created: new Date().toISOString() });
+      }
+    }
+  } else if (tpl === 'content-plan') {
+    var cols2 = ['Ideas','Drafting','Review','Scheduled','Published'];
+    cols2.forEach(function(label, ci) {
+      cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + ci * (w + gap), y: 60, text: label.toUpperCase(), theme: 'header', captionId: null, imgSrc: null, created: new Date().toISOString() });
+      for (var ri = 0; ri < 3; ri++) {
+        cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + ci * (w + gap), y: 160 + ri * 120, text: 'Card ' + (ri+1) + '\nDrag content here...', theme: 'plan', captionId: null, imgSrc: null, created: new Date().toISOString() });
+      }
+    });
+  }
+  cvFitView();
+  cvScheduleSave();
+  toast('Template loaded: ' + tpl);
+}
+
+// ============================================================
 // DRAGGABLE PANEL RESIZE
 // ============================================================
 function initPanelResize() {
@@ -4079,6 +4600,7 @@ function mobileTab(tab, btn) {
   if (btn) btn.classList.add('active');
   if (tab === 'lib') document.getElementById('lib-panel').classList.add('mobile-show');
   else if (tab === 'ctrl') document.getElementById('ctrl-panel').classList.add('mobile-show');
+  else if (tab === 'canvas') { setMode('canvas'); }
 }
 
 // ============================================================
@@ -4244,7 +4766,8 @@ updateWordCount();
 renderSeedLibrary();
 initPanelResize();
 initUniversalDragDrop();
-openCaptionDB().then(() => clLoadAll()).then(() => { if (clCaptions.length === 0) seedGaboCaptions(); }).catch(e => console.warn('IndexedDB:', e));
+openCaptionDB().then(() => Promise.all([clLoadAll(), cvLoad()])).then(() => { if (clCaptions.length === 0) seedGaboCaptions(); cvRender(); }).catch(e => console.warn('IndexedDB:', e));
+cvInitEvents();
 // Restore sidebar state from localStorage
 if(localStorage.getItem('cb-sidebar')==='0'){document.getElementById('workspace').classList.add('two-col');var sb=document.getElementById('sidebar-btn');if(sb)sb.classList.remove('active');}
 </script>
