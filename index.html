@@ -564,6 +564,34 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .canvas-drop-zone{position:relative;min-height:100px}
 .canvas-drop-zone.drag-over{outline:2px dashed var(--accent);outline-offset:-4px;border-radius:8px}
 
+/* === CANVAS WHITEBOARD === */
+.cv-container{display:none;flex:1;position:relative;overflow:hidden;background:#f8f7f4;cursor:grab}
+.cv-container:active{cursor:grabbing}
+.cv-surface{position:absolute;top:0;left:0;transform-origin:0 0}
+.cv-grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(0,0,0,0.05) 1px,transparent 1px);background-size:24px 24px;pointer-events:none;z-index:0}
+.cv-node{position:absolute;min-width:160px;max-width:300px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:14px;cursor:move;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:box-shadow 0.2s,border-color 0.2s;z-index:1;font-family:var(--sans)}
+.cv-node:hover{box-shadow:0 4px 16px rgba(0,0,0,0.10);border-color:rgba(0,0,0,0.15)}
+.cv-node.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(168,85,247,0.2),0 4px 16px rgba(0,0,0,0.10)}
+.cv-node.dragging{opacity:0.7;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.15)}
+.cv-node .cn-text{font-size:11px;line-height:1.65;color:#1a1a1a;word-break:break-word;white-space:pre-line}
+.cv-node .cn-meta{margin-top:8px;font-size:7px;color:#999;display:flex;gap:6px;align-items:center}
+.cv-node .cn-theme{background:rgba(168,85,247,0.10);color:#8b5cf6;padding:1px 5px;border-radius:3px;font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.cv-node.cn-image{padding:6px;min-width:80px}.cv-node.cn-image img{max-width:100%;border-radius:6px;display:block}
+.cv-node .cn-actions{display:none;position:absolute;top:-30px;right:0;gap:2px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:6px;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.cv-node:hover .cn-actions,.cv-node.selected .cn-actions{display:flex}
+.cn-actions button{width:22px;height:22px;border:none;background:transparent;color:#999;cursor:pointer;border-radius:3px;font-size:9px;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+.cn-actions button:hover{background:rgba(0,0,0,0.05);color:#333}
+.cn-actions button.cn-del:hover{color:#ef4444}
+.cv-toolbar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:4px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:4px 10px;box-shadow:var(--shadow-lg);z-index:10;align-items:center}
+.cv-toolbar button{background:transparent;border:none;color:var(--text-secondary);cursor:pointer;padding:5px 8px;border-radius:4px;font-size:8px;font-weight:600;font-family:var(--mono);transition:all 0.15s}
+.cv-toolbar button:hover{background:rgba(255,255,255,0.06);color:var(--text-primary)}
+.cv-toolbar .cv-zoom-val{font-size:8px;color:var(--text-muted);padding:0 4px;min-width:36px;text-align:center}
+.cv-toolbar .cv-sep{width:1px;height:14px;background:var(--border);margin:0 2px}
+.cv-container.cv-drop-hover{outline:2px dashed var(--accent);outline-offset:-4px}
+.cv-empty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:1}
+.cv-empty-title{font-size:14px;color:#bbb;font-weight:600;margin-bottom:6px;font-family:var(--sans)}
+.cv-empty-sub{font-size:10px;color:#ccc;line-height:1.6;font-family:var(--mono)}
+
 /* === SIDEBAR TOGGLE BUTTON (Astra-style) === */
 .sidebar-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);flex-shrink:0;padding:0}
 .sidebar-btn:hover{border-color:var(--border-hover);color:var(--text-primary);background:rgba(255,255,255,0.04)}
@@ -614,6 +642,11 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .ver-panel{width:100vw}
   .ctrl-body{padding:12px}
   .grid2{grid-template-columns:1fr}
+  .cv-container{height:calc(100vh - 44px - 48px)}
+  .cv-toolbar{bottom:8px;padding:3px 6px}
+  .cv-toolbar button{padding:4px 6px;font-size:7px}
+  .cv-node{min-width:140px;max-width:260px;padding:10px}
+  .cv-node .cn-text{font-size:10px}
 }
 
 /* PRINT */
@@ -650,6 +683,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
     <button class="tab-btn" onclick="setMode('caption')">Captions</button>
     <button class="tab-btn" onclick="setMode('atomizer')">Atomizer</button>
+    <button class="tab-btn" onclick="setMode('canvas')">Canvas</button>
   </div>
   <div class="hdr-right">
     <div class="tab-bar" style="margin-right:4px">
@@ -935,6 +969,56 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         </div>
       </div>
 
+      <!-- CANVAS CONTROLS -->
+      <div id="cv-ctrl" style="display:none">
+        <div class="row">
+          <label class="lbl">Add to Canvas</label>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="cvAddTextNode()" style="flex:1">+ Text</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('cv-img-input').click()" style="flex:1">+ Image</button>
+          </div>
+          <input type="file" id="cv-img-input" accept="image/*" style="display:none" multiple onchange="cvHandleImages(this.files)">
+        </div>
+
+        <div class="section-toggle" onclick="toggleSection(this)">
+          <label class="lbl">Templates</label>
+          <span class="section-arrow">v</span>
+        </div>
+        <div class="section-content">
+        <div class="row">
+          <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <button class="mode-btn" onclick="cvLoadTemplate('social-calendar')">Social Calendar</button>
+            <button class="mode-btn" onclick="cvLoadTemplate('carousel')">Carousel</button>
+            <button class="mode-btn" onclick="cvLoadTemplate('mood-board')">Mood Board</button>
+            <button class="mode-btn" onclick="cvLoadTemplate('infographic')">Infographic</button>
+            <button class="mode-btn" onclick="cvLoadTemplate('quote-grid')">Quote Grid</button>
+            <button class="mode-btn" onclick="cvLoadTemplate('content-plan')">Content Plan</button>
+          </div>
+        </div>
+        </div>
+
+        <div class="row">
+          <label class="lbl">Actions</label>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="cvExportJSON()" style="flex:1;color:var(--green)">Export JSON</button>
+            <button class="btn btn-outline btn-sm" onclick="cvClearAll()" style="flex:1;color:var(--red)">Clear All</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label class="lbl">Canvas Info</label>
+          <div id="cv-info" style="font-size:8px;color:var(--text-muted);line-height:1.6">
+            Drag captions from library onto the canvas.<br>
+            Pan: drag empty space / touch drag<br>
+            Zoom: scroll wheel / pinch<br>
+            Select: click node / Shift+click multi<br>
+            Delete: select + Del key<br>
+            Mobile: use + buttons or long-press caption
+          </div>
+          <div id="cv-stats" style="font-size:8px;color:var(--text-muted);margin-top:6px"></div>
+        </div>
+      </div>
+
       <!-- ATOMIZER CONTROLS -->
       <div id="atom-ctrl" style="display:none">
         <div class="pipeline" id="atom-pipeline">
@@ -1077,6 +1161,27 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <div id="atom-preview-content" style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--sans)"></div>
       </div>
     </div>
+    <!-- CANVAS WHITEBOARD -->
+    <div id="cv-container" class="cv-container" tabindex="0">
+      <div id="cv-surface" class="cv-surface">
+        <div class="cv-grid"></div>
+      </div>
+      <div id="cv-empty" class="cv-empty">
+        <div class="cv-empty-title">Canvas</div>
+        <div class="cv-empty-sub">Drag captions from the library<br>or use + buttons to add nodes</div>
+      </div>
+      <div class="cv-toolbar" id="cv-toolbar">
+        <button onclick="cvZoomBy(-0.1)" title="Zoom out">-</button>
+        <span class="cv-zoom-val" id="cv-zoom-val">100%</span>
+        <button onclick="cvZoomBy(0.1)" title="Zoom in">+</button>
+        <button onclick="cvFitView()" title="Fit view">Fit</button>
+        <span class="cv-sep"></span>
+        <button onclick="cvAddTextNode()" title="Add text node">+Text</button>
+        <button onclick="document.getElementById('cv-img-input').click()" title="Add image">+Img</button>
+        <span class="cv-sep"></span>
+        <span class="cv-zoom-val" id="cv-node-count">0 nodes</span>
+      </div>
+    </div>
     <div class="wc-bar" id="wc-bar">
       <span>Words: <b id="wc-words">0</b></span>
       <span>Chars: <b id="wc-chars">0</b></span>
@@ -1098,6 +1203,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   <button class="mobile-tab active" onclick="mobileTab('preview',this)">Preview</button>
   <button class="mobile-tab" onclick="mobileTab('ctrl',this)">Controls</button>
   <button class="mobile-tab" onclick="mobileTab('lib',this)">Library</button>
+  <button class="mobile-tab" onclick="mobileTab('canvas',this)">Canvas</button>
 </div>
 
 <div class="toast" id="toast"></div>
