@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SATURNO FORGE — PDF Maker + Content Multiplier</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg-void:#030303;--bg-base:#050505;--bg-elevated:#0a0a0a;--bg-surface:#111111;
+  --border:#1a1a1a;--border-hover:#2a2a2a;
+  --text-primary:#ffffff;--text-secondary:#a1a1aa;--text-muted:#52525b;
+  --accent:#a855f7;--accent-cyan:#06b6d4;--accent-green:#22c55e;--accent-amber:#f59e0b;--accent-red:#ef4444;
+  --mono:'JetBrains Mono',monospace;--sans:'Sora',system-ui,sans-serif;
+}
+body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondary);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg-base)}
+::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:2px}
+
+/* LAYOUT */
+.app{display:grid;grid-template-rows:48px 1fr 32px;height:100vh}
+header{border-bottom:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+header h1{color:var(--text-primary);font-size:13px;font-weight:700;letter-spacing:-0.02em}
+header .sub{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-left:12px}
+footer{border-top:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:9px;color:var(--text-muted)}
+
+.main{display:grid;grid-template-columns:1fr 1fr;gap:0;overflow:hidden}
+.main.caption-mode{grid-template-columns:340px 1fr}
+
+/* PANELS */
+.panel{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden}
+.panel:last-child{border-right:none}
+.panel-header{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.panel-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.15em}
+.panel-body{flex:1;overflow-y:auto;padding:16px}
+
+/* TABS */
+.tab-bar{display:flex;gap:2px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:2px}
+.tab-btn{padding:6px 12px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;background:transparent;border:none;color:var(--text-muted);cursor:pointer;border-radius:3px;font-family:var(--mono);transition:all 0.15s}
+.tab-btn:hover{color:var(--text-secondary)}
+.tab-btn.active{background:var(--accent);color:white}
+
+/* FORM ELEMENTS */
+textarea,input[type="text"],select{width:100%;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:10px 12px;color:var(--text-primary);font-family:var(--mono);font-size:12px;resize:none;transition:border-color 0.2s}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
+label.field-label{display:block;font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:6px}
+
+/* BUTTONS */
+.btn{padding:8px 14px;border:none;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;transition:all 0.15s}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:#9333ea;transform:translateY(-1px)}
+.btn-secondary{background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border);color:white}
+.btn-green{background:var(--accent-green);color:white}
+.btn-green:hover{background:#16a34a}
+.btn-cyan{background:var(--accent-cyan);color:white}
+.btn-cyan:hover{background:#0891b2}
+.btn-sm{padding:5px 10px;font-size:9px}
+.btn-block{width:100%}
+
+/* MODE BUTTONS */
+.mode-btn{padding:6px 10px;font-size:9px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;color:var(--text-muted);cursor:pointer;transition:all 0.15s;font-family:var(--mono)}
+.mode-btn:hover{border-color:var(--border-hover);color:var(--text-secondary)}
+.mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(168,85,247,0.1)}
+
+/* PDF PREVIEW - EDITABLE */
+.pdf-canvas{background:white;color:#1a1a1a;font-family:'Sora',Georgia,serif;padding:40px 50px;border-radius:4px;min-height:500px;position:relative;box-shadow:0 4px 24px rgba(0,0,0,0.4)}
+.pdf-canvas[contenteditable]{outline:none;cursor:text}
+.pdf-canvas[contenteditable]:focus{box-shadow:0 0 0 2px var(--accent),0 4px 24px rgba(0,0,0,0.4)}
+.pdf-canvas h1{font-size:28px;font-weight:700;margin-bottom:4px;color:#111;font-family:'Sora',sans-serif}
+.pdf-canvas h2{font-size:14px;color:#666;font-style:italic;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #111;font-family:'Sora',sans-serif}
+.pdf-canvas h3{font-size:16px;font-weight:700;margin-top:20px;margin-bottom:8px;color:#222;font-family:'Sora',sans-serif;text-transform:uppercase;letter-spacing:0.05em}
+.pdf-canvas p{font-size:13px;line-height:1.8;margin-bottom:10px;color:#333}
+.pdf-canvas ul,.pdf-canvas ol{margin-left:20px;margin-bottom:12px}
+.pdf-canvas li{font-size:13px;line-height:1.8;margin-bottom:4px;color:#333}
+.pdf-canvas .footer{font-size:10px;color:#999;margin-top:40px;padding-top:16px;border-top:1px solid #ddd;font-family:var(--mono);letter-spacing:0.05em}
+
+/* DARK TEMPLATE */
+.pdf-canvas.dark{background:#0a0a0a;color:#e2e8f0}
+.pdf-canvas.dark h1{color:#fff}
+.pdf-canvas.dark h2{color:#a855f7;border-bottom-color:#a855f7}
+.pdf-canvas.dark h3{color:#22d3ee}
+.pdf-canvas.dark p,.pdf-canvas.dark li{color:#cbd5e1}
+.pdf-canvas.dark .footer{color:#475569;border-top-color:#1e293b}
+
+/* MINIMAL TEMPLATE */
+.pdf-canvas.minimal{padding:60px;font-family:Georgia,serif}
+.pdf-canvas.minimal h1{font-size:24px;font-weight:400;letter-spacing:0.02em}
+.pdf-canvas.minimal h2{font-size:12px;font-style:normal;color:#999;border-bottom:1px solid #eee}
+.pdf-canvas.minimal h3{font-size:14px;font-weight:400;text-transform:none;color:#444}
+
+/* SATURNO MOVEMENT TEMPLATE */
+.pdf-canvas.saturno{background:linear-gradient(180deg,#030508 0%,#050711 100%);color:#e2e8f0;padding:50px;border:1px solid #1a1f2e}
+.pdf-canvas.saturno h1{color:#fff;font-family:'Sora',sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.02em}
+.pdf-canvas.saturno h2{color:#06b6d4;border-bottom-color:#06b6d4;font-style:normal;font-family:'Sora',sans-serif;font-weight:300}
+.pdf-canvas.saturno h3{color:#a855f7;font-family:'Sora',sans-serif}
+.pdf-canvas.saturno p,.pdf-canvas.saturno li{color:#94a3b8;font-family:'Sora',sans-serif}
+.pdf-canvas.saturno .footer{color:#334155;border-top-color:#1e293b}
+.pdf-canvas.saturno .level-badge{display:inline-block;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;font-family:var(--mono)}
+.pdf-canvas.saturno .level-badge.foundation{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3)}
+.pdf-canvas.saturno .level-badge.intermediate{background:rgba(6,182,212,0.15);color:#22d3ee;border:1px solid rgba(6,182,212,0.3)}
+.pdf-canvas.saturno .level-badge.advanced{background:rgba(168,85,247,0.15);color:#c084fc;border:1px solid rgba(168,85,247,0.3)}
+.pdf-canvas.saturno .level-badge.elite{background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3)}
+
+/* EXERCISE CARD LAYOUT */
+.exercise-card{border:1px solid #1e293b;border-radius:8px;padding:16px;margin-bottom:12px;background:rgba(255,255,255,0.02)}
+.exercise-card .ex-name{font-size:15px;font-weight:600;color:#fff;margin-bottom:4px;font-family:'Sora',sans-serif}
+.exercise-card .ex-sets{font-size:11px;color:#06b6d4;font-family:var(--mono);margin-bottom:6px}
+.exercise-card .ex-cue{font-size:12px;color:#64748b;line-height:1.6}
+
+/* CAPTION PANEL */
+.variant-card{background:var(--bg-base);border-left:3px solid var(--accent);padding:12px;margin-bottom:8px;border-radius:0 4px 4px 0}
+.variant-card.ig{border-color:#e1306c}
+.variant-card.email{border-color:var(--accent-amber)}
+.variant-card.yt{border-color:#ff0000}
+.variant-card.twitter{border-color:#1da1f2}
+.variant-card.linkedin{border-color:#0077b5}
+.variant-card.tiktok{border-color:#010101}
+
+.checkbox-custom{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all 0.15s;font-size:10px}
+.checkbox-custom:hover{border-color:var(--border-hover)}
+.checkbox-custom.checked{border-color:var(--accent);background:rgba(168,85,247,0.1)}
+.checkbox-custom input{display:none}
+
+/* STATUS */
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;font-size:9px;font-weight:500;text-transform:uppercase}
+.status-ready{background:rgba(34,197,94,0.1);color:var(--accent-green)}
+.status-working{background:rgba(245,158,11,0.1);color:var(--accent-amber)}
+
+/* TOOLBAR INSIDE PREVIEW */
+.pdf-toolbar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.pdf-toolbar .sep{width:1px;height:20px;background:var(--border);margin:0 4px}
+
+/* TEMPLATE PRESETS GRID */
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.preset-card{background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:10px;cursor:pointer;transition:all 0.15s}
+.preset-card:hover{border-color:var(--border-hover)}
+.preset-card.active{border-color:var(--accent);background:rgba(168,85,247,0.08)}
+.preset-card .preset-name{font-size:10px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
+.preset-card .preset-desc{font-size:8px;color:var(--text-muted)}
+
+/* PAGES INDICATOR */
+.page-indicator{font-size:9px;color:var(--text-muted);text-align:center;padding:8px;border-top:1px dashed var(--border);margin-top:12px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg-surface);border:1px solid var(--accent);color:var(--text-primary);padding:10px 16px;border-radius:4px;font-size:11px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<header>
+  <div style="display:flex;align-items:center;gap:8px">
+    <h1>SATURNO FORGE</h1>
+    <span class="sub">PDF Maker + Content Tools</span>
+    <div class="tab-bar" style="margin-left:16px">
+      <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
+      <button class="tab-btn" onclick="setMode('caption')">Captions</button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="global-status" class="status-badge status-ready"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="main" id="main-grid">
+
+  <!-- LEFT PANEL: CONTROLS -->
+  <div class="panel" id="panel-left">
+    <div class="panel-header">
+      <span class="panel-title" style="color:var(--accent)" id="left-panel-title">PDF CONTROLS</span>
+    </div>
+    <div class="panel-body" id="left-panel-body">
+
+      <!-- === PDF CONTROLS === -->
+      <div id="pdf-controls">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <div>
+            <label class="field-label">Title</label>
+            <input type="text" id="pdf-title" value="Movement Framework" placeholder="Document title" oninput="liveUpdate()">
+          </div>
+          <div>
+            <label class="field-label">Author</label>
+            <input type="text" id="pdf-author" value="Gabo Saturno" placeholder="Author" oninput="liveUpdate()">
+          </div>
+        </div>
+
+        <label class="field-label">Template</label>
+        <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="mode-btn" data-tpl="professional" onclick="setTemplate('professional')">Professional</button>
+          <button class="mode-btn active" data-tpl="saturno" onclick="setTemplate('saturno')">Saturno Dark</button>
+          <button class="mode-btn" data-tpl="dark" onclick="setTemplate('dark')">Minimal Dark</button>
+          <button class="mode-btn" data-tpl="minimal" onclick="setTemplate('minimal')">Minimal Light</button>
+        </div>
+
+        <label class="field-label">Saturno Movement Presets</label>
+        <div class="preset-grid" id="preset-grid">
+          <div class="preset-card" onclick="loadPreset('program')">
+            <div class="preset-name">Program PDF</div>
+            <div class="preset-desc">Workout program with exercises, sets, reps</div>
+          </div>
+          <div class="preset-card" onclick="loadPreset('level')">
+            <div class="preset-name">Level Guide</div>
+            <div class="preset-desc">Foundation / Intermediate / Advanced / Elite</div>
+          </div>
+          <div class="preset-card" onclick="loadPreset('framework')">
+            <div class="preset-name">Framework</div>
+            <div class="preset-desc">Training methodology breakdown</div>
+          </div>
+          <div class="preset-card" onclick="loadPreset('transcript')">
+            <div class="preset-name">Video Transcript</div>
+            <div class="preset-desc">Clean transcript with key points + action items</div>
+          </div>
+        </div>
+
+        <label class="field-label">Content (Markdown)</label>
+        <textarea id="pdf-content" style="height:180px;margin-bottom:12px" placeholder="Paste content here. Supports:
+# Heading
+## Subheading
+### Section
+- Bullet points
+**Bold text**
+1. Numbered lists
+
+Or use a preset above." oninput="liveUpdate()"></textarea>
+
+        <label class="field-label">Level Badge (optional)</label>
+        <div style="display:flex;gap:4px;margin-bottom:12px">
+          <button class="mode-btn" data-level="none" onclick="setLevel('none')">None</button>
+          <button class="mode-btn" data-level="foundation" onclick="setLevel('foundation')" style="color:#4ade80">Foundation</button>
+          <button class="mode-btn" data-level="intermediate" onclick="setLevel('intermediate')" style="color:#22d3ee">Intermediate</button>
+          <button class="mode-btn" data-level="advanced" onclick="setLevel('advanced')" style="color:#c084fc">Advanced</button>
+          <button class="mode-btn" data-level="elite" onclick="setLevel('elite')" style="color:#fbbf24">Elite</button>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button onclick="liveUpdate()" class="btn btn-secondary" style="flex:1">Refresh Preview</button>
+          <button onclick="downloadPDF()" class="btn btn-primary" style="flex:1">Download PDF</button>
+        </div>
+      </div>
+
+      <!-- === CAPTION CONTROLS (hidden by default) === -->
+      <div id="caption-controls" style="display:none">
+        <label class="field-label">Seed Phrase</label>
+        <textarea id="seed-input" style="height:120px;margin-bottom:12px" placeholder="Enter your core idea or seed phrase...
+
+Example: 'Mastery isn't about perfection. It's about showing up before you're ready.'"></textarea>
+
+        <label class="field-label">Voice Mode</label>
+        <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="mode-btn active" data-voice="teacher" onclick="setVoice('teacher')">Teacher</button>
+          <button class="mode-btn" data-voice="raw" onclick="setVoice('raw')">Raw</button>
+          <button class="mode-btn" data-voice="prophet" onclick="setVoice('prophet')">Prophet</button>
+          <button class="mode-btn" data-voice="rebel" onclick="setVoice('rebel')">Rebel</button>
+          <button class="mode-btn" data-voice="mystic" onclick="setVoice('mystic')">Mystic</button>
+        </div>
+
+        <label class="field-label">Platforms</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
+          <label class="checkbox-custom checked"><input type="checkbox" data-platform="ig" checked><span>Instagram</span></label>
+          <label class="checkbox-custom checked"><input type="checkbox" data-platform="email" checked><span>Email</span></label>
+          <label class="checkbox-custom checked"><input type="checkbox" data-platform="yt" checked><span>YouTube</span></label>
+          <label class="checkbox-custom"><input type="checkbox" data-platform="twitter"><span>Twitter/X</span></label>
+          <label class="checkbox-custom"><input type="checkbox" data-platform="linkedin"><span>LinkedIn</span></label>
+          <label class="checkbox-custom"><input type="checkbox" data-platform="tiktok"><span>TikTok</span></label>
+        </div>
+
+        <button onclick="multiplyCaption()" class="btn btn-cyan btn-block">Multiply Variants</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: PREVIEW / OUTPUT -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title" style="color:var(--accent-green)" id="right-panel-title">LIVE PREVIEW</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="font-size:9px;color:var(--text-muted)">Click to edit directly</span>
+      </div>
+    </div>
+    <div class="panel-body" id="right-panel-body" style="background:#1a1a1a;padding:24px">
+
+      <!-- PDF PREVIEW -->
+      <div id="pdf-preview-wrap">
+        <div class="pdf-canvas saturno" id="pdf-canvas" contenteditable="true">
+          <h1>Movement Framework</h1>
+          <h2>By Gabo Saturno</h2>
+          <p>Select a preset or paste content to get started. You can edit this preview directly — click anywhere to type.</p>
+          <div class="footer">SATURNO FORGE / saturnomovement.com</div>
+        </div>
+        <div class="page-indicator" id="page-indicator">Estimated: 1 page (A4)</div>
+      </div>
+
+      <!-- CAPTION OUTPUT (hidden by default) -->
+      <div id="caption-output" style="display:none">
+        <div id="variants-container"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span>SATURNO FORGE v2.0</span>
+  <span>Cmd+S: Download PDF / Cmd+M: Multiply / Cmd+P: Print Preview</span>
+</footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// === STATE ===
+let currentTemplate = 'saturno';
+let currentLevel = 'none';
+let currentVoice = 'teacher';
+let currentMode = 'pdf';
+
+// === MODE SWITCH ===
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('header .tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && mode==='pdf') || (i===1 && mode==='caption'));
+  });
+  const grid = document.getElementById('main-grid');
+  grid.classList.toggle('caption-mode', mode === 'caption');
+
+  document.getElementById('pdf-controls').style.display = mode === 'pdf' ? '' : 'none';
+  document.getElementById('caption-controls').style.display = mode === 'caption' ? '' : 'none';
+  document.getElementById('pdf-preview-wrap').style.display = mode === 'pdf' ? '' : 'none';
+  document.getElementById('caption-output').style.display = mode === 'caption' ? '' : 'none';
+  document.getElementById('left-panel-title').textContent = mode === 'pdf' ? 'PDF CONTROLS' : 'CAPTION MULTIPLIER';
+  document.getElementById('right-panel-title').textContent = mode === 'pdf' ? 'LIVE PREVIEW' : 'VARIANTS';
+}
+
+// === TEMPLATE ===
+function setTemplate(tpl) {
+  currentTemplate = tpl;
+  document.querySelectorAll('[data-tpl]').forEach(b => b.classList.toggle('active', b.dataset.tpl === tpl));
+  const canvas = document.getElementById('pdf-canvas');
+  canvas.className = 'pdf-canvas ' + tpl;
+  toast('Template: ' + tpl);
+}
+
+// === LEVEL BADGE ===
+function setLevel(level) {
+  currentLevel = level;
+  document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('active', b.dataset.level === level));
+  liveUpdate();
+}
+
+// === VOICE MODE ===
+function setVoice(voice) {
+  currentVoice = voice;
+  document.querySelectorAll('[data-voice]').forEach(b => b.classList.toggle('active', b.dataset.voice === voice));
+}
+
+// === PRESETS ===
+function loadPreset(type) {
+  document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  const presets = {
+    program: {
+      title: 'Calisthenics Foundation Phase 1',
+      content: `# CALISTHENICS FOUNDATION — PHASE 1\n## Week 1-4 / Training Block A\n\n### UPPER BODY PUSH\n- Pseudo Planche Push-ups — 4x8-12 / RER 3\n- Pike Push-ups (Elevated) — 3x8-10 / RER 3\n- Diamond Push-ups — 3x10-15 / RER 2\n- Dips (Parallel Bars) — 3x6-10 / RER 3\n\n### UPPER BODY PULL\n- Pull-ups (Pronated) — 4x5-8 / RER 3\n- Australian Rows (Rings) — 3x10-12 / RER 2\n- Chin-ups (Supinated) — 3x6-8 / RER 3\n\n### CORE\n- L-Sit Progression — 4x15-30s hold\n- Dragon Flag Negatives — 3x5-8\n- Hollow Body Hold — 3x30-45s\n\n### NOTES\n- RER = Reps Estimated in Reserve\n- Start conservative — you should feel like you could do 3 more reps\n- Log every set. Track RER honestly.\n- Deload in Week 5: reduce volume 40%, maintain intensity`,
+      level: 'foundation'
+    },
+    level: {
+      title: 'Saturno Movement — Level Guide',
+      content: `# LEVEL PROGRESSION SYSTEM\n## The Saturno Method\n\n### FOUNDATION (Months 1-6)\nBuild the base. Master the basics. Own every rep.\n- Push-up variations mastered\n- Pull-up: 8+ strict reps\n- L-Sit: 15s+ hold\n- Handstand: Wall-assisted 30s+\n- Pistol Squat: 5+ per leg\n\n### INTERMEDIATE (Months 6-18)\nConnect the dots. Skill acquisition begins.\n- Muscle-Up: 3+ clean reps\n- Handstand Push-up: 5+ wall-assisted\n- Front Lever: Tuck hold 10s+\n- Back Lever: Full hold 5s+\n- Planche: Tuck hold 5s+\n\n### ADVANCED (Months 18-36)\nThe refinement phase. Movement quality over quantity.\n- Planche Push-ups: Tuck 5+ reps\n- Front Lever Rows: 5+ reps\n- Freestanding Handstand: 15s+\n- One Arm Pull-up: Negative controlled\n- Human Flag: 5s+ hold\n\n### ELITE (36+ Months)\nArtistry. The body as instrument.\n- Full Planche: 5s+ hold\n- Iron Cross: Controlled entry\n- One Arm Handstand: 5s+\n- Maltese: Entry position\n- Victorian Cross: Progression work`,
+      level: 'none'
+    },
+    framework: {
+      title: 'The Saturno System — Training Framework',
+      content: `# THE SATURNO SYSTEM\n## A Framework for Intelligent Training\n\n### PRINCIPLE 1: PROGRESSIVE OVERLOAD VIA RER\nDon't chase failure. Chase progress.\n- Week 1: RER 4-5 (easy — build momentum)\n- Week 2: RER 3-4 (moderate — find groove)\n- Week 3: RER 2-3 (challenging — push boundaries)\n- Week 4: RER 1-2 (near-max — test limits)\n- Week 5: DELOAD (40% volume reduction)\n\n### PRINCIPLE 2: MOVEMENT QUALITY FIRST\nOne perfect rep > ten sloppy reps.\n- Full range of motion, always\n- Control the eccentric (3s minimum)\n- Pause at end ranges\n- Breathe with intention\n\n### PRINCIPLE 3: SKILL + STRENGTH = MASTERY\nSkills are not separate from strength.\n- Practice skills when fresh (start of session)\n- Build strength after skill work\n- Connect movements — planche push-ups, not just planche holds\n- Every session has a skill component\n\n### PRINCIPLE 4: RECOVERY IS TRAINING\nYou don't grow in the gym.\n- Sleep 7-9 hours (non-negotiable)\n- Mobility work daily (10-15 min)\n- Deload every 4-8 weeks\n- Listen to your body — adjust, don't push through pain`,
+      level: 'none'
+    },
+    transcript: {
+      title: 'Video Transcript — Key Points',
+      content: `# VIDEO TITLE\n## Channel: Saturno Movement\n\n### KEY POINTS\n- Point one from the video\n- Point two from the video\n- Point three from the video\n- Point four from the video\n\n### SUMMARY\nPaste the full summary here. This section should capture the core message of the video in 2-3 paragraphs.\n\nThe second paragraph continues the thought.\n\n### ACTION ITEMS\n- First action step the viewer should take\n- Second action step\n- Third action step\n\n### TIMESTAMPS\n- 0:00 Introduction\n- 2:15 Main topic\n- 5:30 Key exercise demo\n- 8:45 Programming recommendations\n- 11:00 Closing thoughts`,
+      level: 'none'
+    }
+  };
+
+  const p = presets[type];
+  if (!p) return;
+
+  document.getElementById('pdf-title').value = p.title;
+  document.getElementById('pdf-content').value = p.content;
+  if (p.level !== 'none') {
+    setLevel(p.level);
+    setTemplate('saturno');
+  }
+  liveUpdate();
+  toast('Loaded preset: ' + type);
+}
+
+// === LIVE UPDATE ===
+function liveUpdate() {
+  const title = document.getElementById('pdf-title').value || 'Untitled';
+  const author = document.getElementById('pdf-author').value || '';
+  const content = document.getElementById('pdf-content').value;
+  const canvas = document.getElementById('pdf-canvas');
+
+  let html = '';
+
+  // Level badge
+  if (currentLevel !== 'none' && currentTemplate === 'saturno') {
+    html += '<div class="level-badge ' + currentLevel + '">' + currentLevel.toUpperCase() + '</div>\n';
+  }
+
+  html += '<h1>' + esc(title) + '</h1>\n';
+  if (author) html += '<h2>By ' + esc(author) + '</h2>\n';
+
+  if (content.trim()) {
+    html += formatMarkdown(content);
+  } else {
+    html += '<p style="color:#666;font-style:italic">Paste content or select a preset to begin. You can edit this preview directly.</p>';
+  }
+
+  html += '\n<div class="footer">SATURNO FORGE / saturnomovement.com / ' + new Date().toLocaleDateString() + '</div>';
+
+  canvas.innerHTML = html;
+  estimatePages();
+}
+
+function formatMarkdown(text) {
+  return text
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2 style="font-size:18px;font-weight:600;margin-top:24px;margin-bottom:8px;color:inherit;border:none;padding:0;font-style:normal">$1</h2>')
+    .replace(/^# (.*$)/gm, '<h3 style="font-size:22px;font-weight:700;margin-top:28px;margin-bottom:12px">$1</h3>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^\d+\. (.*$)/gm, '<li style="margin-left:20px;list-style:decimal">$1</li>')
+    .replace(/^- (.*$)/gm, '<li style="margin-left:20px">$1</li>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function estimatePages() {
+  const canvas = document.getElementById('pdf-canvas');
+  const h = canvas.scrollHeight;
+  const pageH = 1050; // approx A4 at 96dpi
+  const pages = Math.max(1, Math.ceil(h / pageH));
+  document.getElementById('page-indicator').textContent = 'Estimated: ' + pages + ' page' + (pages > 1 ? 's' : '') + ' (A4)';
+}
+
+// === DOWNLOAD PDF ===
+function downloadPDF() {
+  const canvas = document.getElementById('pdf-canvas');
+  const title = document.getElementById('pdf-title').value || 'document';
+
+  setStatus('GENERATING...', 'working');
+
+  const opt = {
+    margin: [15, 15, 20, 15],
+    filename: title.replace(/[^a-zA-Z0-9_-]/g, '_') + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: currentTemplate === 'saturno' || currentTemplate === 'dark' ? '#0a0a0a' : '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(canvas).save().then(() => {
+    toast('PDF downloaded: ' + opt.filename);
+    setStatus('DOWNLOADED', 'ready');
+  }).catch(err => {
+    toast('Error: ' + err.message);
+    setStatus('ERROR', 'working');
+  });
+}
+
+// === CAPTION MULTIPLIER ===
+function multiplyCaption() {
+  const seed = document.getElementById('seed-input').value.trim();
+  if (!seed) { toast('Enter a seed phrase first'); return; }
+
+  const platforms = [];
+  document.querySelectorAll('[data-platform]:checked').forEach(cb => platforms.push(cb.dataset.platform));
+  if (!platforms.length) { toast('Select at least one platform'); return; }
+
+  const styles = {
+    raw: { prefix: '', suffix: '' },
+    teacher: { prefix: '', suffix: '\n\nSave this for later.' },
+    prophet: { prefix: 'The truth is this:\n\n', suffix: '\n\nThis changes everything.' },
+    rebel: { prefix: 'Most people get this wrong.\n\n', suffix: '\n\nThink different.' },
+    mystic: { prefix: 'In the silence between reps...\n\n', suffix: '' }
+  };
+
+  const formats = {
+    ig: { name: 'Instagram', fn: (s,st) => st.prefix + s + st.suffix + '\n\n#Calisthenics #Movement #Mastery #SaturnoMovement' },
+    email: { name: 'Email', fn: (s,st) => 'Subject: This changed my perspective\n\n' + st.prefix + s + st.suffix + '\n\nReply and tell me what you think.\n\n-- Gabo' },
+    yt: { name: 'YouTube', fn: (s,st) => '[HOOK - 0:00]\n' + s.substring(0,200) + '\n\n[EXPAND - 0:15]\n' + st.prefix + s + st.suffix + '\n\n[CTA - End]\nSubscribe for more movement wisdom.' },
+    twitter: { name: 'Twitter/X', fn: (s,st) => (st.prefix + (s.length>240?s.substring(0,240)+'...':s) + st.suffix) },
+    linkedin: { name: 'LinkedIn', fn: (s,st) => st.prefix + s + st.suffix + '\n\n---\n\nWhat is your experience with this? Share below.' },
+    tiktok: { name: 'TikTok', fn: (s,st) => '[TEXT ON SCREEN]\n"' + s.substring(0,100) + '..."\n\n[VOICEOVER]\n' + st.prefix + s + st.suffix }
+  };
+
+  const style = styles[currentVoice] || styles.teacher;
+  const container = document.getElementById('variants-container');
+  container.innerHTML = platforms.map((p,i) => {
+    const f = formats[p];
+    if (!f) return '';
+    const content = f.fn(seed, style);
+    return '<div class="variant-card ' + p + '">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+      '<span style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">' + f.name + '</span>' +
+      '<button onclick="copyText(this.parentElement.nextElementSibling.innerText)" class="btn btn-sm btn-secondary">Copy</button>' +
+      '</div>' +
+      '<pre style="font-size:11px;color:var(--text-secondary);white-space:pre-wrap;line-height:1.6;font-family:var(--mono)">' + esc(content) + '</pre>' +
+      '</div>';
+  }).join('');
+
+  toast('Generated ' + platforms.length + ' variants');
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+  toast('Copied to clipboard');
+}
+
+// === CHECKBOX TOGGLE ===
+document.querySelectorAll('.checkbox-custom').forEach(label => {
+  label.addEventListener('click', function(e) {
+    if (e.target.tagName !== 'INPUT') {
+      const cb = this.querySelector('input');
+      cb.checked = !cb.checked;
+    }
+    this.classList.toggle('checked', this.querySelector('input').checked);
+  });
+});
+
+// === UTILITIES ===
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function setStatus(text, type) {
+  const el = document.getElementById('global-status');
+  el.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block"></span> ' + text;
+  el.className = 'status-badge status-' + type;
+}
+
+// === KEYBOARD SHORTCUTS ===
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey) {
+    if (e.key === 's') { e.preventDefault(); downloadPDF(); }
+    if (e.key === 'm') { e.preventDefault(); multiplyCaption(); }
+    if (e.key === 'p') { e.preventDefault(); window.print(); }
+  }
+});
+
+// === INIT ===
+liveUpdate();
+</script>
+</body>
+</html>
