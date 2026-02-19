@@ -1,10 +1,10 @@
 # CONTENT BEAST — Build Specs
 
 ## Current State
-- **Version:** v6.5+ (single-file HTML app, `index.html`)
+- **Version:** v7.0 (single-file HTML app, `index.html`, ~4775 lines)
 - **Repo:** gabosaturno11/Content-Beast
 - **Deploy:** Vercel auto-deploy from main → content-beast-five.vercel.app
-- **Architecture:** Single HTML file (~4100+ lines) with inline CSS + JS
+- **Architecture:** Single HTML file with inline CSS + JS
 - **Storage:** IndexedDB (`ContentBeastCaptions` DB) for caption library + canvas state
 - **Caption Library:** 103 Gabo content captions + 80 seed library entries, auto-seeded on first load
 
