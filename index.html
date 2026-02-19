@@ -231,6 +231,35 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .drop-zone{border:2px dashed var(--border);border-radius:4px;padding:20px;text-align:center;margin-bottom:10px;transition:all 0.2s;cursor:pointer}
 .drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:rgba(168,85,247,0.04)}
 .drop-zone .dz-text{font-size:9px;color:var(--text-muted)}
+
+/* WORD COUNT BAR */
+.wc-bar{padding:4px 12px;border-top:1px solid var(--border);font-size:8px;color:var(--text-muted);display:flex;gap:12px;flex-shrink:0;font-family:var(--mono)}
+.wc-bar span{display:inline-flex;gap:3px}
+
+/* TABLE INSERT MODAL */
+.tbl-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:20px;width:300px;z-index:1000;display:none}
+.tbl-modal.open{display:block}
+.tbl-grid-pick{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin:10px 0}
+.tbl-cell{width:100%;aspect-ratio:1;background:var(--bg-base);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all 0.1s}
+.tbl-cell.hl{background:rgba(168,85,247,0.2);border-color:var(--accent)}
+
+/* FIND BAR */
+.find-bar{display:none;padding:6px 12px;border-top:1px solid var(--border);gap:6px;align-items:center;flex-shrink:0;background:var(--bg-surface)}
+.find-bar.open{display:flex}
+.find-bar input{width:160px;padding:5px 8px;font-size:10px}
+.find-bar .find-count{font-size:8px;color:var(--text-muted);min-width:50px;font-family:var(--mono)}
+
+/* VERSION HISTORY */
+.ver-panel{position:fixed;top:0;right:-320px;width:320px;height:100vh;background:var(--bg-base);border-left:1px solid var(--border);z-index:900;transition:right 0.2s;display:flex;flex-direction:column}
+.ver-panel.open{right:0}
+.ver-panel-hdr{padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.ver-panel-hdr h3{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-primary)}
+.ver-list{flex:1;overflow-y:auto;padding:8px}
+.ver-item{padding:8px 10px;border-radius:4px;cursor:pointer;margin-bottom:4px;transition:all 0.1s}
+.ver-item:hover{background:var(--bg-elevated)}
+.ver-item .vi-time{font-size:9px;color:var(--text-primary);font-weight:500}
+.ver-item .vi-meta{font-size:8px;color:var(--text-muted);margin-top:2px}
+.ver-item .vi-preview{font-size:8px;color:var(--text-muted);margin-top:4px;max-height:40px;overflow:hidden;line-height:1.4}
 </style>
 </head>
 <body>
@@ -389,9 +418,14 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         <button class="btn-icon" onclick="insertPageBreak()" title="Page break">||</button>
         <span class="tb-sep"></span>
         <button class="btn-icon" onclick="insertImage()" title="Insert image">Img</button>
+        <button class="btn-icon" onclick="openTblModal()" title="Insert table">Tbl</button>
         <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(this.files[0])">
         <span class="tb-sep"></span>
-        <button class="btn-icon" onclick="toggleFullscreen()" title="Fullscreen" id="fs-btn">F</button>
+        <button class="btn-icon" onclick="toggleFind()" title="Find & Replace (Cmd+F)">F/R</button>
+        <button class="btn-icon" onclick="generateTOC()" title="Insert Table of Contents">TOC</button>
+        <button class="btn-icon" onclick="openVersions()" title="Version history">H</button>
+        <span class="tb-sep"></span>
+        <button class="btn-icon" onclick="toggleFullscreen()" title="Fullscreen" id="fs-btn">FS</button>
         <div class="zoom-bar">
           <button class="btn-icon" onclick="zoom(-10)" title="Zoom out">-</button>
           <span class="zb" id="zoom-val">100%</span>
@@ -399,6 +433,14 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
           <button class="btn-icon" onclick="zoom(0)" title="Reset zoom">R</button>
         </div>
       </div>
+    </div>
+    <div class="find-bar" id="find-bar">
+      <input type="text" id="find-input" placeholder="Find..." oninput="findInCanvas()">
+      <input type="text" id="replace-input" placeholder="Replace..." style="width:140px">
+      <button class="btn btn-outline btn-sm" onclick="replaceOne()">Replace</button>
+      <button class="btn btn-outline btn-sm" onclick="replaceAll()">All</button>
+      <span class="find-count" id="find-count"></span>
+      <button class="btn-icon" onclick="toggleFind()" style="margin-left:auto;font-size:8px">x</button>
     </div>
     <div class="preview-body" id="preview-body">
       <div id="pdf-wrap">
@@ -412,13 +454,18 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
       </div>
       <div id="cap-output" style="display:none"></div>
     </div>
+    <div class="wc-bar" id="wc-bar">
+      <span>Words: <b id="wc-words">0</b></span>
+      <span>Chars: <b id="wc-chars">0</b></span>
+      <span>Pages: <b id="wc-pages">~1</b></span>
+    </div>
   </div>
 
 </div>
 
 <div class="ftr">
   <span>CONTENT BEAST v3.0 — by Saturno Movement</span>
-  <span>Cmd+S: Save / Cmd+Shift+S: Export PDF / Cmd+N: New Doc / Esc: Exit</span>
+  <span>Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find / Esc: Close</span>
 </div>
 
 </div>
@@ -443,6 +490,32 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
   </div>
 </div>
 
+<!-- TABLE INSERT MODAL -->
+<div class="export-overlay" id="tbl-overlay" onclick="closeTblModal()"></div>
+<div class="tbl-modal" id="tbl-modal">
+  <h3 style="font-size:10px;font-weight:600;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Insert Table</h3>
+  <div style="font-size:8px;color:var(--text-muted);margin-bottom:6px">Select size: <span id="tbl-size">0 x 0</span></div>
+  <div class="tbl-grid-pick" id="tbl-grid"></div>
+  <div style="display:flex;gap:6px">
+    <button class="btn btn-primary btn-sm" style="flex:1" onclick="insertTable()">Insert</button>
+    <button class="btn btn-outline btn-sm" style="flex:1" onclick="closeTblModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- VERSION HISTORY PANEL -->
+<div class="ver-panel" id="ver-panel">
+  <div class="ver-panel-hdr">
+    <h3>Version History</h3>
+    <button class="btn-icon" onclick="closeVersions()" style="font-size:8px">x</button>
+  </div>
+  <div style="padding:8px 12px;border-bottom:1px solid var(--border)">
+    <button class="btn btn-outline btn-sm btn-block" onclick="saveVersion()">Save Snapshot</button>
+  </div>
+  <div class="ver-list" id="ver-list">
+    <div style="padding:16px;text-align:center;font-size:9px;color:var(--text-muted)">No snapshots yet</div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // STATE
@@ -455,6 +528,8 @@ let currentLv = '';
 let currentVoice = 'teacher';
 let saveTimer = null;
 let zoomLevel = 100;
+let tblRows = 0, tblCols = 0;
+const VER_KEY = 'content-beast-versions';
 
 // ============================================================
 // PERSISTENCE
@@ -615,6 +690,7 @@ function renderPreview() {
   html += '\n<div class="pdf-footer">CONTENT BEAST / saturnomovement.com / ' + new Date().toLocaleDateString() + '</div>';
   canvas.innerHTML = html;
   estPages();
+  updateWordCount();
   scheduleSave();
 }
 
@@ -906,9 +982,12 @@ function setStatus(text, type) {
 }
 
 // ============================================================
-// AUTO-SAVE ON CANVAS EDIT
+// AUTO-SAVE ON CANVAS EDIT + WORD COUNT
 // ============================================================
-document.getElementById('canvas').addEventListener('input', scheduleSave);
+document.getElementById('canvas').addEventListener('input', function() {
+  scheduleSave();
+  updateWordCount();
+});
 
 // ============================================================
 // ZOOM
@@ -1064,6 +1143,265 @@ function exportPDF() {
 }
 
 // ============================================================
+// WORD COUNT
+// ============================================================
+function updateWordCount() {
+  const canvas = document.getElementById('canvas');
+  const text = canvas.innerText || '';
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const chars = text.length;
+  const pages = Math.max(1, Math.ceil(canvas.scrollHeight / 1050));
+  document.getElementById('wc-words').textContent = words;
+  document.getElementById('wc-chars').textContent = chars;
+  document.getElementById('wc-pages').textContent = '~' + pages;
+  document.getElementById('page-est').textContent = '~ ' + pages + ' page' + (pages > 1 ? 's' : '') + ' (A4)';
+}
+
+// ============================================================
+// FIND & REPLACE
+// ============================================================
+function toggleFind() {
+  const bar = document.getElementById('find-bar');
+  bar.classList.toggle('open');
+  if (bar.classList.contains('open')) {
+    document.getElementById('find-input').focus();
+  } else {
+    clearHighlights();
+  }
+}
+
+function findInCanvas() {
+  clearHighlights();
+  const query = document.getElementById('find-input').value;
+  if (!query) { document.getElementById('find-count').textContent = ''; return; }
+  const canvas = document.getElementById('canvas');
+  const walker = document.createTreeWalker(canvas, NodeFilter.SHOW_TEXT, null, false);
+  let count = 0;
+  const nodes = [];
+  while (walker.nextNode()) { nodes.push(walker.currentNode); }
+  nodes.forEach(node => {
+    const idx = node.textContent.toLowerCase().indexOf(query.toLowerCase());
+    if (idx >= 0) {
+      const span = document.createElement('span');
+      span.style.background = 'rgba(168,85,247,0.4)';
+      span.style.borderRadius = '2px';
+      span.dataset.findhl = 'true';
+      const range = document.createRange();
+      range.setStart(node, idx);
+      range.setEnd(node, idx + query.length);
+      range.surroundContents(span);
+      count++;
+    }
+  });
+  document.getElementById('find-count').textContent = count + ' found';
+}
+
+function clearHighlights() {
+  const canvas = document.getElementById('canvas');
+  canvas.querySelectorAll('[data-findhl]').forEach(el => {
+    const parent = el.parentNode;
+    parent.replaceChild(document.createTextNode(el.textContent), el);
+    parent.normalize();
+  });
+}
+
+function replaceOne() {
+  const query = document.getElementById('find-input').value;
+  const repl = document.getElementById('replace-input').value;
+  if (!query) return;
+  const canvas = document.getElementById('canvas');
+  const hl = canvas.querySelector('[data-findhl]');
+  if (hl) {
+    hl.replaceWith(document.createTextNode(repl));
+    canvas.normalize();
+    findInCanvas();
+    scheduleSave();
+  }
+}
+
+function replaceAll() {
+  const query = document.getElementById('find-input').value;
+  const repl = document.getElementById('replace-input').value;
+  if (!query) return;
+  clearHighlights();
+  const canvas = document.getElementById('canvas');
+  const walker = document.createTreeWalker(canvas, NodeFilter.SHOW_TEXT, null, false);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  let count = 0;
+  nodes.forEach(node => {
+    if (node.textContent.toLowerCase().includes(query.toLowerCase())) {
+      const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+      node.textContent = node.textContent.replace(regex, repl);
+      count++;
+    }
+  });
+  document.getElementById('find-count').textContent = count + ' replaced';
+  scheduleSave();
+}
+
+// ============================================================
+// TABLE INSERT
+// ============================================================
+function openTblModal() {
+  document.getElementById('tbl-overlay').classList.add('open');
+  document.getElementById('tbl-modal').classList.add('open');
+  buildTblGrid();
+}
+
+function closeTblModal() {
+  document.getElementById('tbl-overlay').classList.remove('open');
+  document.getElementById('tbl-modal').classList.remove('open');
+  tblRows = 0; tblCols = 0;
+}
+
+function buildTblGrid() {
+  const grid = document.getElementById('tbl-grid');
+  grid.innerHTML = '';
+  for (let r = 0; r < 6; r++) {
+    for (let c = 0; c < 8; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'tbl-cell';
+      cell.dataset.r = r + 1;
+      cell.dataset.c = c + 1;
+      cell.addEventListener('mouseover', function() {
+        tblRows = parseInt(this.dataset.r);
+        tblCols = parseInt(this.dataset.c);
+        document.getElementById('tbl-size').textContent = tblRows + ' x ' + tblCols;
+        grid.querySelectorAll('.tbl-cell').forEach(tc => {
+          const tr = parseInt(tc.dataset.r), tcl = parseInt(tc.dataset.c);
+          tc.classList.toggle('hl', tr <= tblRows && tcl <= tblCols);
+        });
+      });
+      cell.addEventListener('click', insertTable);
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function insertTable() {
+  if (tblRows < 1 || tblCols < 1) { tblRows = 2; tblCols = 3; }
+  let html = '<table><thead><tr>';
+  for (let c = 0; c < tblCols; c++) html += '<th>Header ' + (c + 1) + '</th>';
+  html += '</tr></thead><tbody>';
+  for (let r = 0; r < tblRows; r++) {
+    html += '<tr>';
+    for (let c = 0; c < tblCols; c++) html += '<td>&nbsp;</td>';
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  const canvas = document.getElementById('canvas');
+  const footer = canvas.querySelector('.pdf-footer');
+  const tbl = document.createElement('div');
+  tbl.innerHTML = html;
+  if (footer) { canvas.insertBefore(tbl.firstChild, footer); }
+  else { canvas.appendChild(tbl.firstChild); }
+  closeTblModal();
+  scheduleSave();
+  toast('Table inserted (' + tblRows + 'x' + tblCols + ')');
+}
+
+// ============================================================
+// TABLE OF CONTENTS GENERATOR
+// ============================================================
+function generateTOC() {
+  const canvas = document.getElementById('canvas');
+  const headings = canvas.querySelectorAll('h1, h2, h3');
+  if (!headings.length) { toast('No headings found'); return; }
+  let html = '<div style="margin:16px 0;padding:16px;border:1px solid #ddd;border-radius:4px">';
+  html += '<h3 style="font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.08em">Table of Contents</h3>';
+  headings.forEach((h, i) => {
+    const tag = h.tagName.toLowerCase();
+    const indent = tag === 'h1' ? 0 : tag === 'h2' ? 16 : 32;
+    const id = 'toc-' + i;
+    h.id = id;
+    html += '<div style="margin-left:' + indent + 'px;margin-bottom:3px">' +
+      '<a href="#' + id + '" style="color:inherit;text-decoration:none;font-size:11px" onclick="document.getElementById(\'' + id + '\').scrollIntoView({behavior:\'smooth\'})">' +
+      h.textContent + '</a></div>';
+  });
+  html += '</div>';
+  const toc = document.createElement('div');
+  toc.innerHTML = html;
+  const first = canvas.firstChild;
+  if (first) { canvas.insertBefore(toc.firstChild, first); }
+  else { canvas.appendChild(toc.firstChild); }
+  scheduleSave();
+  toast('TOC generated with ' + headings.length + ' entries');
+}
+
+// ============================================================
+// VERSION HISTORY
+// ============================================================
+function getVersions() {
+  try { return JSON.parse(localStorage.getItem(VER_KEY) || '[]'); } catch(e) { return []; }
+}
+
+function saveVersion() {
+  snapshotActive();
+  const doc = docs.find(d => d.id === activeDocId);
+  if (!doc) return;
+  const versions = getVersions();
+  versions.unshift({
+    id: 'ver_' + Date.now(),
+    docId: doc.id,
+    title: doc.title,
+    canvasHTML: document.getElementById('canvas').innerHTML,
+    content: doc.content,
+    tpl: doc.tpl,
+    level: doc.level,
+    time: new Date().toISOString(),
+    words: (document.getElementById('canvas').innerText || '').trim().split(/\s+/).length
+  });
+  // Keep max 50 versions
+  if (versions.length > 50) versions.length = 50;
+  localStorage.setItem(VER_KEY, JSON.stringify(versions));
+  renderVersions();
+  toast('Snapshot saved');
+}
+
+function openVersions() {
+  renderVersions();
+  document.getElementById('ver-panel').classList.add('open');
+}
+
+function closeVersions() {
+  document.getElementById('ver-panel').classList.remove('open');
+}
+
+function renderVersions() {
+  const versions = getVersions().filter(v => v.docId === activeDocId);
+  const el = document.getElementById('ver-list');
+  if (!versions.length) {
+    el.innerHTML = '<div style="padding:16px;text-align:center;font-size:9px;color:var(--text-muted)">No snapshots for this document</div>';
+    return;
+  }
+  el.innerHTML = versions.map(v => {
+    const d = new Date(v.time);
+    const timeStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const preview = (v.canvasHTML || '').replace(/<[^>]+>/g, '').substring(0, 100);
+    return '<div class="ver-item" onclick="restoreVersion(\'' + v.id + '\')">' +
+      '<div class="vi-time">' + timeStr + '</div>' +
+      '<div class="vi-meta">' + esc(v.title) + ' / ' + (v.words || 0) + ' words</div>' +
+      '<div class="vi-preview">' + esc(preview) + '</div></div>';
+  }).join('');
+}
+
+function restoreVersion(verId) {
+  const versions = getVersions();
+  const ver = versions.find(v => v.id === verId);
+  if (!ver) return;
+  if (!confirm('Restore this snapshot? Current state will be saved first.')) return;
+  saveVersion(); // Auto-save current state
+  const canvas = document.getElementById('canvas');
+  canvas.innerHTML = ver.canvasHTML;
+  canvas.className = 'pdf-canvas ' + (ver.tpl || currentTpl);
+  if (ver.content) document.getElementById('f-content').value = ver.content;
+  scheduleSave();
+  toast('Version restored');
+  closeVersions();
+}
+
+// ============================================================
 // KEYBOARD SHORTCUTS
 // ============================================================
 document.addEventListener('keydown', e => {
@@ -1071,11 +1409,15 @@ document.addEventListener('keydown', e => {
     if (e.shiftKey && e.key === 's') { e.preventDefault(); openExport(); return; }
     if (e.key === 's') { e.preventDefault(); saveDocs(); toast('Saved'); return; }
     if (e.key === 'n') { e.preventDefault(); newDoc(); return; }
+    if (e.key === 'f') { e.preventDefault(); toggleFind(); return; }
     if (e.key === 'p') { e.preventDefault(); window.print(); return; }
   }
   if (e.key === 'Escape') {
     if (document.body.classList.contains('fullscreen-mode')) toggleFullscreen();
     if (document.getElementById('export-panel').classList.contains('open')) closeExport();
+    if (document.getElementById('find-bar').classList.contains('open')) toggleFind();
+    if (document.getElementById('ver-panel').classList.contains('open')) closeVersions();
+    if (document.getElementById('tbl-modal').classList.contains('open')) closeTblModal();
   }
 });
 
@@ -1083,6 +1425,7 @@ document.addEventListener('keydown', e => {
 // INIT
 // ============================================================
 loadDocs();
+updateWordCount();
 </script>
 </body>
 </html>
