@@ -2089,7 +2089,7 @@ function setCapSub(sub) {
 }
 
 function setMode(mode) {
-  document.querySelectorAll('.hdr .tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&mode==='pdf')||(i===1&&mode==='caption')||(i===2&&mode==='atomizer')));
+  document.querySelectorAll('.hdr .tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&mode==='pdf')||(i===1&&mode==='caption')||(i===2&&mode==='atomizer')||(i===3&&mode==='canvas')));
   const ws = document.getElementById('workspace');
   ws.classList.remove('caption-mode');
   if (mode === 'caption') ws.classList.add('caption-mode');
