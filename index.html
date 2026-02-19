@@ -6,6 +6,7 @@
 <title>CONTENT BEAST — PDF Maker + Content Tools</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
 
@@ -273,6 +274,37 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .ver-item .vi-time{font-size:9px;color:var(--text-primary);font-weight:500}
 .ver-item .vi-meta{font-size:8px;color:var(--text-muted);margin-top:2px}
 .ver-item .vi-preview{font-size:8px;color:var(--text-muted);margin-top:4px;max-height:40px;overflow:hidden;line-height:1.4}
+
+/* CALLOUT BLOCKS */
+.pdf-canvas .callout{padding:12px 16px;border-radius:4px;margin:12px 0;font-size:12px}
+.pdf-canvas .callout-info{background:#eff6ff;border-left:3px solid #3b82f6;color:#1e40af}
+.pdf-canvas .callout-warning{background:#fffbeb;border-left:3px solid #f59e0b;color:#92400e}
+.pdf-canvas .callout-tip{background:#f0fdf4;border-left:3px solid #22c55e;color:#166534}
+.pdf-canvas .callout-fire{background:#fef2f2;border-left:3px solid #ef4444;color:#991b1b}
+.pdf-canvas.tpl-dark .callout-info,.pdf-canvas.tpl-saturno .callout-info{background:rgba(59,130,246,0.08);color:#93c5fd}
+.pdf-canvas.tpl-dark .callout-warning,.pdf-canvas.tpl-saturno .callout-warning{background:rgba(245,158,11,0.08);color:#fcd34d}
+.pdf-canvas.tpl-dark .callout-tip,.pdf-canvas.tpl-saturno .callout-tip{background:rgba(34,197,94,0.08);color:#86efac}
+.pdf-canvas.tpl-dark .callout-fire,.pdf-canvas.tpl-saturno .callout-fire{background:rgba(239,68,68,0.08);color:#fca5a5}
+
+/* QUICK INSERT DROPDOWN */
+.qi-menu{position:absolute;background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:4px;width:180px;z-index:100;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+.qi-menu.open{display:block}
+.qi-item{padding:6px 10px;font-size:9px;color:var(--text-secondary);cursor:pointer;border-radius:3px;font-family:var(--mono);transition:all 0.1s;display:flex;align-items:center;gap:6px}
+.qi-item:hover{background:var(--bg-surface);color:var(--text-primary)}
+.qi-item .qi-icon{font-size:10px;width:16px;text-align:center}
+
+/* SORT BTNS */
+.sort-bar{padding:4px;border-bottom:1px solid var(--border);display:flex;gap:2px}
+.sort-btn{padding:2px 6px;font-size:7px;background:transparent;border:1px solid transparent;border-radius:2px;color:var(--text-muted);cursor:pointer;font-family:var(--mono);transition:all 0.1s}
+.sort-btn:hover{border-color:var(--border)}
+.sort-btn.active{color:var(--accent);border-color:var(--accent)}
+
+/* COLOR PICKER */
+.color-grid{display:flex;gap:3px;flex-wrap:wrap;padding:4px 0}
+.color-dot{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all 0.1s}
+.color-dot:hover{transform:scale(1.2)}
+.color-dot.active{border-color:var(--text-primary)}
+
 /* PRINT */
 @media print {
   body{background:#fff !important;overflow:visible !important}
@@ -320,6 +352,12 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
     </div>
     <div style="padding:4px 4px 0">
       <input type="text" id="lib-search" placeholder="Search docs..." style="padding:5px 8px;font-size:9px;margin-bottom:2px" oninput="filterLibrary()">
+    </div>
+    <div class="sort-bar">
+      <button class="sort-btn active" onclick="sortDocs('recent',this)">Recent</button>
+      <button class="sort-btn" onclick="sortDocs('name',this)">A-Z</button>
+      <button class="sort-btn" onclick="sortDocs('oldest',this)">Oldest</button>
+      <button class="sort-btn" onclick="batchExport()" title="Export all as ZIP" style="margin-left:auto;color:var(--green)">ZIP</button>
     </div>
     <div class="lib-list" id="lib-list">
       <div class="lib-empty">No documents yet.<br>Click + New to start.</div>
@@ -463,6 +501,20 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         <button class="btn-icon" onclick="insertImage()" title="Insert image">Img</button>
         <button class="btn-icon" onclick="openTblModal()" title="Insert table">Tbl</button>
         <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(this.files[0])">
+        <input type="color" id="color-input" style="display:none" onchange="execCmd('foreColor',this.value)">
+        <button class="btn-icon" onclick="document.getElementById('color-input').click()" title="Text color" style="position:relative">A<span style="position:absolute;bottom:2px;left:4px;right:4px;height:2px;background:var(--accent);border-radius:1px"></span></button>
+        <div style="position:relative;display:inline-block">
+          <button class="btn-icon" onclick="toggleQuickInsert()" title="Quick insert blocks">+B</button>
+          <div class="qi-menu" id="qi-menu">
+            <div class="qi-item" onclick="insertCallout('info')"><span class="qi-icon" style="color:#3b82f6">i</span> Info Callout</div>
+            <div class="qi-item" onclick="insertCallout('tip')"><span class="qi-icon" style="color:#22c55e">*</span> Tip Callout</div>
+            <div class="qi-item" onclick="insertCallout('warning')"><span class="qi-icon" style="color:#f59e0b">!</span> Warning Callout</div>
+            <div class="qi-item" onclick="insertCallout('fire')"><span class="qi-icon" style="color:#ef4444">~</span> Important Callout</div>
+            <div class="qi-item" onclick="insertCodeBlock()"><span class="qi-icon">{}</span> Code Block</div>
+            <div class="qi-item" onclick="insertLabeledDivider()"><span class="qi-icon">--</span> Labeled Divider</div>
+            <div class="qi-item" onclick="insertColumns()"><span class="qi-icon">||</span> 2-Column Layout</div>
+          </div>
+        </div>
         <span class="tb-sep"></span>
         <button class="btn-icon" onclick="toggleFind()" title="Find & Replace (Cmd+F)">F/R</button>
         <button class="btn-icon" onclick="generateTOC()" title="Insert Table of Contents">TOC</button>
@@ -1467,6 +1519,133 @@ function restoreVersion(verId) {
   toast('Version restored');
   closeVersions();
 }
+
+// ============================================================
+// SORT DOCUMENTS
+// ============================================================
+function sortDocs(mode, btn) {
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  snapshotActive();
+  if (mode === 'recent') { docs.sort((a, b) => new Date(b.updated) - new Date(a.updated)); }
+  else if (mode === 'name') { docs.sort((a, b) => a.title.localeCompare(b.title)); }
+  else if (mode === 'oldest') { docs.sort((a, b) => new Date(a.created) - new Date(b.created)); }
+  saveDocs();
+  renderLibrary();
+}
+
+// ============================================================
+// BATCH EXPORT (ZIP)
+// ============================================================
+async function batchExport() {
+  if (!docs.length) { toast('No documents to export'); return; }
+  if (typeof JSZip === 'undefined') { toast('JSZip not loaded'); return; }
+  setStatus('EXPORTING ZIP...', 'busy');
+  const zip = new JSZip();
+  const canvas = document.getElementById('canvas');
+  const originalHTML = canvas.innerHTML;
+  const originalClass = canvas.className;
+
+  for (let i = 0; i < docs.length; i++) {
+    const doc = docs[i];
+    canvas.className = 'pdf-canvas ' + (doc.tpl || 'tpl-saturno');
+    canvas.innerHTML = doc.canvasHTML || ('<h1>' + esc(doc.title) + '</h1><p>' + esc(doc.content || '') + '</p>');
+
+    try {
+      const isDark = (doc.tpl || '').includes('saturno') || (doc.tpl || '').includes('dark');
+      const blob = await html2pdf().set({
+        margin: [12, 12, 16, 12],
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: isDark ? '#0a0a0a' : '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      }).from(canvas).outputPdf('blob');
+      const fname = doc.title.replace(/[^a-zA-Z0-9_\- ]/g, '_').replace(/\s+/g, '_') + '.pdf';
+      zip.file(fname, blob);
+    } catch(e) { /* skip failed docs */ }
+  }
+
+  canvas.className = originalClass;
+  canvas.innerHTML = originalHTML;
+
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(zipBlob);
+  a.download = 'Content-Beast-Export-' + new Date().toISOString().slice(0,10) + '.zip';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setStatus('READY', 'ok');
+  toast('Exported ' + docs.length + ' docs as ZIP');
+}
+
+// ============================================================
+// QUICK INSERT BLOCKS
+// ============================================================
+function toggleQuickInsert() {
+  document.getElementById('qi-menu').classList.toggle('open');
+}
+
+function insertCallout(type) {
+  const canvas = document.getElementById('canvas');
+  const div = document.createElement('div');
+  div.className = 'callout callout-' + type;
+  div.contentEditable = 'true';
+  const labels = { info: 'Note:', tip: 'Tip:', warning: 'Warning:', fire: 'Important:' };
+  div.innerHTML = '<strong>' + (labels[type] || 'Note:') + '</strong> Type your content here';
+  const footer = canvas.querySelector('.pdf-footer');
+  if (footer) canvas.insertBefore(div, footer);
+  else canvas.appendChild(div);
+  document.getElementById('qi-menu').classList.remove('open');
+  div.focus();
+  scheduleSave();
+}
+
+function insertCodeBlock() {
+  const canvas = document.getElementById('canvas');
+  const pre = document.createElement('pre');
+  pre.style.cssText = 'background:#f4f4f5;padding:12px;border-radius:4px;font-family:JetBrains Mono,monospace;font-size:11px;overflow-x:auto;margin:12px 0';
+  pre.contentEditable = 'true';
+  pre.textContent = '// code here';
+  const footer = canvas.querySelector('.pdf-footer');
+  if (footer) canvas.insertBefore(pre, footer);
+  else canvas.appendChild(pre);
+  document.getElementById('qi-menu').classList.remove('open');
+  pre.focus();
+  scheduleSave();
+}
+
+function insertLabeledDivider() {
+  const label = prompt('Divider label:', 'SECTION') || 'SECTION';
+  const canvas = document.getElementById('canvas');
+  const div = document.createElement('div');
+  div.style.cssText = 'text-align:center;margin:24px 0;position:relative';
+  div.innerHTML = '<hr style="border:none;border-top:1px solid #ddd"><span style="position:relative;top:-10px;background:inherit;padding:0 12px;font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#999;font-family:JetBrains Mono,monospace">' + esc(label) + '</span>';
+  const footer = canvas.querySelector('.pdf-footer');
+  if (footer) canvas.insertBefore(div, footer);
+  else canvas.appendChild(div);
+  document.getElementById('qi-menu').classList.remove('open');
+  scheduleSave();
+}
+
+function insertColumns() {
+  const canvas = document.getElementById('canvas');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:16px 0';
+  div.innerHTML = '<div style="border-right:1px solid #eee;padding-right:16px" contenteditable="true"><p>Left column content</p></div><div contenteditable="true"><p>Right column content</p></div>';
+  const footer = canvas.querySelector('.pdf-footer');
+  if (footer) canvas.insertBefore(div, footer);
+  else canvas.appendChild(div);
+  document.getElementById('qi-menu').classList.remove('open');
+  scheduleSave();
+}
+
+// Close quick-insert when clicking outside
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('qi-menu');
+  if (menu && menu.classList.contains('open') && !e.target.closest('.qi-menu') && !e.target.closest('[onclick*="toggleQuickInsert"]')) {
+    menu.classList.remove('open');
+  }
+});
 
 // ============================================================
 // LIBRARY SEARCH
