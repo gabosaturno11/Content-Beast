@@ -305,6 +305,26 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .color-dot:hover{transform:scale(1.2)}
 .color-dot.active{border-color:var(--text-primary)}
 
+/* SPLIT VIEW */
+.workspace.split-view{grid-template-columns:0 1fr 1fr}
+.workspace.split-view .lib{display:none}
+.workspace.split-view .ctrl{overflow-y:auto}
+.workspace.split-view .ctrl .ctrl-body{padding:0}
+.workspace.split-view .ctrl #f-content{height:100% !important;min-height:calc(100vh - 120px);border:none;border-radius:0;font-size:12px;line-height:1.7;resize:none}
+.workspace.split-view .ctrl .ctrl-hdr{display:flex}
+.workspace.split-view .ctrl #pdf-ctrl .row:not(:last-child){display:none}
+.workspace.split-view .ctrl #pdf-ctrl .grid2{display:none}
+.workspace.split-view .ctrl #pdf-ctrl [class*="preset"]{display:none}
+.workspace.split-view .ctrl #pdf-ctrl [data-tpl]{display:none}
+.workspace.split-view .ctrl #pdf-ctrl [data-lv]{display:none}
+.workspace.split-view .ctrl #pdf-ctrl .drop-zone{display:none}
+.workspace.split-view .ctrl #pdf-ctrl .md-cheat{display:none}
+.workspace.split-view .ctrl #pdf-ctrl > div:last-child{display:none}
+
+/* FOCUS MODE (hides library) */
+.workspace.focus-mode{grid-template-columns:0 1fr 1fr}
+.workspace.focus-mode .lib{display:none}
+
 /* COMMAND PALETTE */
 .cmd-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1100;display:none}
 .cmd-overlay.open{display:block}
@@ -358,13 +378,18 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 <div class="hdr">
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v3.0</span>
+    <span class="ver">v4.0</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
     <button class="tab-btn" onclick="setMode('caption')">Captions</button>
   </div>
   <div class="hdr-right">
+    <div class="tab-bar" style="margin-right:8px">
+      <button class="tab-btn active" id="view-default" onclick="setView('default')" title="3-panel">Full</button>
+      <button class="tab-btn" id="view-split" onclick="setView('split')" title="Markdown + Preview">Split</button>
+      <button class="tab-btn" id="view-focus" onclick="setView('focus')" title="Controls + Preview">Focus</button>
+    </div>
     <span id="save-ind" style="font-size:8px;color:var(--text-muted);opacity:0;transition:opacity 0.3s">Saved</span>
     <span id="status" class="status status-ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
   </div>
@@ -593,7 +618,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v3.0 — by Saturno Movement</span>
+  <span>CONTENT BEAST v4.0 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -1637,7 +1662,10 @@ const CMD_ACTIONS = [
   { icon: 'P', text: 'Preset: Cover Page', fn: () => loadPreset('cover') },
   { icon: 'M', text: 'Mode: PDF Maker', fn: () => setMode('pdf') },
   { icon: 'M', text: 'Mode: Captions', fn: () => setMode('caption') },
-  { icon: 'D', text: 'Document Stats', desc: 'Show reading time + stats', fn: () => showDocStats() }
+  { icon: 'D', text: 'Document Stats', desc: 'Show reading time + stats', fn: () => showDocStats() },
+  { icon: 'V', text: 'View: Full', desc: '3-panel layout', fn: () => setView('default') },
+  { icon: 'V', text: 'View: Split', desc: 'Markdown + Preview', fn: () => setView('split') },
+  { icon: 'V', text: 'View: Focus', desc: 'Controls + Preview', fn: () => setView('focus') }
 ];
 let cmdSelIdx = 0;
 
@@ -1780,6 +1808,26 @@ function showDocStats() {
     'Tables: ' + tables + '\n' +
     'Links: ' + links;
   alert(msg);
+}
+
+// ============================================================
+// VIEW MODES (Full / Split / Focus)
+// ============================================================
+function setView(mode) {
+  const ws = document.getElementById('workspace');
+  ws.classList.remove('split-view', 'focus-mode');
+  document.querySelectorAll('[id^="view-"]').forEach(b => b.classList.remove('active'));
+  if (mode === 'split') {
+    ws.classList.add('split-view');
+    document.getElementById('view-split').classList.add('active');
+    // In split view, auto-render on content change
+    document.getElementById('f-content').oninput = function() { onFieldChange(); };
+  } else if (mode === 'focus') {
+    ws.classList.add('focus-mode');
+    document.getElementById('view-focus').classList.add('active');
+  } else {
+    document.getElementById('view-default').classList.add('active');
+  }
 }
 
 // ============================================================
