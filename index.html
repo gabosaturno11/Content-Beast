@@ -384,6 +384,34 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .seed-item:last-child{border-bottom:none}
 .seed-tag{display:inline-block;font-size:7px;padding:1px 4px;border-radius:2px;background:var(--bg-base);color:var(--text-muted);margin-right:4px;border:1px solid var(--border)}
 
+/* CAPTION LIBRARY */
+.cap-subtabs{display:flex;gap:1px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:2px;margin-bottom:10px}
+.cap-subtab{flex:1;padding:5px 8px;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;background:transparent;border:none;color:var(--text-muted);cursor:pointer;border-radius:3px;font-family:var(--mono);transition:all 0.15s;text-align:center}
+.cap-subtab:hover{color:var(--text-secondary)}
+.cap-subtab.active{background:var(--cyan);color:#fff}
+.cl-search{display:flex;gap:4px;margin-bottom:8px}
+.cl-search input{flex:1}
+.cl-filters{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+.cl-filter{padding:3px 7px;font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;color:var(--text-muted);cursor:pointer;font-family:var(--mono);transition:all 0.12s}
+.cl-filter:hover{border-color:var(--border-hover);color:var(--text-secondary)}
+.cl-filter.active{border-color:var(--cyan);color:var(--cyan);background:rgba(6,182,212,0.08)}
+.cl-filter .clf-n{font-size:6px;opacity:0.6;margin-left:2px}
+.cl-list{overflow-y:auto;flex:1}
+.cl-item{background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all 0.12s;position:relative}
+.cl-item:hover{border-color:var(--border-hover)}
+.cl-item.selected{border-color:var(--cyan);background:rgba(6,182,212,0.04)}
+.cl-item .cl-voice{display:inline-block;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 6px;border-radius:2px;margin-right:4px;font-family:var(--mono);background:rgba(168,85,247,0.12);color:#c084fc}
+.cl-item .cl-theme{display:inline-block;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 6px;border-radius:2px;font-family:var(--mono);background:rgba(6,182,212,0.12);color:#22d3ee}
+.cl-item .cl-text{font-size:10px;color:var(--text-secondary);line-height:1.6;margin:6px 0;max-height:60px;overflow:hidden}
+.cl-item .cl-text.expanded{max-height:none}
+.cl-item .cl-meta{font-size:7px;color:var(--text-muted);display:flex;gap:8px}
+.cl-item .cl-actions{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap}
+.cl-bulk{padding:6px 8px;border-bottom:1px solid var(--border);display:flex;gap:4px;align-items:center;flex-shrink:0;display:none}
+.cl-stats{padding:6px 8px;border-top:1px solid var(--border);font-size:8px;color:var(--text-muted);display:flex;gap:10px;flex-shrink:0}
+.cl-empty{padding:24px 16px;text-align:center;font-size:9px;color:var(--text-muted);line-height:2}
+.cl-import-zone{border:2px dashed var(--border);border-radius:6px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:10px}
+.cl-import-zone:hover,.cl-import-zone.over{border-color:var(--cyan);background:rgba(6,182,212,0.04)}
+
 /* SPLIT VIEW */
 .workspace.split-view{grid-template-columns:0 1fr 1fr}
 .workspace.split-view .lib{display:none}
@@ -457,7 +485,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 <div class="hdr">
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v5.1</span>
+    <span class="ver">v6.0</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -568,66 +596,105 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         </div>
       </div>
 
-      <!-- CAPTION CONTROLS -->
+      <!-- CAPTION CONTROLS (Library + Multiplier) -->
       <div id="cap-ctrl" style="display:none">
-        <div class="row">
-          <label class="lbl">Seed Phrase</label>
-          <textarea id="seed-input" style="height:100px" placeholder="Enter your core idea or pick from the Seed Library below..."></textarea>
+        <div class="cap-subtabs">
+          <button class="cap-subtab active" onclick="setCapSub('library')">Library</button>
+          <button class="cap-subtab" onclick="setCapSub('multiplier')">Multiplier</button>
         </div>
 
-        <div class="row">
-          <label class="lbl">Seed Library</label>
-          <select id="seed-cat" onchange="renderSeedLibrary()" style="margin-bottom:4px">
-            <option value="all">All Themes</option>
-            <option value="mindset">Mindset / Will</option>
-            <option value="truth">Truth / Clarity</option>
-            <option value="courage">Courage / Trust</option>
-            <option value="discipline">Discipline / Focus</option>
-            <option value="manifesto">Manifesto Lines</option>
-            <option value="training">Training / Movement</option>
-            <option value="vulnerability">Vulnerability / Growth</option>
-          </select>
-          <div id="seed-lib" style="max-height:140px;overflow-y:auto;border:1px solid var(--border);border-radius:3px;padding:2px"></div>
+        <!-- SUB: LIBRARY -->
+        <div id="cap-library">
+          <div class="cl-search">
+            <input type="text" id="cl-search" placeholder="Search captions..." style="padding:5px 8px;font-size:9px" oninput="searchCaptions()">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('cl-file').click()" title="Import captions">Import</button>
+            <button class="btn btn-outline btn-sm" onclick="addCaptionManual()" title="Add new caption">+</button>
+          </div>
+          <input type="file" id="cl-file" accept=".json,.md,.txt,.csv" style="display:none" multiple onchange="importCaptions(this.files)">
+          <div class="cl-filters" id="cl-filters"></div>
+          <div class="cl-bulk" id="cl-bulk">
+            <span style="font-size:8px;color:var(--text-muted)"><b id="cl-sel-count">0</b> selected</span>
+            <button class="btn btn-primary btn-sm" onclick="clBulkToCanvas()">To Canvas</button>
+            <button class="btn btn-outline btn-sm" onclick="clBulkToSeed()">To Seed</button>
+            <button class="btn btn-outline btn-sm" onclick="clBulkCopy()">Copy</button>
+            <button class="btn btn-outline btn-sm" onclick="clBulkExport()">Export</button>
+            <button class="btn btn-outline btn-sm" onclick="clDeselectAll()" style="margin-left:auto">x</button>
+          </div>
+          <div class="cl-list" id="cl-list" style="max-height:calc(100vh - 300px);overflow-y:auto">
+            <div class="cl-empty">
+              <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;font-weight:500">Caption Library</div>
+              Import captions from JSON, Markdown, or TXT.<br>
+              Or click <b style="color:var(--cyan)">+</b> to write one now.<br><br>
+              Every caption gets tagged, searchable,<br>and ready to deploy.
+            </div>
+          </div>
+          <div class="cl-stats" id="cl-stats" style="display:none"></div>
         </div>
 
-        <div class="row">
-          <label class="lbl">Voice Mode (V2)</label>
-          <div style="display:flex;gap:3px;flex-wrap:wrap">
-            <button class="mode-btn active" data-v="teacher" onclick="setVoice(this)">Teacher</button>
-            <button class="mode-btn" data-v="raw" onclick="setVoice(this)">Raw</button>
-            <button class="mode-btn" data-v="prophet" onclick="setVoice(this)">Prophet</button>
-            <button class="mode-btn" data-v="rebel" onclick="setVoice(this)">Rebel</button>
-            <button class="mode-btn" data-v="mystic" onclick="setVoice(this)">Mystic</button>
-            <button class="mode-btn" data-v="philosopher" onclick="setVoice(this)">Philosopher</button>
-            <button class="mode-btn" data-v="companion" onclick="setVoice(this)">Companion</button>
-            <button class="mode-btn" data-v="confessor" onclick="setVoice(this)">Confessor</button>
+        <!-- SUB: MULTIPLIER -->
+        <div id="cap-multiplier" style="display:none">
+          <div class="row">
+            <label class="lbl">Seed Phrase</label>
+            <textarea id="seed-input" style="height:100px" placeholder="Enter your core idea or pick from the Seed Library below..."></textarea>
+          </div>
+
+          <div class="row">
+            <label class="lbl">Seed Library</label>
+            <select id="seed-cat" onchange="renderSeedLibrary()" style="margin-bottom:4px">
+              <option value="all">All Themes</option>
+              <option value="mindset">Mindset / Will</option>
+              <option value="truth">Truth / Clarity</option>
+              <option value="courage">Courage / Trust</option>
+              <option value="discipline">Discipline / Focus</option>
+              <option value="manifesto">Manifesto Lines</option>
+              <option value="training">Training / Movement</option>
+              <option value="vulnerability">Vulnerability / Growth</option>
+            </select>
+            <div id="seed-lib" style="max-height:140px;overflow-y:auto;border:1px solid var(--border);border-radius:3px;padding:2px"></div>
+          </div>
+
+          <div class="row">
+            <label class="lbl">Voice Mode (V2)</label>
+            <div style="display:flex;gap:3px;flex-wrap:wrap">
+              <button class="mode-btn active" data-v="teacher" onclick="setVoice(this)">Teacher</button>
+              <button class="mode-btn" data-v="raw" onclick="setVoice(this)">Raw</button>
+              <button class="mode-btn" data-v="prophet" onclick="setVoice(this)">Prophet</button>
+              <button class="mode-btn" data-v="rebel" onclick="setVoice(this)">Rebel</button>
+              <button class="mode-btn" data-v="mystic" onclick="setVoice(this)">Mystic</button>
+              <button class="mode-btn" data-v="philosopher" onclick="setVoice(this)">Philosopher</button>
+              <button class="mode-btn" data-v="companion" onclick="setVoice(this)">Companion</button>
+              <button class="mode-btn" data-v="confessor" onclick="setVoice(this)">Confessor</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="lbl">Framework Module</label>
+            <div style="display:flex;gap:3px;flex-wrap:wrap">
+              <button class="mode-btn active" data-fw="none" onclick="setFramework(this)">None</button>
+              <button class="mode-btn" data-fw="fusion" onclick="setFramework(this)">Fusion</button>
+              <button class="mode-btn" data-fw="expansion" onclick="setFramework(this)">Expansion</button>
+              <button class="mode-btn" data-fw="contraction" onclick="setFramework(this)">Contraction</button>
+              <button class="mode-btn" data-fw="recursive" onclick="setFramework(this)">Recursive</button>
+            </div>
+            <div id="fw-desc" style="font-size:8px;color:var(--text-muted);margin-top:4px;line-height:1.5;display:none"></div>
+          </div>
+
+          <div class="row">
+            <label class="lbl">Platforms</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+              <label class="chk on"><input type="checkbox" data-pl="ig" checked><span>Instagram</span></label>
+              <label class="chk on"><input type="checkbox" data-pl="email" checked><span>Email</span></label>
+              <label class="chk on"><input type="checkbox" data-pl="yt" checked><span>YouTube</span></label>
+              <label class="chk"><input type="checkbox" data-pl="twitter"><span>Twitter/X</span></label>
+              <label class="chk"><input type="checkbox" data-pl="linkedin"><span>LinkedIn</span></label>
+              <label class="chk"><input type="checkbox" data-pl="tiktok"><span>TikTok</span></label>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <button onclick="multiply()" class="btn btn-cyan" style="flex:1">Multiply Variants</button>
+            <button onclick="multiplyAndSave()" class="btn btn-outline btn-sm" title="Multiply + save to library">+Lib</button>
           </div>
         </div>
-
-        <div class="row">
-          <label class="lbl">Framework Module</label>
-          <div style="display:flex;gap:3px;flex-wrap:wrap">
-            <button class="mode-btn active" data-fw="none" onclick="setFramework(this)">None</button>
-            <button class="mode-btn" data-fw="fusion" onclick="setFramework(this)">Fusion</button>
-            <button class="mode-btn" data-fw="expansion" onclick="setFramework(this)">Expansion</button>
-            <button class="mode-btn" data-fw="contraction" onclick="setFramework(this)">Contraction</button>
-            <button class="mode-btn" data-fw="recursive" onclick="setFramework(this)">Recursive</button>
-          </div>
-          <div id="fw-desc" style="font-size:8px;color:var(--text-muted);margin-top:4px;line-height:1.5;display:none"></div>
-        </div>
-
-        <div class="row">
-          <label class="lbl">Platforms</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-            <label class="chk on"><input type="checkbox" data-pl="ig" checked><span>Instagram</span></label>
-            <label class="chk on"><input type="checkbox" data-pl="email" checked><span>Email</span></label>
-            <label class="chk on"><input type="checkbox" data-pl="yt" checked><span>YouTube</span></label>
-            <label class="chk"><input type="checkbox" data-pl="twitter"><span>Twitter/X</span></label>
-            <label class="chk"><input type="checkbox" data-pl="linkedin"><span>LinkedIn</span></label>
-            <label class="chk"><input type="checkbox" data-pl="tiktok"><span>TikTok</span></label>
-          </div>
-        </div>
-        <button onclick="multiply()" class="btn btn-cyan btn-block">Multiply Variants</button>
       </div>
 
       <!-- ATOMIZER CONTROLS -->
@@ -755,6 +822,11 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         <div class="page-est" id="page-est">~ 1 page (A4)</div>
       </div>
       <div id="cap-output" style="display:none"></div>
+      <div id="cl-preview" style="display:none;padding:16px">
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px">Caption Preview</div>
+        <div id="cl-preview-content" style="font-size:13px;color:var(--text-primary);line-height:1.8;font-family:var(--sans);white-space:pre-wrap"></div>
+        <div id="cl-preview-meta" style="font-size:8px;color:var(--text-muted);margin-top:16px;padding-top:8px;border-top:1px solid var(--border)"></div>
+      </div>
       <div id="atom-preview" style="display:none;padding:8px">
         <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Atom Preview</div>
         <div id="atom-preview-content" style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--sans)"></div>
@@ -771,7 +843,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v5.1 — by Saturno Movement</span>
+  <span>CONTENT BEAST v6.0 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -1516,6 +1588,20 @@ function multiply() {
 // ============================================================
 // MODE SWITCH
 // ============================================================
+let capSubMode = 'library';
+
+function setCapSub(sub) {
+  capSubMode = sub;
+  document.querySelectorAll('.cap-subtab').forEach((b,i) => b.classList.toggle('active', (i===0&&sub==='library')||(i===1&&sub==='multiplier')));
+  document.getElementById('cap-library').style.display = sub === 'library' ? '' : 'none';
+  document.getElementById('cap-multiplier').style.display = sub === 'multiplier' ? '' : 'none';
+  // Update preview area
+  const isLib = sub === 'library';
+  document.getElementById('cl-preview').style.display = isLib ? '' : 'none';
+  document.getElementById('cap-output').style.display = isLib ? 'none' : '';
+  document.getElementById('preview-title').textContent = isLib ? 'Caption Preview' : 'Variants';
+}
+
 function setMode(mode) {
   document.querySelectorAll('.hdr .tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&mode==='pdf')||(i===1&&mode==='caption')||(i===2&&mode==='atomizer')));
   const ws = document.getElementById('workspace');
@@ -1526,10 +1612,16 @@ function setMode(mode) {
   document.getElementById('cap-ctrl').style.display = mode === 'caption' ? '' : 'none';
   document.getElementById('atom-ctrl').style.display = mode === 'atomizer' ? '' : 'none';
   document.getElementById('pdf-wrap').style.display = mode === 'pdf' ? '' : 'none';
-  document.getElementById('cap-output').style.display = mode === 'caption' ? '' : 'none';
   document.getElementById('atom-preview').style.display = mode === 'atomizer' ? '' : 'none';
-  const titles = {pdf:'PDF Controls',caption:'Caption Multiplier',atomizer:'Document Atomizer'};
-  const ptitles = {pdf:'Live Preview',caption:'Variants',atomizer:'Atom Preview'};
+  // Caption mode has sub-modes
+  if (mode === 'caption') {
+    setCapSub(capSubMode);
+  } else {
+    document.getElementById('cap-output').style.display = 'none';
+    document.getElementById('cl-preview').style.display = 'none';
+  }
+  const titles = {pdf:'PDF Controls',caption:'Captions',atomizer:'Document Atomizer'};
+  const ptitles = {pdf:'Live Preview',caption:capSubMode==='library'?'Caption Preview':'Variants',atomizer:'Atom Preview'};
   document.getElementById('ctrl-title').textContent = titles[mode] || '';
   document.getElementById('preview-title').textContent = ptitles[mode] || '';
   document.getElementById('preview-toolbar').style.display = mode === 'pdf' ? '' : 'none';
@@ -2140,7 +2232,13 @@ const CMD_ACTIONS = [
   { icon: 'D', text: 'Document Stats', desc: 'Show reading time + stats', fn: () => showDocStats() },
   { icon: 'V', text: 'View: Full', desc: '3-panel layout', fn: () => setView('default') },
   { icon: 'V', text: 'View: Split', desc: 'Markdown + Preview', fn: () => setView('split') },
-  { icon: 'V', text: 'View: Focus', desc: 'Controls + Preview', fn: () => setView('focus') }
+  { icon: 'V', text: 'View: Focus', desc: 'Controls + Preview', fn: () => setView('focus') },
+  { icon: 'CL', text: 'Caption Library', desc: 'Browse saved captions', fn: () => { setMode('caption'); setCapSub('library'); } },
+  { icon: 'CL', text: 'Import Captions', desc: 'Import JSON/MD/TXT/CSV', fn: () => { setMode('caption'); setCapSub('library'); document.getElementById('cl-file').click(); } },
+  { icon: 'CL', text: 'Export All Captions (JSON)', desc: 'Full library backup', fn: () => clExportAll('json') },
+  { icon: 'CL', text: 'Export All Captions (Markdown)', desc: 'Library as MD', fn: () => clExportAll('md') },
+  { icon: 'CL', text: 'Import Seeds to Library', desc: 'Add built-in quotes to library', fn: () => importSeedsToLibrary() },
+  { icon: 'CL', text: 'Add Caption', desc: 'Add manually', fn: () => { setMode('caption'); setCapSub('library'); addCaptionManual(); } }
 ];
 let cmdSelIdx = 0;
 
@@ -2791,6 +2889,469 @@ function clearAtoms() {
 }
 
 // ============================================================
+// CAPTION LIBRARY — IndexedDB Storage
+// ============================================================
+const CL_DB_NAME = 'ContentBeastCaptions';
+const CL_DB_VER = 1;
+const CL_STORE = 'captions';
+let clDB = null;
+let clCaptions = [];
+let clFilter = 'all';
+let clSortMode = 'recent';
+
+function openCaptionDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(CL_DB_NAME, CL_DB_VER);
+    req.onupgradeneeded = function(e) {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(CL_STORE)) {
+        const store = db.createObjectStore(CL_STORE, { keyPath: 'id' });
+        store.createIndex('theme', 'theme', { unique: false });
+        store.createIndex('voice', 'voice', { unique: false });
+        store.createIndex('platform', 'platform', { unique: false, multiEntry: true });
+        store.createIndex('created', 'created', { unique: false });
+      }
+    };
+    req.onsuccess = function(e) { clDB = e.target.result; resolve(clDB); };
+    req.onerror = function(e) { reject(e.target.error); };
+  });
+}
+
+function clPut(caption) {
+  return new Promise((resolve, reject) => {
+    const tx = clDB.transaction(CL_STORE, 'readwrite');
+    tx.objectStore(CL_STORE).put(caption);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function clDelete(id) {
+  return new Promise((resolve, reject) => {
+    const tx = clDB.transaction(CL_STORE, 'readwrite');
+    tx.objectStore(CL_STORE).delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function clGetAll() {
+  return new Promise((resolve, reject) => {
+    const tx = clDB.transaction(CL_STORE, 'readonly');
+    const req = tx.objectStore(CL_STORE).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function clLoadAll() {
+  clCaptions = await clGetAll();
+  renderCaptionLibrary();
+}
+
+function makeCaptionId() { return 'cap_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6); }
+
+function makeCaption(text, opts) {
+  return {
+    id: makeCaptionId(),
+    text: text.trim(),
+    theme: (opts && opts.theme) || 'general',
+    voice: (opts && opts.voice) || '',
+    platform: (opts && opts.platform) || [],
+    source: (opts && opts.source) || 'manual',
+    scale: (opts && opts.scale) || '',
+    words: text.trim().split(/\s+/).length,
+    created: new Date().toISOString(),
+    updated: new Date().toISOString()
+  };
+}
+
+// CAPTION LIBRARY RENDER
+function renderCaptionLibrary() {
+  const searchQ = (document.getElementById('cl-search').value || '').toLowerCase();
+  let filtered = clCaptions;
+
+  // Filter by theme
+  if (clFilter !== 'all') {
+    filtered = filtered.filter(c => c.theme === clFilter);
+  }
+
+  // Filter by search
+  if (searchQ) {
+    filtered = filtered.filter(c =>
+      c.text.toLowerCase().includes(searchQ) ||
+      (c.theme || '').toLowerCase().includes(searchQ) ||
+      (c.voice || '').toLowerCase().includes(searchQ) ||
+      (c.source || '').toLowerCase().includes(searchQ)
+    );
+  }
+
+  // Sort
+  if (clSortMode === 'recent') filtered.sort((a, b) => new Date(b.created) - new Date(a.created));
+  else if (clSortMode === 'oldest') filtered.sort((a, b) => new Date(a.created) - new Date(b.created));
+  else if (clSortMode === 'words') filtered.sort((a, b) => a.words - b.words);
+  else if (clSortMode === 'alpha') filtered.sort((a, b) => a.text.localeCompare(b.text));
+
+  // Render filters
+  renderClFilters();
+
+  const el = document.getElementById('cl-list');
+  if (!filtered.length) {
+    if (clCaptions.length === 0) {
+      el.innerHTML = '<div class="cl-empty"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;font-weight:500">Caption Library</div>Import captions from JSON, Markdown, or TXT.<br>Or click <b style="color:var(--cyan)">+</b> to write one now.<br><br>Every caption gets tagged, searchable,<br>and ready to deploy.</div>';
+    } else {
+      el.innerHTML = '<div class="cl-empty">No captions match this filter.</div>';
+    }
+    document.getElementById('cl-stats').style.display = 'none';
+    return;
+  }
+
+  el.innerHTML = filtered.map(c =>
+    '<div class="cl-item" data-cl-id="' + c.id + '" onclick="toggleClSelect(this,\'' + c.id + '\')">' +
+    (c.voice ? '<span class="cl-voice">' + esc(c.voice) + '</span>' : '') +
+    '<span class="cl-theme">' + esc(c.theme) + '</span>' +
+    '<div class="cl-text">' + esc(c.text) + '</div>' +
+    '<div class="cl-meta"><span>' + c.words + 'w</span>' +
+    (c.platform && c.platform.length ? '<span>' + c.platform.join(', ') + '</span>' : '') +
+    '<span>' + new Date(c.created).toLocaleDateString() + '</span>' +
+    (c.source && c.source !== 'manual' ? '<span>' + esc(c.source) + '</span>' : '') +
+    '</div>' +
+    '<div class="cl-actions">' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clPreview(\'' + c.id + '\')" style="color:var(--cyan)">View</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clToCanvas(\'' + c.id + '\')">Canvas</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clToSeed(\'' + c.id + '\')">Seed</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clCopy(\'' + c.id + '\')">Copy</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clEdit(\'' + c.id + '\')">Edit</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clRemove(\'' + c.id + '\')" style="color:var(--red)">x</button>' +
+    '</div></div>'
+  ).join('');
+
+  // Stats
+  const stats = document.getElementById('cl-stats');
+  stats.style.display = '';
+  stats.innerHTML = '<span>Total: ' + clCaptions.length + '</span><span>Shown: ' + filtered.length + '</span><span>Sort: ' + clSortMode + '</span>';
+  updateClBulk();
+}
+
+function renderClFilters() {
+  const counts = {};
+  clCaptions.forEach(c => { counts[c.theme] = (counts[c.theme] || 0) + 1; });
+  const themes = ['all', ...Object.keys(counts).sort()];
+  const el = document.getElementById('cl-filters');
+
+  // Sort buttons + theme filters
+  el.innerHTML =
+    '<button class="cl-filter' + (clSortMode==='recent'?' active':'') + '" onclick="clSetSort(\'recent\')" style="border-color:var(--border-hover);color:var(--text-secondary)">Recent</button>' +
+    '<button class="cl-filter' + (clSortMode==='alpha'?' active':'') + '" onclick="clSetSort(\'alpha\')" style="border-color:var(--border-hover);color:var(--text-secondary)">A-Z</button>' +
+    '<button class="cl-filter' + (clSortMode==='words'?' active':'') + '" onclick="clSetSort(\'words\')" style="border-color:var(--border-hover);color:var(--text-secondary)">Short</button>' +
+    '<span style="width:1px;height:14px;background:var(--border);margin:0 2px"></span>' +
+    themes.map(t =>
+      '<button class="cl-filter' + (t === clFilter ? ' active' : '') + '" onclick="clSetFilter(\'' + t + '\')">' +
+      t + (t !== 'all' ? '<span class="clf-n">' + counts[t] + '</span>' : '<span class="clf-n">' + clCaptions.length + '</span>') +
+      '</button>'
+    ).join('');
+}
+
+function clSetFilter(f) { clFilter = f; renderCaptionLibrary(); }
+function clSetSort(s) { clSortMode = s; renderCaptionLibrary(); }
+function searchCaptions() { renderCaptionLibrary(); }
+
+// SELECTION
+function toggleClSelect(el, id) { el.classList.toggle('selected'); updateClBulk(); }
+
+function updateClBulk() {
+  const sel = document.querySelectorAll('.cl-item.selected');
+  const bar = document.getElementById('cl-bulk');
+  if (sel.length > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('cl-sel-count').textContent = sel.length;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function getSelectedCaptions() {
+  const ids = [];
+  document.querySelectorAll('.cl-item.selected').forEach(el => ids.push(el.dataset.clId));
+  return clCaptions.filter(c => ids.includes(c.id));
+}
+
+function clDeselectAll() {
+  document.querySelectorAll('.cl-item.selected').forEach(el => el.classList.remove('selected'));
+  updateClBulk();
+}
+
+// SINGLE ACTIONS
+function clPreview(id) {
+  const c = clCaptions.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('cl-preview-content').textContent = c.text;
+  document.getElementById('cl-preview-meta').innerHTML =
+    '<span>Theme: <b>' + esc(c.theme) + '</b></span>' +
+    (c.voice ? ' / Voice: <b>' + esc(c.voice) + '</b>' : '') +
+    (c.platform && c.platform.length ? ' / Platform: <b>' + c.platform.join(', ') + '</b>' : '') +
+    ' / Words: <b>' + c.words + '</b>' +
+    ' / Source: <b>' + esc(c.source || 'manual') + '</b>' +
+    ' / Created: <b>' + new Date(c.created).toLocaleDateString() + '</b>';
+}
+
+function clToCanvas(id) {
+  const c = clCaptions.find(x => x.id === id);
+  if (!c) return;
+  const canvas = document.getElementById('canvas');
+  const footer = canvas.querySelector('.pdf-footer');
+  const p = document.createElement('p');
+  p.textContent = c.text;
+  if (footer) canvas.insertBefore(p, footer);
+  else canvas.appendChild(p);
+  setMode('pdf');
+  scheduleSave();
+  toast('Caption added to canvas');
+}
+
+function clToSeed(id) {
+  const c = clCaptions.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('seed-input').value = c.text;
+  setCapSub('multiplier');
+  toast('Caption loaded as seed');
+}
+
+function clCopy(id) {
+  const c = clCaptions.find(x => x.id === id);
+  if (!c) return;
+  navigator.clipboard.writeText(c.text);
+  toast('Copied');
+}
+
+async function clRemove(id) {
+  if (!confirm('Remove this caption from library?')) return;
+  await clDelete(id);
+  clCaptions = clCaptions.filter(c => c.id !== id);
+  renderCaptionLibrary();
+  toast('Caption removed');
+}
+
+function clEdit(id) {
+  const c = clCaptions.find(x => x.id === id);
+  if (!c) return;
+  const newText = prompt('Edit caption:', c.text);
+  if (newText === null || newText.trim() === '') return;
+  c.text = newText.trim();
+  c.words = c.text.split(/\s+/).length;
+  c.updated = new Date().toISOString();
+  const newTheme = prompt('Theme:', c.theme);
+  if (newTheme !== null) c.theme = newTheme.trim() || 'general';
+  clPut(c).then(() => { renderCaptionLibrary(); toast('Caption updated'); });
+}
+
+// BULK ACTIONS
+function clBulkToCanvas() {
+  const sel = getSelectedCaptions();
+  sel.forEach(c => clToCanvas(c.id));
+  clDeselectAll();
+}
+
+function clBulkToSeed() {
+  const sel = getSelectedCaptions();
+  document.getElementById('seed-input').value = sel.map(c => c.text).join('\n\n');
+  clDeselectAll();
+  setCapSub('multiplier');
+  toast(sel.length + ' captions loaded as seed');
+}
+
+function clBulkCopy() {
+  const sel = getSelectedCaptions();
+  navigator.clipboard.writeText(sel.map(c => c.text).join('\n\n'));
+  clDeselectAll();
+  toast(sel.length + ' captions copied');
+}
+
+function clBulkExport() {
+  const sel = getSelectedCaptions();
+  if (!sel.length) return;
+  const data = JSON.stringify(sel, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'captions-export-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  clDeselectAll();
+  toast('Exported ' + sel.length + ' captions');
+}
+
+// ADD MANUAL
+function addCaptionManual() {
+  const text = prompt('Enter caption text:');
+  if (!text || !text.trim()) return;
+  const theme = prompt('Theme (e.g. mindset, truth, courage, discipline, manifesto, training, vulnerability):', 'general') || 'general';
+  const c = makeCaption(text, { theme: theme.toLowerCase() });
+  clPut(c).then(() => {
+    clCaptions.push(c);
+    renderCaptionLibrary();
+    toast('Caption added');
+  });
+}
+
+// IMPORT
+async function importCaptions(files) {
+  let imported = 0;
+  for (const file of files) {
+    const text = await readFileText(file);
+    const ext = file.name.split('.').pop().toLowerCase();
+    let newCaptions = [];
+
+    if (ext === 'json') {
+      newCaptions = parseJsonCaptions(text, file.name);
+    } else if (ext === 'csv') {
+      newCaptions = parseCsvCaptions(text, file.name);
+    } else {
+      // MD or TXT — split by double newlines
+      newCaptions = parseTextCaptions(text, file.name);
+    }
+
+    // Deduplicate against existing
+    for (const c of newCaptions) {
+      const exists = clCaptions.some(existing => existing.text === c.text);
+      if (!exists) {
+        await clPut(c);
+        clCaptions.push(c);
+        imported++;
+      }
+    }
+  }
+  renderCaptionLibrary();
+  toast('Imported ' + imported + ' caption' + (imported !== 1 ? 's' : ''));
+  // Reset file input
+  document.getElementById('cl-file').value = '';
+}
+
+function readFileText(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.readAsText(file);
+  });
+}
+
+function parseJsonCaptions(text, source) {
+  try {
+    let data = JSON.parse(text);
+    if (!Array.isArray(data)) data = [data];
+    return data.map(item => {
+      // Flexible: support {text}, {content}, {caption}, {q}
+      const t = item.text || item.content || item.caption || item.q || item.body || '';
+      if (!t.trim()) return null;
+      return makeCaption(t, {
+        theme: item.theme || item.t || item.category || 'imported',
+        voice: item.voice || item.voice_mode || '',
+        platform: Array.isArray(item.platform) ? item.platform : (item.platform ? [item.platform] : []),
+        source: source,
+        scale: item.scale || ''
+      });
+    }).filter(Boolean);
+  } catch(e) { toast('JSON parse error: ' + e.message); return []; }
+}
+
+function parseCsvCaptions(text, source) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
+  const textIdx = headers.findIndex(h => ['text','content','caption','body','quote'].includes(h));
+  const themeIdx = headers.findIndex(h => ['theme','category','tag','type'].includes(h));
+  if (textIdx === -1) { toast('CSV needs a text/content/caption column'); return []; }
+  const results = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+    const t = cols[textIdx] || '';
+    if (t.trim()) {
+      results.push(makeCaption(t, {
+        theme: (themeIdx >= 0 ? cols[themeIdx] : '') || 'imported',
+        source: source
+      }));
+    }
+  }
+  return results;
+}
+
+function parseTextCaptions(text, source) {
+  // Split by double newline, each block is a caption
+  const blocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 10);
+  return blocks.map(block => {
+    // Try to detect theme from common patterns
+    let theme = 'imported';
+    const lc = block.toLowerCase();
+    if (lc.includes('trust') || lc.includes('faith') || lc.includes('courage')) theme = 'courage';
+    else if (lc.includes('discipline') || lc.includes('focus') || lc.includes('effort')) theme = 'discipline';
+    else if (lc.includes('truth') || lc.includes('clarity') || lc.includes('honest')) theme = 'truth';
+    else if (lc.includes('rise') || lc.includes('become') || lc.includes('manifesto')) theme = 'manifesto';
+    else if (lc.includes('mindset') || lc.includes('will') || lc.includes('purpose')) theme = 'mindset';
+    else if (lc.includes('training') || lc.includes('movement') || lc.includes('exercise')) theme = 'training';
+    else if (lc.includes('vulnerability') || lc.includes('growth') || lc.includes('heal')) theme = 'vulnerability';
+    return makeCaption(block, { theme, source });
+  });
+}
+
+// MULTIPLY + SAVE TO LIBRARY
+function multiplyAndSave() {
+  multiply();
+  // Save the original seed to the library
+  const seed = document.getElementById('seed-input').value.trim();
+  if (!seed) return;
+  const c = makeCaption(seed, { theme: 'seed', voice: currentVoice, source: 'multiplier' });
+  clPut(c).then(() => {
+    clCaptions.push(c);
+    renderCaptionLibrary();
+    toast('Seed saved to library');
+  });
+}
+
+// EXPORT ALL CAPTIONS
+function clExportAll(fmt) {
+  if (!clCaptions.length) { toast('No captions to export'); return; }
+  let content, mimeType, ext;
+  if (fmt === 'json') {
+    content = JSON.stringify(clCaptions, null, 2);
+    mimeType = 'application/json';
+    ext = 'json';
+  } else if (fmt === 'md') {
+    content = clCaptions.map(c =>
+      '## ' + c.theme.toUpperCase() + (c.voice ? ' / ' + c.voice : '') + '\n\n' + c.text + '\n'
+    ).join('\n---\n\n');
+    mimeType = 'text/markdown';
+    ext = 'md';
+  } else {
+    content = clCaptions.map(c => c.text).join('\n\n---\n\n');
+    mimeType = 'text/plain';
+    ext = 'txt';
+  }
+  const blob = new Blob([content], { type: mimeType });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'content-beast-captions-' + new Date().toISOString().slice(0, 10) + '.' + ext;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Exported ' + clCaptions.length + ' captions as ' + ext.toUpperCase());
+}
+
+// SEED LIBRARY → CAPTION LIBRARY (import built-in seeds)
+async function importSeedsToLibrary() {
+  let imported = 0;
+  for (const s of SEED_LIBRARY) {
+    const exists = clCaptions.some(c => c.text === s.q);
+    if (!exists) {
+      const c = makeCaption(s.q, { theme: s.t, source: 'seed-library' });
+      await clPut(c);
+      clCaptions.push(c);
+      imported++;
+    }
+  }
+  renderCaptionLibrary();
+  toast('Imported ' + imported + ' seeds to library');
+}
+
+// ============================================================
 // DRAGGABLE PANEL RESIZE
 // ============================================================
 function initPanelResize() {
@@ -2891,6 +3452,7 @@ loadDocs();
 updateWordCount();
 renderSeedLibrary();
 initPanelResize();
+openCaptionDB().then(() => clLoadAll()).catch(e => console.warn('IndexedDB:', e));
 </script>
 </body>
 </html>
