@@ -112,9 +112,10 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .preset-card .pd{font-size:7px;color:var(--text-muted)}
 
 /* === PDF CANVAS === */
-.pdf-canvas{background:#fff;color:#1a1a1a;font-family:var(--sans);padding:48px 56px;border-radius:3px;min-height:600px;position:relative;box-shadow:0 2px 20px rgba(0,0,0,0.5);line-height:1.7}
+.pdf-canvas{background:#fff;color:#1a1a1a;font-family:var(--sans);padding:48px 56px;border-radius:4px;min-height:600px;position:relative;box-shadow:0 4px 30px rgba(0,0,0,0.5);line-height:1.75;transition:box-shadow 0.3s}
 .pdf-canvas[contenteditable]{outline:none;cursor:text}
-.pdf-canvas[contenteditable]:focus{box-shadow:0 0 0 2px var(--accent),0 2px 20px rgba(0,0,0,0.5)}
+.pdf-canvas[contenteditable]:focus{box-shadow:0 0 0 2px var(--accent),0 4px 30px rgba(0,0,0,0.5)}
+.pdf-canvas[contenteditable]:empty::before{content:attr(data-placeholder);color:#ccc;font-style:italic;pointer-events:none}
 
 .pdf-canvas h1{font-size:28px;font-weight:700;margin-bottom:4px;color:#111;line-height:1.2}
 .pdf-canvas h2{font-size:13px;color:#888;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #111}
@@ -202,6 +203,20 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .fullscreen-mode .lib,.fullscreen-mode .ctrl{display:none !important}
 .fullscreen-mode .preview-body{padding:32px 10%}
 
+/* FOCUS VIEW — immersive writing */
+.workspace.focus-mode .lib{width:0;overflow:hidden;border:none;padding:0}
+.workspace.focus-mode .ctrl{border-right-color:var(--border)}
+.workspace.focus-mode .preview-body{padding:40px 12%;background:var(--bg-void)}
+.workspace.focus-mode .pdf-canvas{box-shadow:0 4px 40px rgba(0,0,0,0.6);max-width:780px;margin:0 auto}
+.workspace.focus-mode .preview-hdr{background:var(--bg-void);border-bottom-color:transparent}
+.workspace.focus-mode .preview-toolbar{opacity:0.3;transition:opacity 0.3s}
+.workspace.focus-mode .preview-toolbar:hover{opacity:1}
+.workspace.focus-mode .wc-bar{background:var(--bg-void)}
+
+/* SPLIT VIEW */
+.workspace.split-view .lib{width:0;overflow:hidden;border:none;padding:0}
+.workspace.split-view{grid-template-columns:0 1fr 1fr}
+
 /* COVER PAGE */
 .cover-page{text-align:center;padding:80px 60px;min-height:500px;display:flex;flex-direction:column;justify-content:center;align-items:center}
 .cover-page h1{font-size:42px;margin-bottom:8px;line-height:1.1}
@@ -227,8 +242,12 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .chk input{display:none}
 
 /* TOAST */
-.toast{position:fixed;bottom:16px;right:16px;background:var(--bg-surface);border:1px solid var(--accent);color:var(--text-primary);padding:8px 14px;border-radius:3px;font-size:10px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:9999;font-family:var(--mono)}
-.toast.show{opacity:1}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg-surface);border:1px solid var(--accent);color:var(--text-primary);padding:10px 16px;border-radius:4px;font-size:10px;opacity:0;transform:translateY(8px);transition:all 0.2s;pointer-events:none;z-index:9999;font-family:var(--mono);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* SAVE PULSE */
+@keyframes savePulse{0%{opacity:1}50%{opacity:0.3}100%{opacity:1}}
+.save-pulse{animation:savePulse 0.6s ease-in-out}
 
 /* DROP ZONE */
 .drop-zone{border:2px dashed var(--border);border-radius:4px;padding:20px;text-align:center;margin-bottom:10px;transition:all 0.2s;cursor:pointer}
@@ -324,10 +343,13 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .resize-handle:hover::after{background:var(--accent)}
 
 /* ATOMIZER */
-.atom-import{border:2px dashed var(--border);border-radius:6px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:12px}
-.atom-import:hover,.atom-import.over{border-color:var(--accent);background:rgba(168,85,247,0.04)}
-.atom-import .ai-title{font-size:11px;color:var(--text-secondary);margin-bottom:4px}
-.atom-import .ai-sub{font-size:8px;color:var(--text-muted)}
+.atom-import{border:2px dashed var(--border);border-radius:8px;padding:28px 20px;text-align:center;cursor:pointer;transition:all 0.25s;margin-bottom:12px;position:relative}
+.atom-import:hover,.atom-import.over{border-color:var(--accent);background:rgba(168,85,247,0.04);transform:scale(1.01)}
+.atom-import .ai-icon{font-size:20px;color:var(--text-muted);margin-bottom:8px;font-weight:700;font-family:var(--mono)}
+.atom-import .ai-title{font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:500}
+.atom-import .ai-sub{font-size:8px;color:var(--text-muted);line-height:1.5}
+.atom-import .ai-formats{display:flex;gap:4px;justify-content:center;margin-top:8px}
+.atom-import .ai-fmt{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:2px 6px;border-radius:2px;background:var(--bg-surface);border:1px solid var(--border);color:var(--text-muted);font-family:var(--mono)}
 
 .atom-filters{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
 .atom-filter{padding:3px 8px;font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;color:var(--text-muted);cursor:pointer;font-family:var(--mono);transition:all 0.12s}
@@ -611,8 +633,10 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
       <!-- ATOMIZER CONTROLS -->
       <div id="atom-ctrl" style="display:none">
         <div class="atom-import" id="atom-drop" onclick="document.getElementById('atom-file').click()">
-          <div class="ai-title">Drop PDF, MD, or TXT here</div>
-          <div class="ai-sub">or click to browse -- extracts all atomic units</div>
+          <div class="ai-icon">/</div>
+          <div class="ai-title">Drop any document to atomize</div>
+          <div class="ai-sub">Extracts quotes, headings, paragraphs, lists, tables, code blocks</div>
+          <div class="ai-formats"><span class="ai-fmt">PDF</span><span class="ai-fmt">MD</span><span class="ai-fmt">TXT</span><span class="ai-fmt">HTML</span></div>
         </div>
         <input type="file" id="atom-file" accept=".pdf,.md,.txt,.markdown,.text,.html" style="display:none" onchange="atomizeFile(this.files[0])">
         <div id="atom-source-info" style="display:none;padding:8px;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;margin-bottom:8px">
@@ -632,8 +656,12 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
           <button class="btn btn-outline btn-sm" onclick="deselectAll()" style="margin-left:auto">Deselect</button>
         </div>
         <div class="atom-list" id="atom-list" style="max-height:calc(100vh - 360px);overflow-y:auto">
-          <div style="padding:20px;text-align:center;font-size:9px;color:var(--text-muted);line-height:1.8">
-            Import a document to break it into<br>atomic units: quotes, headings, paragraphs,<br>lists, tables, code blocks, images
+          <div style="padding:24px 16px;text-align:center;font-size:9px;color:var(--text-muted);line-height:2">
+            <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;font-weight:500">Ingest. Atomize. Transform.</div>
+            Drop any document above to break it<br>into reusable atomic units.<br><br>
+            <span style="color:var(--accent)">Quotes</span> / <span style="color:var(--cyan)">Headings</span> / <span style="color:var(--text-secondary)">Paragraphs</span><br>
+            <span style="color:var(--green)">Lists</span> / <span style="color:var(--amber)">Tables</span> / Code / Images<br><br>
+            Each atom can be sent to the canvas,<br>saved as a seed, copied, or exported.
           </div>
         </div>
         <div class="atom-stats" id="atom-stats" style="display:none"></div>
@@ -718,10 +746,10 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
     </div>
     <div class="preview-body" id="preview-body">
       <div id="pdf-wrap">
-        <div class="pdf-canvas tpl-saturno" id="canvas" contenteditable="true">
+        <div class="pdf-canvas tpl-saturno" id="canvas" contenteditable="true" data-placeholder="Start writing... or paste content here. Everything you type becomes exportable as PDF, HTML, Markdown, or plain text.">
           <h1>Content Beast</h1>
           <h2>By Gabo Saturno</h2>
-          <p>Select a preset or paste content. Click here to edit directly.</p>
+          <p>Select a preset, pick from the seed library, or just start typing. Your words, any format.</p>
           <div class="pdf-footer">CONTENT BEAST / saturnomovement.com</div>
         </div>
         <div class="page-est" id="page-est">~ 1 page (A4)</div>
@@ -873,8 +901,9 @@ function saveDocs() {
 function flashSave() {
   const ind = document.getElementById('save-ind');
   ind.style.opacity = '1';
+  ind.classList.add('save-pulse');
   clearTimeout(ind._t);
-  ind._t = setTimeout(() => ind.style.opacity = '0', 1500);
+  ind._t = setTimeout(() => { ind.style.opacity = '0'; ind.classList.remove('save-pulse'); }, 1500);
 }
 
 function scheduleSave() {
@@ -971,7 +1000,7 @@ function snapshotActive() {
 // ============================================================
 function renderLibrary() {
   const el = document.getElementById('lib-list');
-  if (!docs.length) { el.innerHTML = '<div class="lib-empty">No documents yet.</div>'; return; }
+  if (!docs.length) { el.innerHTML = '<div class="lib-empty">No documents yet.<br><br>Hit <b style="color:var(--accent)">Cmd+N</b> to start writing<br>or drop a file on the Atomizer<br>to break it into gold.</div>'; return; }
   el.innerHTML = docs.map(d => {
     const active = d.id === activeDocId;
     const date = new Date(d.updated).toLocaleDateString();
