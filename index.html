@@ -7,6 +7,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap');
 
@@ -49,7 +51,7 @@ body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondar
 .workspace.caption-mode{grid-template-columns:200px 320px 1fr}
 
 /* LEFT: LIBRARY */
-.lib{background:var(--bg-base);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width 0.2s}
+.lib{background:var(--bg-base);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width 0.2s;position:relative}
 .lib-hdr{padding:8px;border-bottom:1px solid var(--border);display:flex;gap:4px}
 .lib-list{flex:1;overflow-y:auto;padding:4px}
 .lib-item{padding:8px 10px;border-radius:4px;cursor:pointer;transition:all 0.1s;margin-bottom:2px}
@@ -60,7 +62,7 @@ body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondar
 .lib-empty{padding:16px;text-align:center;font-size:9px;color:var(--text-muted);line-height:1.6}
 
 /* MID: CONTROLS */
-.ctrl{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.ctrl{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:relative}
 .ctrl-hdr{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .ctrl-hdr .title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em}
 .ctrl-body{flex:1;overflow-y:auto;padding:12px}
@@ -305,6 +307,45 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .color-dot:hover{transform:scale(1.2)}
 .color-dot.active{border-color:var(--text-primary)}
 
+/* DRAGGABLE PANEL RESIZE */
+.resize-handle{width:6px;cursor:col-resize;background:transparent;position:absolute;right:-3px;top:0;height:100%;z-index:20;transition:background 0.15s}
+.resize-handle:hover,.resize-handle.dragging{background:var(--accent)}
+.resize-handle::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:24px;background:var(--border);border-radius:1px}
+.resize-handle:hover::after{background:var(--accent)}
+
+/* ATOMIZER */
+.atom-import{border:2px dashed var(--border);border-radius:6px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:12px}
+.atom-import:hover,.atom-import.over{border-color:var(--accent);background:rgba(168,85,247,0.04)}
+.atom-import .ai-title{font-size:11px;color:var(--text-secondary);margin-bottom:4px}
+.atom-import .ai-sub{font-size:8px;color:var(--text-muted)}
+
+.atom-filters{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+.atom-filter{padding:3px 8px;font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;color:var(--text-muted);cursor:pointer;font-family:var(--mono);transition:all 0.12s}
+.atom-filter:hover{border-color:var(--border-hover);color:var(--text-secondary)}
+.atom-filter.active{border-color:var(--accent);color:var(--accent);background:rgba(168,85,247,0.08)}
+.atom-filter .af-count{font-size:6px;opacity:0.6;margin-left:2px}
+
+.atom-list{overflow-y:auto;flex:1}
+.atom-card{background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:6px;transition:all 0.12s;position:relative}
+.atom-card:hover{border-color:var(--border-hover)}
+.atom-card.selected{border-color:var(--accent);background:rgba(168,85,247,0.04)}
+.atom-card .ac-type{display:inline-block;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:2px 6px;border-radius:2px;margin-bottom:6px;font-family:var(--mono)}
+.ac-type.t-quote{background:rgba(168,85,247,0.12);color:#c084fc}
+.ac-type.t-heading{background:rgba(6,182,212,0.12);color:#22d3ee}
+.ac-type.t-paragraph{background:rgba(148,163,184,0.12);color:#94a3b8}
+.ac-type.t-list{background:rgba(34,197,94,0.12);color:#4ade80}
+.ac-type.t-table{background:rgba(245,158,11,0.12);color:#fbbf24}
+.ac-type.t-image{background:rgba(236,72,153,0.12);color:#f472b6}
+.ac-type.t-code{background:rgba(99,102,241,0.12);color:#a5b4fc}
+.ac-type.t-divider{background:rgba(100,116,139,0.08);color:#64748b}
+.atom-card .ac-text{font-size:10px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px;max-height:80px;overflow:hidden}
+.atom-card .ac-text.expanded{max-height:none}
+.atom-card .ac-actions{display:flex;gap:3px;flex-wrap:wrap}
+.atom-card .ac-meta{font-size:7px;color:var(--text-muted);margin-bottom:4px}
+
+.atom-stats{padding:8px;border-top:1px solid var(--border);font-size:8px;color:var(--text-muted);display:flex;gap:10px;flex-shrink:0}
+.atom-bulk{padding:6px 8px;border-bottom:1px solid var(--border);display:flex;gap:4px;align-items:center;flex-shrink:0}
+
 /* SEED LIBRARY */
 .seed-item{padding:6px 8px;font-size:9px;color:var(--text-secondary);cursor:pointer;border-bottom:1px solid var(--border);transition:all 0.1s;line-height:1.5}
 .seed-item:hover{background:rgba(168,85,247,0.06);color:var(--text-primary)}
@@ -384,11 +425,12 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 <div class="hdr">
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v4.0</span>
+    <span class="ver">v5.0</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
     <button class="tab-btn" onclick="setMode('caption')">Captions</button>
+    <button class="tab-btn" onclick="setMode('atomizer')">Atomizer</button>
   </div>
   <div class="hdr-right">
     <div class="tab-bar" style="margin-right:8px">
@@ -555,6 +597,37 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         </div>
         <button onclick="multiply()" class="btn btn-cyan btn-block">Multiply Variants</button>
       </div>
+
+      <!-- ATOMIZER CONTROLS -->
+      <div id="atom-ctrl" style="display:none">
+        <div class="atom-import" id="atom-drop" onclick="document.getElementById('atom-file').click()">
+          <div class="ai-title">Drop PDF, MD, or TXT here</div>
+          <div class="ai-sub">or click to browse -- extracts all atomic units</div>
+        </div>
+        <input type="file" id="atom-file" accept=".pdf,.md,.txt,.markdown,.text,.html" style="display:none" onchange="atomizeFile(this.files[0])">
+        <div id="atom-source-info" style="display:none;padding:8px;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span id="atom-source-name" style="font-size:9px;color:var(--text-primary);font-weight:500"></span>
+            <button class="btn btn-outline btn-sm" onclick="clearAtoms()">Clear</button>
+          </div>
+          <div id="atom-source-meta" style="font-size:8px;color:var(--text-muted);margin-top:3px"></div>
+        </div>
+        <div class="atom-filters" id="atom-filters"></div>
+        <div class="atom-bulk" id="atom-bulk" style="display:none">
+          <span style="font-size:8px;color:var(--text-muted)"><b id="atom-sel-count">0</b> selected</span>
+          <button class="btn btn-primary btn-sm" onclick="bulkToCanvas()">To Canvas</button>
+          <button class="btn btn-outline btn-sm" onclick="bulkToSeed()">To Seed</button>
+          <button class="btn btn-outline btn-sm" onclick="bulkNewDoc()">New Doc</button>
+          <button class="btn btn-outline btn-sm" onclick="bulkCopy()">Copy</button>
+          <button class="btn btn-outline btn-sm" onclick="deselectAll()" style="margin-left:auto">Deselect</button>
+        </div>
+        <div class="atom-list" id="atom-list" style="max-height:calc(100vh - 360px);overflow-y:auto">
+          <div style="padding:20px;text-align:center;font-size:9px;color:var(--text-muted);line-height:1.8">
+            Import a document to break it into<br>atomic units: quotes, headings, paragraphs,<br>lists, tables, code blocks, images
+          </div>
+        </div>
+        <div class="atom-stats" id="atom-stats" style="display:none"></div>
+      </div>
     </div>
   </div>
 
@@ -644,6 +717,10 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         <div class="page-est" id="page-est">~ 1 page (A4)</div>
       </div>
       <div id="cap-output" style="display:none"></div>
+      <div id="atom-preview" style="display:none;padding:8px">
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Atom Preview</div>
+        <div id="atom-preview-content" style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--sans)"></div>
+      </div>
     </div>
     <div class="wc-bar" id="wc-bar">
       <span>Words: <b id="wc-words">0</b></span>
@@ -656,7 +733,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v4.0 — by Saturno Movement</span>
+  <span>CONTENT BEAST v5.0 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -1360,16 +1437,21 @@ function multiply() {
 // MODE SWITCH
 // ============================================================
 function setMode(mode) {
-  document.querySelectorAll('.hdr .tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&mode==='pdf')||(i===1&&mode==='caption')));
+  document.querySelectorAll('.hdr .tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&mode==='pdf')||(i===1&&mode==='caption')||(i===2&&mode==='atomizer')));
   const ws = document.getElementById('workspace');
-  ws.classList.toggle('caption-mode', mode === 'caption');
+  ws.classList.remove('caption-mode');
+  if (mode === 'caption') ws.classList.add('caption-mode');
 
   document.getElementById('pdf-ctrl').style.display = mode === 'pdf' ? '' : 'none';
   document.getElementById('cap-ctrl').style.display = mode === 'caption' ? '' : 'none';
+  document.getElementById('atom-ctrl').style.display = mode === 'atomizer' ? '' : 'none';
   document.getElementById('pdf-wrap').style.display = mode === 'pdf' ? '' : 'none';
   document.getElementById('cap-output').style.display = mode === 'caption' ? '' : 'none';
-  document.getElementById('ctrl-title').textContent = mode === 'pdf' ? 'PDF Controls' : 'Caption Multiplier';
-  document.getElementById('preview-title').textContent = mode === 'pdf' ? 'Live Preview' : 'Variants';
+  document.getElementById('atom-preview').style.display = mode === 'atomizer' ? '' : 'none';
+  const titles = {pdf:'PDF Controls',caption:'Caption Multiplier',atomizer:'Document Atomizer'};
+  const ptitles = {pdf:'Live Preview',caption:'Variants',atomizer:'Atom Preview'};
+  document.getElementById('ctrl-title').textContent = titles[mode] || '';
+  document.getElementById('preview-title').textContent = ptitles[mode] || '';
   document.getElementById('preview-toolbar').style.display = mode === 'pdf' ? '' : 'none';
 }
 
@@ -1847,6 +1929,9 @@ const CMD_ACTIONS = [
   { icon: 'P', text: 'Preset: Cover Page', fn: () => loadPreset('cover') },
   { icon: 'M', text: 'Mode: PDF Maker', fn: () => setMode('pdf') },
   { icon: 'M', text: 'Mode: Captions', fn: () => setMode('caption') },
+  { icon: 'M', text: 'Mode: Atomizer', desc: 'Document atomizer', fn: () => setMode('atomizer') },
+  { icon: 'AT', text: 'Atomize File', desc: 'Import PDF/TXT to atoms', fn: () => { setMode('atomizer'); document.getElementById('atom-file').click(); } },
+  { icon: 'AT', text: 'Clear Atoms', desc: 'Reset atomizer', fn: () => clearAtoms() },
   { icon: 'D', text: 'Document Stats', desc: 'Show reading time + stats', fn: () => showDocStats() },
   { icon: 'V', text: 'View: Full', desc: '3-panel layout', fn: () => setView('default') },
   { icon: 'V', text: 'View: Split', desc: 'Markdown + Preview', fn: () => setView('split') },
@@ -2155,6 +2240,410 @@ function filterLibrary() {
 }
 
 // ============================================================
+// DOCUMENT ATOMIZER
+// ============================================================
+let atoms = [];
+let atomFilter = 'all';
+
+// Drag-drop on atomizer
+document.addEventListener('DOMContentLoaded', function() {
+  const ad = document.getElementById('atom-drop');
+  if (ad) {
+    ad.addEventListener('dragover', e => { e.preventDefault(); ad.classList.add('over'); });
+    ad.addEventListener('dragleave', () => ad.classList.remove('over'));
+    ad.addEventListener('drop', e => { e.preventDefault(); ad.classList.remove('over'); if (e.dataTransfer.files.length) atomizeFile(e.dataTransfer.files[0]); });
+  }
+});
+
+async function atomizeFile(file) {
+  if (!file) return;
+  setStatus('ATOMIZING...', 'busy');
+  let text = '';
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'pdf') {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pages = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        pages.push(content.items.map(item => item.str).join(' '));
+      }
+      text = pages.join('\n\n');
+    } catch(e) { toast('PDF error: ' + e.message); setStatus('ERROR', 'busy'); return; }
+  } else {
+    text = await file.text();
+  }
+
+  // Clean the text
+  text = cleanText(text);
+  atoms = parseAtoms(text, file.name);
+
+  // Show source info
+  document.getElementById('atom-source-info').style.display = '';
+  document.getElementById('atom-source-name').textContent = file.name;
+  document.getElementById('atom-source-meta').textContent = atoms.length + ' atoms extracted / ' + text.split(/\s+/).length + ' words / ' + (ext === 'pdf' ? 'PDF' : ext.toUpperCase());
+
+  renderAtomFilters();
+  renderAtoms();
+  setStatus('READY', 'ok');
+  toast(atoms.length + ' atoms extracted from ' + file.name);
+}
+
+function cleanText(text) {
+  return text
+    .replace(/\r\n/g, '\n')
+    .replace(/\t/g, '  ')
+    .replace(/[^\x20-\x7E\n]/g, function(c) {
+      if (/[\u2018\u2019]/.test(c)) return "'";
+      if (/[\u201C\u201D]/.test(c)) return '"';
+      if (c === '\u2013' || c === '\u2014') return '--';
+      if (c === '\u2026') return '...';
+      if (c === '\u00A0') return ' ';
+      return c;
+    })
+    .replace(/\n{4,}/g, '\n\n\n')
+    .replace(/[ ]{3,}/g, '  ')
+    .trim();
+}
+
+function parseAtoms(text, filename) {
+  const lines = text.split('\n');
+  const result = [];
+  let idx = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    // HEADING
+    if (/^#{1,4}\s/.test(line)) {
+      const level = (line.match(/^#+/) || [''])[0].length;
+      result.push({ id: idx++, type: 'heading', level: level, text: line.replace(/^#+\s*/, ''), raw: line, source: filename });
+      continue;
+    }
+
+    // ALL-CAPS heading (common in PDFs)
+    if (line.length > 3 && line.length < 100 && line === line.toUpperCase() && /[A-Z]/.test(line) && !/^[-=*#>|]/.test(line)) {
+      result.push({ id: idx++, type: 'heading', level: 2, text: line, raw: line, source: filename });
+      continue;
+    }
+
+    // QUOTE (blockquote or "quoted text")
+    if (/^>\s/.test(line)) {
+      result.push({ id: idx++, type: 'quote', text: line.replace(/^>\s*/, ''), raw: line, source: filename });
+      continue;
+    }
+    if (/^[""\u201C]/.test(line) && /["".\u201D]$/.test(line) && line.length > 10 && line.length < 300) {
+      result.push({ id: idx++, type: 'quote', text: line.replace(/^[""\u201C]+|[""\u201D]+$/g, '').trim(), raw: line, source: filename });
+      continue;
+    }
+
+    // DIVIDER
+    if (/^[-=*]{3,}$/.test(line) || /^---+$/.test(line)) {
+      result.push({ id: idx++, type: 'divider', text: '---', raw: line, source: filename });
+      continue;
+    }
+
+    // TABLE ROW
+    if (/^\|.*\|$/.test(line) && !(/^\|[-:| ]+\|$/.test(line))) {
+      result.push({ id: idx++, type: 'table', text: line, raw: line, source: filename });
+      continue;
+    }
+
+    // LIST ITEM
+    if (/^[-*+]\s/.test(line) || /^\d+\.\s/.test(line)) {
+      result.push({ id: idx++, type: 'list', text: line.replace(/^[-*+]\s*/, '').replace(/^\d+\.\s*/, ''), raw: line, source: filename });
+      continue;
+    }
+
+    // CODE BLOCK
+    if (/^```/.test(line)) {
+      let code = '';
+      i++;
+      while (i < lines.length && !/^```/.test(lines[i].trim())) {
+        code += lines[i] + '\n';
+        i++;
+      }
+      if (code.trim()) {
+        result.push({ id: idx++, type: 'code', text: code.trim(), raw: '```\n' + code.trim() + '\n```', source: filename });
+      }
+      continue;
+    }
+
+    // IMAGE REFERENCE
+    if (/!\[.*\]\(.*\)/.test(line) || /\.(png|jpg|jpeg|gif|svg|webp)/i.test(line)) {
+      result.push({ id: idx++, type: 'image', text: line, raw: line, source: filename });
+      continue;
+    }
+
+    // SHORT PUNCHY LINE = potential quote (under 200 chars, no question mark, has a period or is a statement)
+    if (line.length > 10 && line.length < 200 && !line.endsWith('?') && /[.!]$/.test(line) && !/^(Note|TODO|FIXME|See|Ref|http|www)/i.test(line)) {
+      const words = line.split(/\s+/).length;
+      if (words >= 4 && words <= 35) {
+        result.push({ id: idx++, type: 'quote', text: line.replace(/^\*\*|\*\*$/g, '').replace(/^\*|\*$/g, ''), raw: line, source: filename });
+        continue;
+      }
+    }
+
+    // PARAGRAPH (everything else)
+    if (line.length > 5) {
+      result.push({ id: idx++, type: 'paragraph', text: line, raw: line, source: filename });
+    }
+  }
+
+  return result;
+}
+
+function renderAtomFilters() {
+  const counts = {};
+  atoms.forEach(a => { counts[a.type] = (counts[a.type] || 0) + 1; });
+  const types = ['all', ...Object.keys(counts).sort()];
+  const el = document.getElementById('atom-filters');
+  el.innerHTML = types.map(t =>
+    '<button class="atom-filter' + (t === atomFilter ? ' active' : '') + '" onclick="setAtomFilter(\'' + t + '\')">' +
+    t + (t !== 'all' ? '<span class="af-count">' + counts[t] + '</span>' : '<span class="af-count">' + atoms.length + '</span>') + '</button>'
+  ).join('');
+}
+
+function setAtomFilter(f) {
+  atomFilter = f;
+  renderAtomFilters();
+  renderAtoms();
+}
+
+function renderAtoms() {
+  const el = document.getElementById('atom-list');
+  const filtered = atomFilter === 'all' ? atoms : atoms.filter(a => a.type === atomFilter);
+  if (!filtered.length) {
+    el.innerHTML = '<div style="padding:16px;text-align:center;font-size:9px;color:var(--text-muted)">No atoms of this type</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(a =>
+    '<div class="atom-card" data-atom-id="' + a.id + '" onclick="toggleAtomSelect(this,' + a.id + ')">' +
+    '<span class="ac-type t-' + a.type + '">' + a.type + (a.level ? ' H' + a.level : '') + '</span>' +
+    '<div class="ac-meta">#' + a.id + ' / ' + a.text.split(/\s+/).length + ' words</div>' +
+    '<div class="ac-text">' + esc(a.text) + '</div>' +
+    '<div class="ac-actions">' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();atomToCanvas(' + a.id + ')">To Canvas</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();atomToSeed(' + a.id + ')">To Seed</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();atomCopy(' + a.id + ')">Copy</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();atomNewDoc(' + a.id + ')">New Doc</button>' +
+    '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();previewAtom(' + a.id + ')" style="color:var(--green)">Preview</button>' +
+    '</div></div>'
+  ).join('');
+
+  // Stats
+  const stats = document.getElementById('atom-stats');
+  stats.style.display = '';
+  const qCount = atoms.filter(a => a.type === 'quote').length;
+  const hCount = atoms.filter(a => a.type === 'heading').length;
+  stats.innerHTML = '<span>Total: ' + atoms.length + '</span><span>Quotes: ' + qCount + '</span><span>Headings: ' + hCount + '</span><span>Filter: ' + atomFilter + '</span>';
+  updateBulkBar();
+}
+
+function toggleAtomSelect(el, id) {
+  el.classList.toggle('selected');
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const sel = document.querySelectorAll('.atom-card.selected');
+  const bar = document.getElementById('atom-bulk');
+  if (sel.length > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('atom-sel-count').textContent = sel.length;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function getSelectedAtoms() {
+  const ids = [];
+  document.querySelectorAll('.atom-card.selected').forEach(el => ids.push(parseInt(el.dataset.atomId)));
+  return atoms.filter(a => ids.includes(a.id));
+}
+
+function deselectAll() {
+  document.querySelectorAll('.atom-card.selected').forEach(el => el.classList.remove('selected'));
+  updateBulkBar();
+}
+
+// SINGLE ATOM ACTIONS
+function atomToCanvas(id) {
+  const a = atoms.find(x => x.id === id);
+  if (!a) return;
+  const canvas = document.getElementById('canvas');
+  const footer = canvas.querySelector('.pdf-footer');
+  let html = '';
+  if (a.type === 'heading') html = '<h' + (a.level || 2) + '>' + esc(a.text) + '</h' + (a.level || 2) + '>';
+  else if (a.type === 'quote') html = '<blockquote>' + esc(a.text) + '</blockquote>';
+  else if (a.type === 'list') html = '<li>' + esc(a.text) + '</li>';
+  else if (a.type === 'code') html = '<pre style="background:#f4f4f5;padding:12px;border-radius:4px;font-family:JetBrains Mono,monospace;font-size:11px;margin:12px 0">' + esc(a.text) + '</pre>';
+  else html = '<p>' + esc(a.text) + '</p>';
+  const el = document.createElement('div');
+  el.innerHTML = html;
+  if (footer) canvas.insertBefore(el.firstChild, footer);
+  else canvas.appendChild(el.firstChild);
+  setMode('pdf');
+  scheduleSave();
+  toast('Atom #' + id + ' added to canvas');
+}
+
+function atomToSeed(id) {
+  const a = atoms.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('seed-input').value = a.text;
+  setMode('caption');
+  toast('Atom #' + id + ' loaded as seed');
+}
+
+function atomCopy(id) {
+  const a = atoms.find(x => x.id === id);
+  if (!a) return;
+  navigator.clipboard.writeText(a.text);
+  toast('Copied atom #' + id);
+}
+
+function atomNewDoc(id) {
+  const a = atoms.find(x => x.id === id);
+  if (!a) return;
+  const title = a.type === 'heading' ? a.text : a.text.substring(0, 40) + '...';
+  const doc = createDoc(title, a.raw, currentTpl, '');
+  switchDoc(doc.id);
+  setMode('pdf');
+  toast('New doc from atom #' + id);
+}
+
+function previewAtom(id) {
+  const a = atoms.find(x => x.id === id);
+  if (!a) return;
+  const el = document.getElementById('atom-preview-content');
+  let html = '<div style="margin-bottom:8px"><span class="ac-type t-' + a.type + '">' + a.type + '</span></div>';
+  if (a.type === 'heading') html += '<h2 style="color:var(--text-primary);font-size:18px;font-family:var(--sans)">' + esc(a.text) + '</h2>';
+  else if (a.type === 'quote') html += '<blockquote style="border-left:3px solid var(--accent);padding:12px 16px;font-style:italic;color:var(--text-primary);font-size:13px;font-family:var(--sans);line-height:1.8">' + esc(a.text) + '</blockquote>';
+  else if (a.type === 'code') html += '<pre style="background:var(--bg-base);padding:12px;border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--text-secondary);overflow-x:auto">' + esc(a.text) + '</pre>';
+  else html += '<p style="color:var(--text-primary);font-size:12px;font-family:var(--sans);line-height:1.8">' + esc(a.text) + '</p>';
+  html += '<div style="margin-top:12px;font-size:8px;color:var(--text-muted)">Source: ' + esc(a.source) + ' / #' + a.id + ' / ' + a.text.split(/\s+/).length + ' words</div>';
+  el.innerHTML = html;
+}
+
+// BULK ACTIONS
+function bulkToCanvas() {
+  const sel = getSelectedAtoms();
+  if (!sel.length) return;
+  sel.forEach(a => atomToCanvas(a.id));
+  deselectAll();
+  setMode('pdf');
+  toast(sel.length + ' atoms added to canvas');
+}
+
+function bulkToSeed() {
+  const sel = getSelectedAtoms();
+  if (!sel.length) return;
+  document.getElementById('seed-input').value = sel.map(a => a.text).join('\n\n');
+  deselectAll();
+  setMode('caption');
+  toast(sel.length + ' atoms loaded as seed');
+}
+
+function bulkNewDoc() {
+  const sel = getSelectedAtoms();
+  if (!sel.length) return;
+  const content = sel.map(a => {
+    if (a.type === 'heading') return '## ' + a.text;
+    if (a.type === 'quote') return '> ' + a.text;
+    if (a.type === 'list') return '- ' + a.text;
+    return a.text;
+  }).join('\n\n');
+  const doc = createDoc('Assembled Document', content, currentTpl, '');
+  switchDoc(doc.id);
+  deselectAll();
+  setMode('pdf');
+  renderPreview();
+  toast('New doc from ' + sel.length + ' atoms');
+}
+
+function bulkCopy() {
+  const sel = getSelectedAtoms();
+  if (!sel.length) return;
+  navigator.clipboard.writeText(sel.map(a => a.text).join('\n\n'));
+  deselectAll();
+  toast(sel.length + ' atoms copied');
+}
+
+function clearAtoms() {
+  atoms = [];
+  atomFilter = 'all';
+  document.getElementById('atom-list').innerHTML = '<div style="padding:20px;text-align:center;font-size:9px;color:var(--text-muted);line-height:1.8">Import a document to break it into<br>atomic units</div>';
+  document.getElementById('atom-filters').innerHTML = '';
+  document.getElementById('atom-stats').style.display = 'none';
+  document.getElementById('atom-bulk').style.display = 'none';
+  document.getElementById('atom-source-info').style.display = 'none';
+  document.getElementById('atom-preview-content').innerHTML = '';
+}
+
+// ============================================================
+// DRAGGABLE PANEL RESIZE
+// ============================================================
+function initPanelResize() {
+  const ws = document.getElementById('workspace');
+  const lib = document.getElementById('lib-panel');
+  const ctrl = document.getElementById('ctrl-panel');
+
+  // Insert resize handles INSIDE panels (positioned absolute at right edge)
+  const h1 = document.createElement('div');
+  h1.className = 'resize-handle';
+  h1.id = 'rh-lib';
+  lib.appendChild(h1);
+
+  const h2 = document.createElement('div');
+  h2.className = 'resize-handle';
+  h2.id = 'rh-ctrl';
+  ctrl.appendChild(h2);
+
+  let dragging = null;
+  let startX = 0;
+  let startCols = [];
+
+  function onDown(e, target) {
+    e.preventDefault();
+    dragging = target;
+    startX = e.clientX;
+    startCols = getComputedStyle(ws).gridTemplateColumns.split(' ').map(v => parseFloat(v));
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.target.classList.add('dragging');
+  }
+
+  h1.addEventListener('mousedown', e => onDown(e, 'lib'));
+  h2.addEventListener('mousedown', e => onDown(e, 'ctrl'));
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const delta = e.clientX - startX;
+    if (dragging === 'lib') {
+      const newW = Math.max(120, Math.min(400, startCols[0] + delta));
+      ws.style.gridTemplateColumns = newW + 'px 1fr 1fr';
+    } else {
+      const newW = Math.max(200, Math.min(600, startCols[1] + delta));
+      ws.style.gridTemplateColumns = startCols[0] + 'px ' + newW + 'px 1fr';
+    }
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (dragging) {
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.querySelectorAll('.resize-handle').forEach(h => h.classList.remove('dragging'));
+      dragging = null;
+    }
+  });
+}
+
+// ============================================================
 // SHORTCUTS HELP
 // ============================================================
 function openShortcuts() {
@@ -2196,6 +2685,7 @@ document.addEventListener('keydown', e => {
 loadDocs();
 updateWordCount();
 renderSeedLibrary();
+initPanelResize();
 </script>
 </body>
 </html>
