@@ -305,6 +305,34 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .color-dot:hover{transform:scale(1.2)}
 .color-dot.active{border-color:var(--text-primary)}
 
+/* COMMAND PALETTE */
+.cmd-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1100;display:none}
+.cmd-overlay.open{display:block}
+.cmd-palette{position:fixed;top:20%;left:50%;transform:translateX(-50%);width:480px;background:var(--bg-elevated);border:1px solid var(--border-hover);border-radius:8px;z-index:1101;display:none;box-shadow:0 8px 40px rgba(0,0,0,0.6);overflow:hidden}
+.cmd-palette.open{display:block}
+.cmd-palette input{width:100%;padding:14px 16px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text-primary);font-family:var(--mono);font-size:13px;outline:none}
+.cmd-results{max-height:320px;overflow-y:auto;padding:4px}
+.cmd-item{padding:10px 14px;cursor:pointer;border-radius:4px;margin:2px;display:flex;align-items:center;gap:10px;transition:all 0.08s}
+.cmd-item:hover,.cmd-item.sel{background:rgba(168,85,247,0.12)}
+.cmd-item .ci-icon{font-size:11px;width:20px;text-align:center;color:var(--text-muted)}
+.cmd-item .ci-text{font-size:11px;color:var(--text-primary)}
+.cmd-item .ci-desc{font-size:8px;color:var(--text-muted);margin-left:auto}
+.cmd-item .ci-key{font-size:8px;color:var(--text-muted);background:var(--bg-base);padding:2px 5px;border-radius:2px;border:1px solid var(--border);margin-left:auto}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .workspace{grid-template-columns:1fr !important}
+  .lib,.ctrl{display:none}
+  .preview-toolbar{flex-wrap:wrap}
+  .hdr{gap:6px}
+  .hdr-brand h1{font-size:10px}
+  .tab-btn{padding:4px 6px;font-size:7px}
+  .preview-body{padding:8px}
+  .pdf-canvas{padding:24px 20px}
+  .ftr span:last-child{display:none}
+  .wc-bar{font-size:7px;gap:6px}
+}
+
 /* PRINT */
 @media print {
   body{background:#fff !important;overflow:visible !important}
@@ -560,7 +588,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 
 <div class="ftr">
   <span>CONTENT BEAST v3.0 — by Saturno Movement</span>
-  <span>Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find / Esc: Close</span>
+  <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
 </div>
@@ -585,10 +613,18 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
   </div>
 </div>
 
+<!-- COMMAND PALETTE -->
+<div class="cmd-overlay" id="cmd-overlay" onclick="closeCmd()"></div>
+<div class="cmd-palette" id="cmd-palette">
+  <input type="text" id="cmd-input" placeholder="Type a command..." oninput="filterCmd()" onkeydown="cmdKeyHandler(event)">
+  <div class="cmd-results" id="cmd-results"></div>
+</div>
+
 <!-- SHORTCUTS HELP -->
 <div class="export-overlay" id="sc-overlay" onclick="closeShortcuts()"></div>
 <div class="shortcuts-modal" id="sc-modal">
   <h3>Keyboard Shortcuts</h3>
+  <div class="sc-row"><span class="sc-desc">Command Palette</span><span class="sc-key">Cmd+K</span></div>
   <div class="sc-row"><span class="sc-desc">Save document</span><span class="sc-key">Cmd+S</span></div>
   <div class="sc-row"><span class="sc-desc">Export PDF</span><span class="sc-key">Cmd+Shift+S</span></div>
   <div class="sc-row"><span class="sc-desc">New document</span><span class="sc-key">Cmd+N</span></div>
@@ -1521,6 +1557,189 @@ function restoreVersion(verId) {
 }
 
 // ============================================================
+// COMMAND PALETTE (Cmd+K)
+// ============================================================
+const CMD_ACTIONS = [
+  { icon: '+', text: 'New Document', desc: 'Create blank doc', key: 'Cmd+N', fn: () => newDoc() },
+  { icon: 'I', text: 'Import File', desc: 'Import .md/.txt', fn: () => importFile() },
+  { icon: 'P', text: 'Export PDF', desc: 'Open export settings', key: 'Cmd+Shift+S', fn: () => openExport() },
+  { icon: 'H', text: 'Download HTML', desc: 'Export as HTML', fn: () => downloadHTML() },
+  { icon: 'Z', text: 'Export All (ZIP)', desc: 'Batch export all docs', fn: () => batchExport() },
+  { icon: 'B', text: 'Backup All Data', desc: 'Download JSON backup', fn: () => backupData() },
+  { icon: 'R', text: 'Restore Backup', desc: 'Import JSON backup', fn: () => restoreBackup() },
+  { icon: 'S', text: 'Save', desc: 'Save to localStorage', key: 'Cmd+S', fn: () => { saveDocs(); toast('Saved'); } },
+  { icon: 'F', text: 'Find & Replace', desc: 'Search in canvas', key: 'Cmd+F', fn: () => toggleFind() },
+  { icon: 'T', text: 'Insert Table', desc: 'Visual table builder', fn: () => openTblModal() },
+  { icon: 'C', text: 'Insert TOC', desc: 'Table of contents', fn: () => generateTOC() },
+  { icon: '*', text: 'Insert Info Callout', desc: 'Blue info box', fn: () => insertCallout('info') },
+  { icon: '!', text: 'Insert Tip Callout', desc: 'Green tip box', fn: () => insertCallout('tip') },
+  { icon: '~', text: 'Insert Warning', desc: 'Yellow warning box', fn: () => insertCallout('warning') },
+  { icon: '||', text: 'Insert Page Break', desc: 'PDF page separator', fn: () => insertPageBreak() },
+  { icon: '--', text: 'Insert Divider', desc: 'Labeled section divider', fn: () => insertLabeledDivider() },
+  { icon: '{}', text: 'Insert Code Block', desc: 'Monospace code', fn: () => insertCodeBlock() },
+  { icon: 'Img', text: 'Insert Image', desc: 'From file', fn: () => insertImage() },
+  { icon: '||', text: 'Insert 2 Columns', desc: 'Side-by-side layout', fn: () => insertColumns() },
+  { icon: 'V', text: 'Save Snapshot', desc: 'Version history', fn: () => saveVersion() },
+  { icon: 'H', text: 'Version History', desc: 'Browse snapshots', fn: () => openVersions() },
+  { icon: 'FS', text: 'Fullscreen', desc: 'Toggle fullscreen', fn: () => toggleFullscreen() },
+  { icon: '?', text: 'Keyboard Shortcuts', desc: 'Show help', key: 'Cmd+/', fn: () => openShortcuts() },
+  { icon: 'A', text: 'Template: Saturno', fn: () => { document.querySelector('[data-tpl="tpl-saturno"]').click(); } },
+  { icon: 'A', text: 'Template: Dark', fn: () => { document.querySelector('[data-tpl="tpl-dark"]').click(); } },
+  { icon: 'A', text: 'Template: Minimal', fn: () => { document.querySelector('[data-tpl="tpl-minimal"]').click(); } },
+  { icon: 'A', text: 'Template: White', fn: () => { document.querySelector('[data-tpl=""]').click(); } },
+  { icon: 'P', text: 'Preset: Program PDF', fn: () => loadPreset('program') },
+  { icon: 'P', text: 'Preset: Level Guide', fn: () => loadPreset('level') },
+  { icon: 'P', text: 'Preset: Framework', fn: () => loadPreset('framework') },
+  { icon: 'P', text: 'Preset: Transcript', fn: () => loadPreset('transcript') },
+  { icon: 'P', text: 'Preset: Cover Page', fn: () => loadPreset('cover') },
+  { icon: 'M', text: 'Mode: PDF Maker', fn: () => setMode('pdf') },
+  { icon: 'M', text: 'Mode: Captions', fn: () => setMode('caption') },
+  { icon: 'D', text: 'Document Stats', desc: 'Show reading time + stats', fn: () => showDocStats() }
+];
+let cmdSelIdx = 0;
+
+function openCmd() {
+  document.getElementById('cmd-overlay').classList.add('open');
+  document.getElementById('cmd-palette').classList.add('open');
+  document.getElementById('cmd-input').value = '';
+  cmdSelIdx = 0;
+  filterCmd();
+  document.getElementById('cmd-input').focus();
+}
+
+function closeCmd() {
+  document.getElementById('cmd-overlay').classList.remove('open');
+  document.getElementById('cmd-palette').classList.remove('open');
+}
+
+function filterCmd() {
+  const q = (document.getElementById('cmd-input').value || '').toLowerCase();
+  const results = CMD_ACTIONS.filter(a => {
+    const txt = (a.text + ' ' + (a.desc || '')).toLowerCase();
+    return !q || txt.includes(q);
+  }).slice(0, 12);
+  cmdSelIdx = 0;
+  renderCmdResults(results);
+}
+
+function renderCmdResults(results) {
+  const el = document.getElementById('cmd-results');
+  el.innerHTML = results.map((a, i) =>
+    '<div class="cmd-item' + (i === cmdSelIdx ? ' sel' : '') + '" onclick="runCmd(' + CMD_ACTIONS.indexOf(a) + ')" onmouseenter="cmdSelIdx=' + i + ';renderCmdResults(getCmdFiltered())">' +
+    '<span class="ci-icon">' + a.icon + '</span>' +
+    '<span class="ci-text">' + a.text + '</span>' +
+    (a.key ? '<span class="ci-key">' + a.key + '</span>' : (a.desc ? '<span class="ci-desc">' + a.desc + '</span>' : '')) +
+    '</div>'
+  ).join('');
+}
+
+function getCmdFiltered() {
+  const q = (document.getElementById('cmd-input').value || '').toLowerCase();
+  return CMD_ACTIONS.filter(a => {
+    const txt = (a.text + ' ' + (a.desc || '')).toLowerCase();
+    return !q || txt.includes(q);
+  }).slice(0, 12);
+}
+
+function cmdKeyHandler(e) {
+  const results = getCmdFiltered();
+  if (e.key === 'ArrowDown') { e.preventDefault(); cmdSelIdx = Math.min(cmdSelIdx + 1, results.length - 1); renderCmdResults(results); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); cmdSelIdx = Math.max(cmdSelIdx - 1, 0); renderCmdResults(results); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (results[cmdSelIdx]) { runCmd(CMD_ACTIONS.indexOf(results[cmdSelIdx])); } }
+  else if (e.key === 'Escape') { closeCmd(); }
+}
+
+function runCmd(idx) {
+  closeCmd();
+  if (CMD_ACTIONS[idx] && CMD_ACTIONS[idx].fn) CMD_ACTIONS[idx].fn();
+}
+
+// ============================================================
+// BACKUP / RESTORE
+// ============================================================
+function backupData() {
+  snapshotActive();
+  const backup = {
+    version: '3.3',
+    exported: new Date().toISOString(),
+    docs: docs,
+    versions: getVersions()
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'content-beast-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Backup downloaded (' + docs.length + ' docs)');
+}
+
+function restoreBackup() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function() {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.docs || !Array.isArray(data.docs)) { toast('Invalid backup file'); return; }
+        if (!confirm('Restore ' + data.docs.length + ' documents? This will MERGE with existing docs.')) return;
+        const existingIds = new Set(docs.map(d => d.id));
+        let added = 0;
+        data.docs.forEach(d => {
+          if (!existingIds.has(d.id)) { docs.push(d); added++; }
+        });
+        saveDocs();
+        renderLibrary();
+        if (data.versions) {
+          const existing = getVersions();
+          const existingVerIds = new Set(existing.map(v => v.id));
+          data.versions.forEach(v => { if (!existingVerIds.has(v.id)) existing.push(v); });
+          localStorage.setItem(VER_KEY, JSON.stringify(existing));
+        }
+        toast('Restored ' + added + ' new docs (skipped ' + (data.docs.length - added) + ' duplicates)');
+      } catch(err) { toast('Error: ' + err.message); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// ============================================================
+// DOCUMENT STATS
+// ============================================================
+function showDocStats() {
+  const canvas = document.getElementById('canvas');
+  const text = canvas.innerText || '';
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const chars = text.length;
+  const charsNoSpace = text.replace(/\s/g, '').length;
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
+  const paragraphs = text.split(/\n\n+/).filter(p => p.trim()).length;
+  const readTime = Math.max(1, Math.ceil(words / 200));
+  const headings = canvas.querySelectorAll('h1,h2,h3').length;
+  const images = canvas.querySelectorAll('img').length;
+  const tables = canvas.querySelectorAll('table').length;
+  const links = canvas.querySelectorAll('a').length;
+
+  const msg = 'DOCUMENT STATS\n' +
+    '---\n' +
+    'Words: ' + words + '\n' +
+    'Characters: ' + chars + ' (' + charsNoSpace + ' without spaces)\n' +
+    'Sentences: ' + sentences + '\n' +
+    'Paragraphs: ' + paragraphs + '\n' +
+    'Reading time: ~' + readTime + ' min\n' +
+    'Headings: ' + headings + '\n' +
+    'Images: ' + images + '\n' +
+    'Tables: ' + tables + '\n' +
+    'Links: ' + links;
+  alert(msg);
+}
+
+// ============================================================
 // SORT DOCUMENTS
 // ============================================================
 function sortDocs(mode, btn) {
@@ -1679,6 +1898,7 @@ document.addEventListener('keydown', e => {
     if (e.shiftKey && e.key === 's') { e.preventDefault(); openExport(); return; }
     if (e.key === 's') { e.preventDefault(); saveDocs(); toast('Saved'); return; }
     if (e.key === 'n') { e.preventDefault(); newDoc(); return; }
+    if (e.key === 'k') { e.preventDefault(); openCmd(); return; }
     if (e.key === 'f') { e.preventDefault(); toggleFind(); return; }
     if (e.key === '/') { e.preventDefault(); openShortcuts(); return; }
     if (e.key === 'p') { e.preventDefault(); window.print(); return; }
@@ -1690,6 +1910,7 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('ver-panel').classList.contains('open')) closeVersions();
     if (document.getElementById('tbl-modal').classList.contains('open')) closeTblModal();
     if (document.getElementById('sc-modal').classList.contains('open')) closeShortcuts();
+    if (document.getElementById('cmd-palette').classList.contains('open')) closeCmd();
   }
 });
 
