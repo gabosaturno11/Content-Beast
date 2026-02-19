@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SATURNO FORGE — PDF Maker + Content Multiplier</title>
+<title>CONTENT BEAST — PDF Maker + Content Tools</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
@@ -11,437 +11,556 @@
 
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg-void:#030303;--bg-base:#050505;--bg-elevated:#0a0a0a;--bg-surface:#111111;
-  --border:#1a1a1a;--border-hover:#2a2a2a;
-  --text-primary:#ffffff;--text-secondary:#a1a1aa;--text-muted:#52525b;
-  --accent:#a855f7;--accent-cyan:#06b6d4;--accent-green:#22c55e;--accent-amber:#f59e0b;--accent-red:#ef4444;
+  --bg-void:#020202;--bg-base:#050505;--bg-elevated:#0a0a0a;--bg-surface:#111;
+  --border:#1a1a1a;--border-hover:#2a2a2a;--border-active:#333;
+  --text-primary:#fff;--text-secondary:#a1a1aa;--text-muted:#52525b;
+  --accent:#a855f7;--cyan:#06b6d4;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
   --mono:'JetBrains Mono',monospace;--sans:'Sora',system-ui,sans-serif;
 }
-body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondary);min-height:100vh;overflow-x:hidden}
+body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondary);height:100vh;overflow:hidden}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:var(--bg-base)}
 ::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:2px}
 
-/* LAYOUT */
-.app{display:grid;grid-template-rows:48px 1fr 32px;height:100vh}
-header{border-bottom:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
-header h1{color:var(--text-primary);font-size:13px;font-weight:700;letter-spacing:-0.02em}
-header .sub{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-left:12px}
-footer{border-top:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:9px;color:var(--text-muted)}
+/* === APP SHELL === */
+.app{display:grid;grid-template-rows:44px 1fr 28px;height:100vh}
 
-.main{display:grid;grid-template-columns:1fr 1fr;gap:0;overflow:hidden}
-.main.caption-mode{grid-template-columns:340px 1fr}
-
-/* PANELS */
-.panel{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden}
-.panel:last-child{border-right:none}
-.panel-header{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.panel-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.15em}
-.panel-body{flex:1;overflow-y:auto;padding:16px}
-
-/* TABS */
-.tab-bar{display:flex;gap:2px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:2px}
-.tab-btn{padding:6px 12px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;background:transparent;border:none;color:var(--text-muted);cursor:pointer;border-radius:3px;font-family:var(--mono);transition:all 0.15s}
+/* HEADER */
+.hdr{border-bottom:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;padding:0 12px;gap:12px}
+.hdr-brand{display:flex;align-items:center;gap:8px}
+.hdr-brand h1{color:var(--text-primary);font-size:12px;font-weight:700;letter-spacing:-0.01em}
+.hdr-brand .ver{font-size:8px;color:var(--text-muted);padding:1px 5px;border:1px solid var(--border);border-radius:3px}
+.hdr .tab-bar{display:flex;gap:1px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:2px}
+.tab-btn{padding:5px 10px;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;background:transparent;border:none;color:var(--text-muted);cursor:pointer;border-radius:3px;font-family:var(--mono);transition:all 0.15s}
 .tab-btn:hover{color:var(--text-secondary)}
-.tab-btn.active{background:var(--accent);color:white}
+.tab-btn.active{background:var(--accent);color:#fff}
+.hdr-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:10px;font-size:8px;font-weight:500;text-transform:uppercase}
+.status-ok{background:rgba(34,197,94,0.1);color:var(--green)}
+.status-busy{background:rgba(245,158,11,0.1);color:var(--amber)}
 
-/* FORM ELEMENTS */
-textarea,input[type="text"],select{width:100%;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:10px 12px;color:var(--text-primary);font-family:var(--mono);font-size:12px;resize:none;transition:border-color 0.2s}
+/* FOOTER */
+.ftr{border-top:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:8px;color:var(--text-muted)}
+
+/* === 3-COLUMN LAYOUT === */
+.workspace{display:grid;grid-template-columns:200px 1fr 1fr;overflow:hidden}
+.workspace.two-col{grid-template-columns:0px 1fr 1fr}
+.workspace.caption-mode{grid-template-columns:200px 320px 1fr}
+
+/* LEFT: LIBRARY */
+.lib{background:var(--bg-base);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width 0.2s}
+.lib-hdr{padding:8px;border-bottom:1px solid var(--border);display:flex;gap:4px}
+.lib-list{flex:1;overflow-y:auto;padding:4px}
+.lib-item{padding:8px 10px;border-radius:4px;cursor:pointer;transition:all 0.1s;margin-bottom:2px}
+.lib-item:hover{background:var(--bg-elevated)}
+.lib-item.active{background:rgba(168,85,247,0.12);border-left:2px solid var(--accent)}
+.lib-item .li-title{font-size:10px;color:var(--text-primary);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-item .li-meta{font-size:8px;color:var(--text-muted);margin-top:2px}
+.lib-empty{padding:16px;text-align:center;font-size:9px;color:var(--text-muted);line-height:1.6}
+
+/* MID: CONTROLS */
+.ctrl{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.ctrl-hdr{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ctrl-hdr .title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em}
+.ctrl-body{flex:1;overflow-y:auto;padding:12px}
+
+/* RIGHT: PREVIEW */
+.preview{display:flex;flex-direction:column;overflow:hidden}
+.preview-hdr{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:6px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.preview-hdr .title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.12em;color:var(--green)}
+.preview-toolbar{display:flex;gap:3px;flex-wrap:wrap;align-items:center}
+.preview-body{flex:1;overflow-y:auto;padding:20px;background:#1a1a1a}
+
+/* FORM */
+textarea,input[type="text"],select{width:100%;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;padding:8px 10px;color:var(--text-primary);font-family:var(--mono);font-size:11px;resize:none;transition:border-color 0.15s}
 textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
-label.field-label{display:block;font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:6px}
+.lbl{display:block;font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:4px;font-weight:600}
+.row{margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 
 /* BUTTONS */
-.btn{padding:8px 14px;border:none;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;transition:all 0.15s}
-.btn-primary{background:var(--accent);color:white}
-.btn-primary:hover{background:#9333ea;transform:translateY(-1px)}
-.btn-secondary{background:var(--bg-surface);color:var(--text-secondary);border:1px solid var(--border)}
-.btn-secondary:hover{background:var(--border);color:white}
-.btn-green{background:var(--accent-green);color:white}
+.btn{padding:6px 12px;border:none;border-radius:3px;font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;transition:all 0.12s;display:inline-flex;align-items:center;gap:4px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#9333ea}
+.btn-outline{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--border-hover);color:#fff}
+.btn-green{background:var(--green);color:#fff}
 .btn-green:hover{background:#16a34a}
-.btn-cyan{background:var(--accent-cyan);color:white}
-.btn-cyan:hover{background:#0891b2}
-.btn-sm{padding:5px 10px;font-size:9px}
+.btn-cyan{background:var(--cyan);color:#fff}
+.btn-red{background:transparent;color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+.btn-red:hover{background:rgba(239,68,68,0.1)}
+.btn-sm{padding:4px 8px;font-size:8px}
 .btn-block{width:100%}
+.btn-icon{width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;color:var(--text-muted);cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;transition:all 0.1s}
+.btn-icon:hover{border-color:var(--border-hover);color:var(--text-primary)}
+.btn-icon.active{border-color:var(--accent);color:var(--accent);background:rgba(168,85,247,0.08)}
 
-/* MODE BUTTONS */
-.mode-btn{padding:6px 10px;font-size:9px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;color:var(--text-muted);cursor:pointer;transition:all 0.15s;font-family:var(--mono)}
+/* MODE BTNS */
+.mode-btn{padding:5px 8px;font-size:8px;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;color:var(--text-muted);cursor:pointer;transition:all 0.12s;font-family:var(--mono);font-weight:500}
 .mode-btn:hover{border-color:var(--border-hover);color:var(--text-secondary)}
-.mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(168,85,247,0.1)}
+.mode-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(168,85,247,0.08)}
 
-/* PDF PREVIEW - EDITABLE */
-.pdf-canvas{background:white;color:#1a1a1a;font-family:'Sora',Georgia,serif;padding:40px 50px;border-radius:4px;min-height:500px;position:relative;box-shadow:0 4px 24px rgba(0,0,0,0.4)}
+/* PRESET CARDS */
+.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.preset-card{background:var(--bg-base);border:1px solid var(--border);border-radius:3px;padding:8px;cursor:pointer;transition:all 0.12s}
+.preset-card:hover{border-color:var(--border-hover)}
+.preset-card.active{border-color:var(--accent);background:rgba(168,85,247,0.06)}
+.preset-card .pn{font-size:9px;font-weight:600;color:var(--text-primary);margin-bottom:1px}
+.preset-card .pd{font-size:7px;color:var(--text-muted)}
+
+/* === PDF CANVAS === */
+.pdf-canvas{background:#fff;color:#1a1a1a;font-family:var(--sans);padding:48px 56px;border-radius:3px;min-height:600px;position:relative;box-shadow:0 2px 20px rgba(0,0,0,0.5);line-height:1.7}
 .pdf-canvas[contenteditable]{outline:none;cursor:text}
-.pdf-canvas[contenteditable]:focus{box-shadow:0 0 0 2px var(--accent),0 4px 24px rgba(0,0,0,0.4)}
-.pdf-canvas h1{font-size:28px;font-weight:700;margin-bottom:4px;color:#111;font-family:'Sora',sans-serif}
-.pdf-canvas h2{font-size:14px;color:#666;font-style:italic;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #111;font-family:'Sora',sans-serif}
-.pdf-canvas h3{font-size:16px;font-weight:700;margin-top:20px;margin-bottom:8px;color:#222;font-family:'Sora',sans-serif;text-transform:uppercase;letter-spacing:0.05em}
-.pdf-canvas p{font-size:13px;line-height:1.8;margin-bottom:10px;color:#333}
-.pdf-canvas ul,.pdf-canvas ol{margin-left:20px;margin-bottom:12px}
-.pdf-canvas li{font-size:13px;line-height:1.8;margin-bottom:4px;color:#333}
-.pdf-canvas .footer{font-size:10px;color:#999;margin-top:40px;padding-top:16px;border-top:1px solid #ddd;font-family:var(--mono);letter-spacing:0.05em}
+.pdf-canvas[contenteditable]:focus{box-shadow:0 0 0 2px var(--accent),0 2px 20px rgba(0,0,0,0.5)}
 
-/* DARK TEMPLATE */
-.pdf-canvas.dark{background:#0a0a0a;color:#e2e8f0}
-.pdf-canvas.dark h1{color:#fff}
-.pdf-canvas.dark h2{color:#a855f7;border-bottom-color:#a855f7}
-.pdf-canvas.dark h3{color:#22d3ee}
-.pdf-canvas.dark p,.pdf-canvas.dark li{color:#cbd5e1}
-.pdf-canvas.dark .footer{color:#475569;border-top-color:#1e293b}
+.pdf-canvas h1{font-size:28px;font-weight:700;margin-bottom:4px;color:#111;line-height:1.2}
+.pdf-canvas h2{font-size:13px;color:#888;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #111}
+.pdf-canvas h3{font-size:15px;font-weight:700;margin-top:24px;margin-bottom:8px;color:#222;text-transform:uppercase;letter-spacing:0.04em}
+.pdf-canvas h4{font-size:13px;font-weight:600;margin-top:16px;margin-bottom:6px;color:#444}
+.pdf-canvas p{font-size:12px;margin-bottom:8px;color:#333}
+.pdf-canvas ul,.pdf-canvas ol{margin-left:20px;margin-bottom:10px}
+.pdf-canvas li{font-size:12px;margin-bottom:3px;color:#333}
+.pdf-canvas strong{font-weight:700;color:#111}
+.pdf-canvas em{font-style:italic}
+.pdf-canvas hr{border:none;border-top:1px solid #ddd;margin:20px 0}
+.pdf-canvas blockquote{border-left:3px solid #a855f7;padding:8px 16px;margin:12px 0;background:#faf5ff;font-style:italic;color:#555}
+.pdf-canvas code{background:#f4f4f5;padding:1px 4px;border-radius:2px;font-family:var(--mono);font-size:11px}
+.pdf-canvas .pdf-footer{font-size:9px;color:#aaa;margin-top:40px;padding-top:12px;border-top:1px solid #eee;font-family:var(--mono);letter-spacing:0.04em}
+.pdf-canvas table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+.pdf-canvas th{background:#f8f8f8;font-weight:600;text-align:left;padding:8px 10px;border:1px solid #e5e5e5;font-size:11px;text-transform:uppercase;letter-spacing:0.03em}
+.pdf-canvas td{padding:6px 10px;border:1px solid #e5e5e5;color:#444}
 
-/* MINIMAL TEMPLATE */
-.pdf-canvas.minimal{padding:60px;font-family:Georgia,serif}
-.pdf-canvas.minimal h1{font-size:24px;font-weight:400;letter-spacing:0.02em}
-.pdf-canvas.minimal h2{font-size:12px;font-style:normal;color:#999;border-bottom:1px solid #eee}
-.pdf-canvas.minimal h3{font-size:14px;font-weight:400;text-transform:none;color:#444}
+/* DARK */
+.pdf-canvas.tpl-dark{background:#0a0a0a;color:#e2e8f0}
+.pdf-canvas.tpl-dark h1{color:#fff}
+.pdf-canvas.tpl-dark h2{color:#a855f7;border-bottom-color:#a855f7}
+.pdf-canvas.tpl-dark h3{color:#22d3ee}
+.pdf-canvas.tpl-dark h4{color:#94a3b8}
+.pdf-canvas.tpl-dark p,.pdf-canvas.tpl-dark li{color:#cbd5e1}
+.pdf-canvas.tpl-dark blockquote{background:rgba(168,85,247,0.05);border-left-color:#a855f7;color:#a78bfa}
+.pdf-canvas.tpl-dark th{background:#111;border-color:#222;color:#94a3b8}
+.pdf-canvas.tpl-dark td{border-color:#1a1a1a;color:#94a3b8}
+.pdf-canvas.tpl-dark hr{border-top-color:#222}
+.pdf-canvas.tpl-dark .pdf-footer{color:#334155;border-top-color:#1e293b}
 
-/* SATURNO MOVEMENT TEMPLATE */
-.pdf-canvas.saturno{background:linear-gradient(180deg,#030508 0%,#050711 100%);color:#e2e8f0;padding:50px;border:1px solid #1a1f2e}
-.pdf-canvas.saturno h1{color:#fff;font-family:'Sora',sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.02em}
-.pdf-canvas.saturno h2{color:#06b6d4;border-bottom-color:#06b6d4;font-style:normal;font-family:'Sora',sans-serif;font-weight:300}
-.pdf-canvas.saturno h3{color:#a855f7;font-family:'Sora',sans-serif}
-.pdf-canvas.saturno p,.pdf-canvas.saturno li{color:#94a3b8;font-family:'Sora',sans-serif}
-.pdf-canvas.saturno .footer{color:#334155;border-top-color:#1e293b}
-.pdf-canvas.saturno .level-badge{display:inline-block;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;font-family:var(--mono)}
-.pdf-canvas.saturno .level-badge.foundation{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3)}
-.pdf-canvas.saturno .level-badge.intermediate{background:rgba(6,182,212,0.15);color:#22d3ee;border:1px solid rgba(6,182,212,0.3)}
-.pdf-canvas.saturno .level-badge.advanced{background:rgba(168,85,247,0.15);color:#c084fc;border:1px solid rgba(168,85,247,0.3)}
-.pdf-canvas.saturno .level-badge.elite{background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3)}
+/* SATURNO */
+.pdf-canvas.tpl-saturno{background:linear-gradient(180deg,#030508 0%,#050711 100%);color:#e2e8f0;border:1px solid #1a1f2e;padding:48px 52px}
+.pdf-canvas.tpl-saturno h1{color:#fff;font-size:30px;letter-spacing:-0.02em}
+.pdf-canvas.tpl-saturno h2{color:#06b6d4;border-bottom-color:#06b6d430;font-weight:300}
+.pdf-canvas.tpl-saturno h3{color:#a855f7}
+.pdf-canvas.tpl-saturno h4{color:#06b6d4}
+.pdf-canvas.tpl-saturno p,.pdf-canvas.tpl-saturno li{color:#94a3b8}
+.pdf-canvas.tpl-saturno strong{color:#e2e8f0}
+.pdf-canvas.tpl-saturno blockquote{background:rgba(6,182,212,0.05);border-left-color:#06b6d4;color:#67e8f9}
+.pdf-canvas.tpl-saturno th{background:rgba(168,85,247,0.08);border-color:#1e293b;color:#a78bfa}
+.pdf-canvas.tpl-saturno td{border-color:#1e293b;color:#94a3b8}
+.pdf-canvas.tpl-saturno hr{border-top-color:#1e293b}
+.pdf-canvas.tpl-saturno .pdf-footer{color:#334155;border-top-color:#1e293b}
+.pdf-canvas.tpl-saturno .level-badge{display:inline-block;padding:3px 10px;border-radius:3px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;font-family:var(--mono)}
+.level-badge.lv-foundation{background:rgba(34,197,94,0.12);color:#4ade80;border:1px solid rgba(34,197,94,0.25)}
+.level-badge.lv-intermediate{background:rgba(6,182,212,0.12);color:#22d3ee;border:1px solid rgba(6,182,212,0.25)}
+.level-badge.lv-advanced{background:rgba(168,85,247,0.12);color:#c084fc;border:1px solid rgba(168,85,247,0.25)}
+.level-badge.lv-elite{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.25)}
 
-/* EXERCISE CARD LAYOUT */
-.exercise-card{border:1px solid #1e293b;border-radius:8px;padding:16px;margin-bottom:12px;background:rgba(255,255,255,0.02)}
-.exercise-card .ex-name{font-size:15px;font-weight:600;color:#fff;margin-bottom:4px;font-family:'Sora',sans-serif}
-.exercise-card .ex-sets{font-size:11px;color:#06b6d4;font-family:var(--mono);margin-bottom:6px}
-.exercise-card .ex-cue{font-size:12px;color:#64748b;line-height:1.6}
+/* MINIMAL */
+.pdf-canvas.tpl-minimal{padding:60px 64px;font-family:Georgia,'Times New Roman',serif}
+.pdf-canvas.tpl-minimal h1{font-size:24px;font-weight:400;letter-spacing:0.01em}
+.pdf-canvas.tpl-minimal h2{font-size:11px;color:#aaa;border-bottom:1px solid #eee;font-weight:400}
+.pdf-canvas.tpl-minimal h3{font-size:13px;font-weight:400;text-transform:none;color:#555}
 
-/* CAPTION PANEL */
-.variant-card{background:var(--bg-base);border-left:3px solid var(--accent);padding:12px;margin-bottom:8px;border-radius:0 4px 4px 0}
+/* PAGE EST */
+.page-est{font-size:8px;color:var(--text-muted);text-align:center;padding:6px;margin-top:8px}
+
+/* CAPTION */
+.variant-card{background:var(--bg-base);border-left:3px solid var(--accent);padding:10px;margin-bottom:6px;border-radius:0 3px 3px 0}
 .variant-card.ig{border-color:#e1306c}
-.variant-card.email{border-color:var(--accent-amber)}
+.variant-card.email{border-color:var(--amber)}
 .variant-card.yt{border-color:#ff0000}
 .variant-card.twitter{border-color:#1da1f2}
 .variant-card.linkedin{border-color:#0077b5}
-.variant-card.tiktok{border-color:#010101}
-
-.checkbox-custom{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-base);border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all 0.15s;font-size:10px}
-.checkbox-custom:hover{border-color:var(--border-hover)}
-.checkbox-custom.checked{border-color:var(--accent);background:rgba(168,85,247,0.1)}
-.checkbox-custom input{display:none}
-
-/* STATUS */
-.status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;font-size:9px;font-weight:500;text-transform:uppercase}
-.status-ready{background:rgba(34,197,94,0.1);color:var(--accent-green)}
-.status-working{background:rgba(245,158,11,0.1);color:var(--accent-amber)}
-
-/* TOOLBAR INSIDE PREVIEW */
-.pdf-toolbar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.pdf-toolbar .sep{width:1px;height:20px;background:var(--border);margin:0 4px}
-
-/* TEMPLATE PRESETS GRID */
-.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.preset-card{background:var(--bg-base);border:1px solid var(--border);border-radius:4px;padding:10px;cursor:pointer;transition:all 0.15s}
-.preset-card:hover{border-color:var(--border-hover)}
-.preset-card.active{border-color:var(--accent);background:rgba(168,85,247,0.08)}
-.preset-card .preset-name{font-size:10px;font-weight:600;color:var(--text-primary);margin-bottom:2px}
-.preset-card .preset-desc{font-size:8px;color:var(--text-muted)}
-
-/* PAGES INDICATOR */
-.page-indicator{font-size:9px;color:var(--text-muted);text-align:center;padding:8px;border-top:1px dashed var(--border);margin-top:12px}
+.variant-card.tiktok{border-color:#69c9d0}
+.chk{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:all 0.12s;font-size:9px}
+.chk:hover{border-color:var(--border-hover)}
+.chk.on{border-color:var(--accent);background:rgba(168,85,247,0.08)}
+.chk input{display:none}
 
 /* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:var(--bg-surface);border:1px solid var(--accent);color:var(--text-primary);padding:10px 16px;border-radius:4px;font-size:11px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999}
+.toast{position:fixed;bottom:16px;right:16px;background:var(--bg-surface);border:1px solid var(--accent);color:var(--text-primary);padding:8px 14px;border-radius:3px;font-size:10px;opacity:0;transition:opacity 0.2s;pointer-events:none;z-index:9999;font-family:var(--mono)}
 .toast.show{opacity:1}
+
+/* DROP ZONE */
+.drop-zone{border:2px dashed var(--border);border-radius:4px;padding:20px;text-align:center;margin-bottom:10px;transition:all 0.2s;cursor:pointer}
+.drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:rgba(168,85,247,0.04)}
+.drop-zone .dz-text{font-size:9px;color:var(--text-muted)}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- HEADER -->
-<header>
-  <div style="display:flex;align-items:center;gap:8px">
-    <h1>SATURNO FORGE</h1>
-    <span class="sub">PDF Maker + Content Tools</span>
-    <div class="tab-bar" style="margin-left:16px">
-      <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
-      <button class="tab-btn" onclick="setMode('caption')">Captions</button>
+<div class="hdr">
+  <div class="hdr-brand">
+    <h1>CONTENT BEAST</h1>
+    <span class="ver">v2.0</span>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
+    <button class="tab-btn" onclick="setMode('caption')">Captions</button>
+  </div>
+  <div class="hdr-right">
+    <span id="save-ind" style="font-size:8px;color:var(--text-muted);opacity:0;transition:opacity 0.3s">Saved</span>
+    <span id="status" class="status status-ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
+  </div>
+</div>
+
+<div class="workspace" id="workspace">
+
+  <!-- LIBRARY -->
+  <div class="lib" id="lib-panel">
+    <div class="lib-hdr">
+      <button class="btn btn-primary btn-sm" style="flex:1" onclick="newDoc()">+ New</button>
+      <button class="btn btn-outline btn-sm" onclick="importFile()" title="Import .md or .txt">Import</button>
+    </div>
+    <div class="lib-list" id="lib-list">
+      <div class="lib-empty">No documents yet.<br>Click + New to start.</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <span id="global-status" class="status-badge status-ready"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
-  </div>
-</header>
 
-<!-- MAIN -->
-<div class="main" id="main-grid">
-
-  <!-- LEFT PANEL: CONTROLS -->
-  <div class="panel" id="panel-left">
-    <div class="panel-header">
-      <span class="panel-title" style="color:var(--accent)" id="left-panel-title">PDF CONTROLS</span>
+  <!-- CONTROLS -->
+  <div class="ctrl" id="ctrl-panel">
+    <div class="ctrl-hdr">
+      <span class="title" id="ctrl-title" style="color:var(--accent)">PDF Controls</span>
     </div>
-    <div class="panel-body" id="left-panel-body">
+    <div class="ctrl-body" id="ctrl-body">
 
-      <!-- === PDF CONTROLS === -->
-      <div id="pdf-controls">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-          <div>
-            <label class="field-label">Title</label>
-            <input type="text" id="pdf-title" value="Movement Framework" placeholder="Document title" oninput="liveUpdate()">
-          </div>
-          <div>
-            <label class="field-label">Author</label>
-            <input type="text" id="pdf-author" value="Gabo Saturno" placeholder="Author" oninput="liveUpdate()">
+      <!-- PDF CONTROLS -->
+      <div id="pdf-ctrl">
+        <div class="grid2 row">
+          <div><label class="lbl">Title</label><input type="text" id="f-title" value="" placeholder="Document title" oninput="onFieldChange()"></div>
+          <div><label class="lbl">Author</label><input type="text" id="f-author" value="Gabo Saturno" oninput="onFieldChange()"></div>
+        </div>
+
+        <div class="row">
+          <label class="lbl">Template</label>
+          <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <button class="mode-btn active" data-tpl="tpl-saturno" onclick="setTpl(this)">Saturno</button>
+            <button class="mode-btn" data-tpl="tpl-dark" onclick="setTpl(this)">Dark</button>
+            <button class="mode-btn" data-tpl="tpl-minimal" onclick="setTpl(this)">Minimal</button>
+            <button class="mode-btn" data-tpl="" onclick="setTpl(this)">White</button>
           </div>
         </div>
 
-        <label class="field-label">Template</label>
-        <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap">
-          <button class="mode-btn" data-tpl="professional" onclick="setTemplate('professional')">Professional</button>
-          <button class="mode-btn active" data-tpl="saturno" onclick="setTemplate('saturno')">Saturno Dark</button>
-          <button class="mode-btn" data-tpl="dark" onclick="setTemplate('dark')">Minimal Dark</button>
-          <button class="mode-btn" data-tpl="minimal" onclick="setTemplate('minimal')">Minimal Light</button>
-        </div>
-
-        <label class="field-label">Saturno Movement Presets</label>
-        <div class="preset-grid" id="preset-grid">
-          <div class="preset-card" onclick="loadPreset('program')">
-            <div class="preset-name">Program PDF</div>
-            <div class="preset-desc">Workout program with exercises, sets, reps</div>
-          </div>
-          <div class="preset-card" onclick="loadPreset('level')">
-            <div class="preset-name">Level Guide</div>
-            <div class="preset-desc">Foundation / Intermediate / Advanced / Elite</div>
-          </div>
-          <div class="preset-card" onclick="loadPreset('framework')">
-            <div class="preset-name">Framework</div>
-            <div class="preset-desc">Training methodology breakdown</div>
-          </div>
-          <div class="preset-card" onclick="loadPreset('transcript')">
-            <div class="preset-name">Video Transcript</div>
-            <div class="preset-desc">Clean transcript with key points + action items</div>
+        <div class="row">
+          <label class="lbl">Level Badge</label>
+          <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <button class="mode-btn active" data-lv="" onclick="setLv(this)">None</button>
+            <button class="mode-btn" data-lv="foundation" onclick="setLv(this)" style="color:#4ade80">Foundation</button>
+            <button class="mode-btn" data-lv="intermediate" onclick="setLv(this)" style="color:#22d3ee">Intermediate</button>
+            <button class="mode-btn" data-lv="advanced" onclick="setLv(this)" style="color:#c084fc">Advanced</button>
+            <button class="mode-btn" data-lv="elite" onclick="setLv(this)" style="color:#fbbf24">Elite</button>
           </div>
         </div>
 
-        <label class="field-label">Content (Markdown)</label>
-        <textarea id="pdf-content" style="height:180px;margin-bottom:12px" placeholder="Paste content here. Supports:
-# Heading
-## Subheading
-### Section
-- Bullet points
-**Bold text**
-1. Numbered lists
-
-Or use a preset above." oninput="liveUpdate()"></textarea>
-
-        <label class="field-label">Level Badge (optional)</label>
-        <div style="display:flex;gap:4px;margin-bottom:12px">
-          <button class="mode-btn" data-level="none" onclick="setLevel('none')">None</button>
-          <button class="mode-btn" data-level="foundation" onclick="setLevel('foundation')" style="color:#4ade80">Foundation</button>
-          <button class="mode-btn" data-level="intermediate" onclick="setLevel('intermediate')" style="color:#22d3ee">Intermediate</button>
-          <button class="mode-btn" data-level="advanced" onclick="setLevel('advanced')" style="color:#c084fc">Advanced</button>
-          <button class="mode-btn" data-level="elite" onclick="setLevel('elite')" style="color:#fbbf24">Elite</button>
+        <div class="row">
+          <label class="lbl">Presets</label>
+          <div class="preset-grid">
+            <div class="preset-card" onclick="loadPreset('program',this)"><div class="pn">Program PDF</div><div class="pd">Workout with exercises, sets, reps</div></div>
+            <div class="preset-card" onclick="loadPreset('level',this)"><div class="pn">Level Guide</div><div class="pd">Foundation to Elite progression</div></div>
+            <div class="preset-card" onclick="loadPreset('framework',this)"><div class="pn">Framework</div><div class="pd">Training methodology breakdown</div></div>
+            <div class="preset-card" onclick="loadPreset('transcript',this)"><div class="pn">Transcript</div><div class="pd">Video key points + actions</div></div>
+          </div>
         </div>
 
-        <div style="display:flex;gap:8px">
-          <button onclick="liveUpdate()" class="btn btn-secondary" style="flex:1">Refresh Preview</button>
+        <div class="row">
+          <label class="lbl">Content (Markdown)</label>
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('f-content').focus()">
+            <div class="dz-text">Drop .md / .txt file here or type below</div>
+          </div>
+          <textarea id="f-content" style="height:200px" placeholder="# Heading&#10;## Subheading&#10;### Section&#10;- Bullet points&#10;**Bold** *italic*&#10;> Blockquote&#10;---&#10;| Col1 | Col2 |&#10;|------|------|&#10;| data | data |" oninput="onFieldChange()"></textarea>
+        </div>
+
+        <div style="display:flex;gap:6px">
+          <button onclick="renderPreview()" class="btn btn-outline" style="flex:1">Refresh</button>
           <button onclick="downloadPDF()" class="btn btn-primary" style="flex:1">Download PDF</button>
+          <button onclick="downloadHTML()" class="btn btn-outline" title="Download as HTML">HTML</button>
         </div>
       </div>
 
-      <!-- === CAPTION CONTROLS (hidden by default) === -->
-      <div id="caption-controls" style="display:none">
-        <label class="field-label">Seed Phrase</label>
-        <textarea id="seed-input" style="height:120px;margin-bottom:12px" placeholder="Enter your core idea or seed phrase...
-
-Example: 'Mastery isn't about perfection. It's about showing up before you're ready.'"></textarea>
-
-        <label class="field-label">Voice Mode</label>
-        <div style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap">
-          <button class="mode-btn active" data-voice="teacher" onclick="setVoice('teacher')">Teacher</button>
-          <button class="mode-btn" data-voice="raw" onclick="setVoice('raw')">Raw</button>
-          <button class="mode-btn" data-voice="prophet" onclick="setVoice('prophet')">Prophet</button>
-          <button class="mode-btn" data-voice="rebel" onclick="setVoice('rebel')">Rebel</button>
-          <button class="mode-btn" data-voice="mystic" onclick="setVoice('mystic')">Mystic</button>
+      <!-- CAPTION CONTROLS -->
+      <div id="cap-ctrl" style="display:none">
+        <div class="row">
+          <label class="lbl">Seed Phrase</label>
+          <textarea id="seed-input" style="height:120px" placeholder="Enter your core idea...&#10;&#10;Example: 'Mastery is not about perfection. It is about showing up before you are ready.'"></textarea>
         </div>
-
-        <label class="field-label">Platforms</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-          <label class="checkbox-custom checked"><input type="checkbox" data-platform="ig" checked><span>Instagram</span></label>
-          <label class="checkbox-custom checked"><input type="checkbox" data-platform="email" checked><span>Email</span></label>
-          <label class="checkbox-custom checked"><input type="checkbox" data-platform="yt" checked><span>YouTube</span></label>
-          <label class="checkbox-custom"><input type="checkbox" data-platform="twitter"><span>Twitter/X</span></label>
-          <label class="checkbox-custom"><input type="checkbox" data-platform="linkedin"><span>LinkedIn</span></label>
-          <label class="checkbox-custom"><input type="checkbox" data-platform="tiktok"><span>TikTok</span></label>
+        <div class="row">
+          <label class="lbl">Voice</label>
+          <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <button class="mode-btn active" data-v="teacher" onclick="setVoice(this)">Teacher</button>
+            <button class="mode-btn" data-v="raw" onclick="setVoice(this)">Raw</button>
+            <button class="mode-btn" data-v="prophet" onclick="setVoice(this)">Prophet</button>
+            <button class="mode-btn" data-v="rebel" onclick="setVoice(this)">Rebel</button>
+            <button class="mode-btn" data-v="mystic" onclick="setVoice(this)">Mystic</button>
+          </div>
         </div>
-
-        <button onclick="multiplyCaption()" class="btn btn-cyan btn-block">Multiply Variants</button>
+        <div class="row">
+          <label class="lbl">Platforms</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+            <label class="chk on"><input type="checkbox" data-pl="ig" checked><span>Instagram</span></label>
+            <label class="chk on"><input type="checkbox" data-pl="email" checked><span>Email</span></label>
+            <label class="chk on"><input type="checkbox" data-pl="yt" checked><span>YouTube</span></label>
+            <label class="chk"><input type="checkbox" data-pl="twitter"><span>Twitter/X</span></label>
+            <label class="chk"><input type="checkbox" data-pl="linkedin"><span>LinkedIn</span></label>
+            <label class="chk"><input type="checkbox" data-pl="tiktok"><span>TikTok</span></label>
+          </div>
+        </div>
+        <button onclick="multiply()" class="btn btn-cyan btn-block">Multiply Variants</button>
       </div>
-
     </div>
   </div>
 
-  <!-- RIGHT PANEL: PREVIEW / OUTPUT -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title" style="color:var(--accent-green)" id="right-panel-title">LIVE PREVIEW</span>
-      <div style="display:flex;gap:6px;align-items:center">
-        <span style="font-size:9px;color:var(--text-muted)">Click to edit directly</span>
+  <!-- PREVIEW -->
+  <div class="preview">
+    <div class="preview-hdr">
+      <span class="title" id="preview-title">Live Preview</span>
+      <div class="preview-toolbar" id="preview-toolbar">
+        <button class="btn-icon" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
+        <button class="btn-icon" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
+        <button class="btn-icon" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+        <span style="width:1px;height:16px;background:var(--border);margin:0 2px"></span>
+        <button class="btn-icon" onclick="execBlock('h3')" title="Heading">H</button>
+        <button class="btn-icon" onclick="execCmd('insertUnorderedList')" title="Bullet list">*</button>
+        <button class="btn-icon" onclick="execCmd('insertOrderedList')" title="Numbered list">#</button>
+        <span style="width:1px;height:16px;background:var(--border);margin:0 2px"></span>
+        <button class="btn-icon" onclick="execCmd('formatBlock','blockquote')" title="Blockquote">"</button>
+        <button class="btn-icon" onclick="insertHR()" title="Horizontal rule">--</button>
       </div>
     </div>
-    <div class="panel-body" id="right-panel-body" style="background:#1a1a1a;padding:24px">
-
-      <!-- PDF PREVIEW -->
-      <div id="pdf-preview-wrap">
-        <div class="pdf-canvas saturno" id="pdf-canvas" contenteditable="true">
-          <h1>Movement Framework</h1>
+    <div class="preview-body" id="preview-body">
+      <div id="pdf-wrap">
+        <div class="pdf-canvas tpl-saturno" id="canvas" contenteditable="true">
+          <h1>Content Beast</h1>
           <h2>By Gabo Saturno</h2>
-          <p>Select a preset or paste content to get started. You can edit this preview directly — click anywhere to type.</p>
-          <div class="footer">SATURNO FORGE / saturnomovement.com</div>
+          <p>Select a preset or paste content. Click here to edit directly.</p>
+          <div class="pdf-footer">CONTENT BEAST / saturnomovement.com</div>
         </div>
-        <div class="page-indicator" id="page-indicator">Estimated: 1 page (A4)</div>
+        <div class="page-est" id="page-est">~ 1 page (A4)</div>
       </div>
-
-      <!-- CAPTION OUTPUT (hidden by default) -->
-      <div id="caption-output" style="display:none">
-        <div id="variants-container"></div>
-      </div>
-
+      <div id="cap-output" style="display:none"></div>
     </div>
   </div>
 
 </div>
 
-<!-- FOOTER -->
-<footer>
-  <span>SATURNO FORGE v2.0</span>
-  <span>Cmd+S: Download PDF / Cmd+M: Multiply / Cmd+P: Print Preview</span>
-</footer>
+<div class="ftr">
+  <span>CONTENT BEAST v2.0 — by Saturno Movement</span>
+  <span>Cmd+S: Save / Cmd+Shift+S: Download PDF / Cmd+N: New Doc</span>
+</div>
 
 </div>
 
 <div class="toast" id="toast"></div>
+<input type="file" id="file-input" accept=".md,.txt,.markdown,.text" style="display:none" onchange="handleFile(this.files[0])">
 
 <script>
-// === STATE ===
-let currentTemplate = 'saturno';
-let currentLevel = 'none';
+// ============================================================
+// STATE
+// ============================================================
+const STORE_KEY = 'content-beast-docs';
+let docs = [];
+let activeDocId = null;
+let currentTpl = 'tpl-saturno';
+let currentLv = '';
 let currentVoice = 'teacher';
-let currentMode = 'pdf';
+let saveTimer = null;
 
-// === MODE SWITCH ===
-function setMode(mode) {
-  currentMode = mode;
-  document.querySelectorAll('header .tab-btn').forEach((b,i) => {
-    b.classList.toggle('active', (i===0 && mode==='pdf') || (i===1 && mode==='caption'));
-  });
-  const grid = document.getElementById('main-grid');
-  grid.classList.toggle('caption-mode', mode === 'caption');
-
-  document.getElementById('pdf-controls').style.display = mode === 'pdf' ? '' : 'none';
-  document.getElementById('caption-controls').style.display = mode === 'caption' ? '' : 'none';
-  document.getElementById('pdf-preview-wrap').style.display = mode === 'pdf' ? '' : 'none';
-  document.getElementById('caption-output').style.display = mode === 'caption' ? '' : 'none';
-  document.getElementById('left-panel-title').textContent = mode === 'pdf' ? 'PDF CONTROLS' : 'CAPTION MULTIPLIER';
-  document.getElementById('right-panel-title').textContent = mode === 'pdf' ? 'LIVE PREVIEW' : 'VARIANTS';
-}
-
-// === TEMPLATE ===
-function setTemplate(tpl) {
-  currentTemplate = tpl;
-  document.querySelectorAll('[data-tpl]').forEach(b => b.classList.toggle('active', b.dataset.tpl === tpl));
-  const canvas = document.getElementById('pdf-canvas');
-  canvas.className = 'pdf-canvas ' + tpl;
-  toast('Template: ' + tpl);
-}
-
-// === LEVEL BADGE ===
-function setLevel(level) {
-  currentLevel = level;
-  document.querySelectorAll('[data-level]').forEach(b => b.classList.toggle('active', b.dataset.level === level));
-  liveUpdate();
-}
-
-// === VOICE MODE ===
-function setVoice(voice) {
-  currentVoice = voice;
-  document.querySelectorAll('[data-voice]').forEach(b => b.classList.toggle('active', b.dataset.voice === voice));
-}
-
-// === PRESETS ===
-function loadPreset(type) {
-  document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-
-  const presets = {
-    program: {
-      title: 'Calisthenics Foundation Phase 1',
-      content: `# CALISTHENICS FOUNDATION — PHASE 1\n## Week 1-4 / Training Block A\n\n### UPPER BODY PUSH\n- Pseudo Planche Push-ups — 4x8-12 / RER 3\n- Pike Push-ups (Elevated) — 3x8-10 / RER 3\n- Diamond Push-ups — 3x10-15 / RER 2\n- Dips (Parallel Bars) — 3x6-10 / RER 3\n\n### UPPER BODY PULL\n- Pull-ups (Pronated) — 4x5-8 / RER 3\n- Australian Rows (Rings) — 3x10-12 / RER 2\n- Chin-ups (Supinated) — 3x6-8 / RER 3\n\n### CORE\n- L-Sit Progression — 4x15-30s hold\n- Dragon Flag Negatives — 3x5-8\n- Hollow Body Hold — 3x30-45s\n\n### NOTES\n- RER = Reps Estimated in Reserve\n- Start conservative — you should feel like you could do 3 more reps\n- Log every set. Track RER honestly.\n- Deload in Week 5: reduce volume 40%, maintain intensity`,
-      level: 'foundation'
-    },
-    level: {
-      title: 'Saturno Movement — Level Guide',
-      content: `# LEVEL PROGRESSION SYSTEM\n## The Saturno Method\n\n### FOUNDATION (Months 1-6)\nBuild the base. Master the basics. Own every rep.\n- Push-up variations mastered\n- Pull-up: 8+ strict reps\n- L-Sit: 15s+ hold\n- Handstand: Wall-assisted 30s+\n- Pistol Squat: 5+ per leg\n\n### INTERMEDIATE (Months 6-18)\nConnect the dots. Skill acquisition begins.\n- Muscle-Up: 3+ clean reps\n- Handstand Push-up: 5+ wall-assisted\n- Front Lever: Tuck hold 10s+\n- Back Lever: Full hold 5s+\n- Planche: Tuck hold 5s+\n\n### ADVANCED (Months 18-36)\nThe refinement phase. Movement quality over quantity.\n- Planche Push-ups: Tuck 5+ reps\n- Front Lever Rows: 5+ reps\n- Freestanding Handstand: 15s+\n- One Arm Pull-up: Negative controlled\n- Human Flag: 5s+ hold\n\n### ELITE (36+ Months)\nArtistry. The body as instrument.\n- Full Planche: 5s+ hold\n- Iron Cross: Controlled entry\n- One Arm Handstand: 5s+\n- Maltese: Entry position\n- Victorian Cross: Progression work`,
-      level: 'none'
-    },
-    framework: {
-      title: 'The Saturno System — Training Framework',
-      content: `# THE SATURNO SYSTEM\n## A Framework for Intelligent Training\n\n### PRINCIPLE 1: PROGRESSIVE OVERLOAD VIA RER\nDon't chase failure. Chase progress.\n- Week 1: RER 4-5 (easy — build momentum)\n- Week 2: RER 3-4 (moderate — find groove)\n- Week 3: RER 2-3 (challenging — push boundaries)\n- Week 4: RER 1-2 (near-max — test limits)\n- Week 5: DELOAD (40% volume reduction)\n\n### PRINCIPLE 2: MOVEMENT QUALITY FIRST\nOne perfect rep > ten sloppy reps.\n- Full range of motion, always\n- Control the eccentric (3s minimum)\n- Pause at end ranges\n- Breathe with intention\n\n### PRINCIPLE 3: SKILL + STRENGTH = MASTERY\nSkills are not separate from strength.\n- Practice skills when fresh (start of session)\n- Build strength after skill work\n- Connect movements — planche push-ups, not just planche holds\n- Every session has a skill component\n\n### PRINCIPLE 4: RECOVERY IS TRAINING\nYou don't grow in the gym.\n- Sleep 7-9 hours (non-negotiable)\n- Mobility work daily (10-15 min)\n- Deload every 4-8 weeks\n- Listen to your body — adjust, don't push through pain`,
-      level: 'none'
-    },
-    transcript: {
-      title: 'Video Transcript — Key Points',
-      content: `# VIDEO TITLE\n## Channel: Saturno Movement\n\n### KEY POINTS\n- Point one from the video\n- Point two from the video\n- Point three from the video\n- Point four from the video\n\n### SUMMARY\nPaste the full summary here. This section should capture the core message of the video in 2-3 paragraphs.\n\nThe second paragraph continues the thought.\n\n### ACTION ITEMS\n- First action step the viewer should take\n- Second action step\n- Third action step\n\n### TIMESTAMPS\n- 0:00 Introduction\n- 2:15 Main topic\n- 5:30 Key exercise demo\n- 8:45 Programming recommendations\n- 11:00 Closing thoughts`,
-      level: 'none'
-    }
-  };
-
-  const p = presets[type];
-  if (!p) return;
-
-  document.getElementById('pdf-title').value = p.title;
-  document.getElementById('pdf-content').value = p.content;
-  if (p.level !== 'none') {
-    setLevel(p.level);
-    setTemplate('saturno');
+// ============================================================
+// PERSISTENCE
+// ============================================================
+function loadDocs() {
+  try { docs = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e) { docs = []; }
+  if (!docs.length) { createDoc('Untitled', '', 'tpl-saturno', ''); }
+  renderLibrary();
+  if (!activeDocId || !docs.find(d => d.id === activeDocId)) {
+    switchDoc(docs[0].id);
   }
-  liveUpdate();
-  toast('Loaded preset: ' + type);
 }
 
-// === LIVE UPDATE ===
-function liveUpdate() {
-  const title = document.getElementById('pdf-title').value || 'Untitled';
-  const author = document.getElementById('pdf-author').value || '';
-  const content = document.getElementById('pdf-content').value;
-  const canvas = document.getElementById('pdf-canvas');
+function saveDocs() {
+  snapshotActive();
+  localStorage.setItem(STORE_KEY, JSON.stringify(docs));
+  flashSave();
+}
+
+function flashSave() {
+  const ind = document.getElementById('save-ind');
+  ind.style.opacity = '1';
+  clearTimeout(ind._t);
+  ind._t = setTimeout(() => ind.style.opacity = '0', 1500);
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveDocs, 800);
+}
+
+// ============================================================
+// DOCUMENT MANAGEMENT
+// ============================================================
+function createDoc(title, content, tpl, lv) {
+  const doc = {
+    id: 'doc_' + Date.now(),
+    title: title || 'Untitled',
+    author: 'Gabo Saturno',
+    content: content || '',
+    tpl: tpl || 'tpl-saturno',
+    level: lv || '',
+    canvasHTML: '',
+    created: new Date().toISOString(),
+    updated: new Date().toISOString()
+  };
+  docs.unshift(doc);
+  saveDocs();
+  renderLibrary();
+  return doc;
+}
+
+function newDoc() {
+  const doc = createDoc('Untitled', '', currentTpl, '');
+  switchDoc(doc.id);
+}
+
+function deleteDoc(id) {
+  if (docs.length <= 1) { toast('Cannot delete last document'); return; }
+  if (!confirm('Delete this document?')) return;
+  docs = docs.filter(d => d.id !== id);
+  saveDocs();
+  renderLibrary();
+  if (activeDocId === id) switchDoc(docs[0].id);
+}
+
+function duplicateDoc(id) {
+  const src = docs.find(d => d.id === id);
+  if (!src) return;
+  const doc = createDoc(src.title + ' (copy)', src.content, src.tpl, src.level);
+  doc.canvasHTML = src.canvasHTML;
+  saveDocs();
+  renderLibrary();
+  switchDoc(doc.id);
+}
+
+function switchDoc(id) {
+  snapshotActive();
+  activeDocId = id;
+  const doc = docs.find(d => d.id === id);
+  if (!doc) return;
+
+  document.getElementById('f-title').value = doc.title;
+  document.getElementById('f-author').value = doc.author;
+  document.getElementById('f-content').value = doc.content;
+  currentTpl = doc.tpl || 'tpl-saturno';
+  currentLv = doc.level || '';
+
+  document.querySelectorAll('[data-tpl]').forEach(b => b.classList.toggle('active', b.dataset.tpl === currentTpl));
+  document.querySelectorAll('[data-lv]').forEach(b => b.classList.toggle('active', b.dataset.lv === currentLv));
+
+  if (doc.canvasHTML) {
+    const canvas = document.getElementById('canvas');
+    canvas.className = 'pdf-canvas ' + currentTpl;
+    canvas.innerHTML = doc.canvasHTML;
+  } else {
+    renderPreview();
+  }
+
+  renderLibrary();
+}
+
+function snapshotActive() {
+  if (!activeDocId) return;
+  const doc = docs.find(d => d.id === activeDocId);
+  if (!doc) return;
+  doc.title = document.getElementById('f-title').value || 'Untitled';
+  doc.author = document.getElementById('f-author').value || '';
+  doc.content = document.getElementById('f-content').value || '';
+  doc.tpl = currentTpl;
+  doc.level = currentLv;
+  doc.canvasHTML = document.getElementById('canvas').innerHTML;
+  doc.updated = new Date().toISOString();
+}
+
+// ============================================================
+// LIBRARY RENDER
+// ============================================================
+function renderLibrary() {
+  const el = document.getElementById('lib-list');
+  if (!docs.length) { el.innerHTML = '<div class="lib-empty">No documents yet.</div>'; return; }
+  el.innerHTML = docs.map(d => {
+    const active = d.id === activeDocId;
+    const date = new Date(d.updated).toLocaleDateString();
+    return '<div class="lib-item' + (active ? ' active' : '') + '" onclick="switchDoc(\'' + d.id + '\')">' +
+      '<div class="li-title">' + esc(d.title) + '</div>' +
+      '<div class="li-meta">' + date + (d.level ? ' / ' + d.level : '') +
+      '<span style="float:right;display:flex;gap:4px">' +
+      '<span onclick="event.stopPropagation();duplicateDoc(\'' + d.id + '\')" style="cursor:pointer" title="Duplicate">+</span>' +
+      '<span onclick="event.stopPropagation();deleteDoc(\'' + d.id + '\')" style="cursor:pointer;color:var(--red)" title="Delete">x</span>' +
+      '</span></div></div>';
+  }).join('');
+}
+
+// ============================================================
+// PREVIEW RENDERING
+// ============================================================
+function renderPreview() {
+  const title = document.getElementById('f-title').value || 'Untitled';
+  const author = document.getElementById('f-author').value || '';
+  const content = document.getElementById('f-content').value;
+  const canvas = document.getElementById('canvas');
+
+  canvas.className = 'pdf-canvas ' + currentTpl;
 
   let html = '';
-
-  // Level badge
-  if (currentLevel !== 'none' && currentTemplate === 'saturno') {
-    html += '<div class="level-badge ' + currentLevel + '">' + currentLevel.toUpperCase() + '</div>\n';
+  if (currentLv && currentTpl === 'tpl-saturno') {
+    html += '<div class="level-badge lv-' + currentLv + '">' + currentLv.toUpperCase() + '</div>\n';
   }
-
   html += '<h1>' + esc(title) + '</h1>\n';
   if (author) html += '<h2>By ' + esc(author) + '</h2>\n';
 
   if (content.trim()) {
-    html += formatMarkdown(content);
+    html += md(content);
   } else {
-    html += '<p style="color:#666;font-style:italic">Paste content or select a preset to begin. You can edit this preview directly.</p>';
+    html += '<p style="color:#999;font-style:italic">Paste content or select a preset. Click the preview to edit directly.</p>';
   }
-
-  html += '\n<div class="footer">SATURNO FORGE / saturnomovement.com / ' + new Date().toLocaleDateString() + '</div>';
-
+  html += '\n<div class="pdf-footer">CONTENT BEAST / saturnomovement.com / ' + new Date().toLocaleDateString() + '</div>';
   canvas.innerHTML = html;
-  estimatePages();
+  estPages();
+  scheduleSave();
 }
 
-function formatMarkdown(text) {
+function onFieldChange() {
+  renderPreview();
+}
+
+// ============================================================
+// MARKDOWN PARSER
+// ============================================================
+function md(text) {
+  // Tables
+  text = text.replace(/^(\|.+\|)\n(\|[-:| ]+\|)\n((?:\|.+\|\n?)*)/gm, function(m, header, sep, body) {
+    const hCells = header.split('|').filter(c => c.trim());
+    const bRows = body.trim().split('\n').map(r => r.split('|').filter(c => c.trim()));
+    let t = '<table><thead><tr>' + hCells.map(c => '<th>' + c.trim() + '</th>').join('') + '</tr></thead><tbody>';
+    bRows.forEach(row => { t += '<tr>' + row.map(c => '<td>' + c.trim() + '</td>').join('') + '</tr>'; });
+    return t + '</tbody></table>';
+  });
+
   return text
+    .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
     .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gm, '<h2 style="font-size:18px;font-weight:600;margin-top:24px;margin-bottom:8px;color:inherit;border:none;padding:0;font-style:normal">$1</h2>')
-    .replace(/^# (.*$)/gm, '<h3 style="font-size:22px;font-weight:700;margin-top:28px;margin-bottom:12px">$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1 style="font-size:22px;font-weight:700;margin-top:24px;margin-bottom:8px">$1</h1>')
+    .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+    .replace(/^---$/gm, '<hr>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
     .replace(/^\d+\. (.*$)/gm, '<li style="margin-left:20px;list-style:decimal">$1</li>')
     .replace(/^- (.*$)/gm, '<li style="margin-left:20px">$1</li>')
     .replace(/\n\n/g, '</p><p>')
@@ -450,125 +569,254 @@ function formatMarkdown(text) {
 
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-function estimatePages() {
-  const canvas = document.getElementById('pdf-canvas');
-  const h = canvas.scrollHeight;
-  const pageH = 1050; // approx A4 at 96dpi
-  const pages = Math.max(1, Math.ceil(h / pageH));
-  document.getElementById('page-indicator').textContent = 'Estimated: ' + pages + ' page' + (pages > 1 ? 's' : '') + ' (A4)';
+function estPages() {
+  const c = document.getElementById('canvas');
+  const pages = Math.max(1, Math.ceil(c.scrollHeight / 1050));
+  document.getElementById('page-est').textContent = '~ ' + pages + ' page' + (pages > 1 ? 's' : '') + ' (A4)';
 }
 
-// === DOWNLOAD PDF ===
+// ============================================================
+// RICH TEXT COMMANDS (for canvas editing)
+// ============================================================
+function execCmd(cmd, val) { document.execCommand(cmd, false, val || null); }
+function execBlock(tag) { document.execCommand('formatBlock', false, '<' + tag + '>'); }
+function insertHR() {
+  const sel = window.getSelection();
+  if (sel.rangeCount) {
+    const range = sel.getRangeAt(0);
+    const hr = document.createElement('hr');
+    range.insertNode(hr);
+    range.setStartAfter(hr);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
+
+// ============================================================
+// TEMPLATE & LEVEL
+// ============================================================
+function setTpl(btn) {
+  currentTpl = btn.dataset.tpl;
+  document.querySelectorAll('[data-tpl]').forEach(b => b.classList.toggle('active', b === btn));
+  document.getElementById('canvas').className = 'pdf-canvas ' + currentTpl;
+  scheduleSave();
+  toast('Template: ' + (currentTpl || 'white'));
+}
+
+function setLv(btn) {
+  currentLv = btn.dataset.lv;
+  document.querySelectorAll('[data-lv]').forEach(b => b.classList.toggle('active', b === btn));
+  renderPreview();
+}
+
+// ============================================================
+// PRESETS
+// ============================================================
+const PRESETS = {
+  program: {
+    title: 'Calisthenics Foundation Phase 1',
+    content: '# CALISTHENICS FOUNDATION -- PHASE 1\n## Week 1-4 / Training Block A\n\n### UPPER BODY PUSH\n- Pseudo Planche Push-ups -- 4x8-12 / RER 3\n- Pike Push-ups (Elevated) -- 3x8-10 / RER 3\n- Diamond Push-ups -- 3x10-15 / RER 2\n- Dips (Parallel Bars) -- 3x6-10 / RER 3\n\n### UPPER BODY PULL\n- Pull-ups (Pronated) -- 4x5-8 / RER 3\n- Australian Rows (Rings) -- 3x10-12 / RER 2\n- Chin-ups (Supinated) -- 3x6-8 / RER 3\n\n### CORE\n- L-Sit Progression -- 4x15-30s hold\n- Dragon Flag Negatives -- 3x5-8\n- Hollow Body Hold -- 3x30-45s\n\n### PROGRAMMING NOTES\n\n| Variable | Week 1-2 | Week 3-4 | Deload |\n|----------|----------|----------|--------|\n| Volume | 100% | 110% | 60% |\n| RER | 4-5 | 2-3 | 5+ |\n| Intensity | Moderate | High | Low |\n\n- RER = Reps Estimated in Reserve\n- Start conservative -- you should feel like you could do 3 more reps\n- Log every set. Track RER honestly.\n- Deload in Week 5: reduce volume 40%, maintain intensity',
+    level: 'foundation'
+  },
+  level: {
+    title: 'Saturno Movement -- Level Guide',
+    content: '# LEVEL PROGRESSION SYSTEM\n## The Saturno Method\n\n### FOUNDATION (Months 1-6)\nBuild the base. Master the basics. Own every rep.\n- Push-up variations mastered\n- Pull-up: 8+ strict reps\n- L-Sit: 15s+ hold\n- Handstand: Wall-assisted 30s+\n- Pistol Squat: 5+ per leg\n\n---\n\n### INTERMEDIATE (Months 6-18)\nConnect the dots. Skill acquisition begins.\n- Muscle-Up: 3+ clean reps\n- Handstand Push-up: 5+ wall-assisted\n- Front Lever: Tuck hold 10s+\n- Back Lever: Full hold 5s+\n- Planche: Tuck hold 5s+\n\n---\n\n### ADVANCED (Months 18-36)\nThe refinement phase. Movement quality over quantity.\n- Planche Push-ups: Tuck 5+ reps\n- Front Lever Rows: 5+ reps\n- Freestanding Handstand: 15s+\n- One Arm Pull-up: Negative controlled\n- Human Flag: 5s+ hold\n\n---\n\n### ELITE (36+ Months)\nArtistry. The body as instrument.\n- Full Planche: 5s+ hold\n- Iron Cross: Controlled entry\n- One Arm Handstand: 5s+\n- Maltese: Entry position\n- Victorian Cross: Progression work',
+    level: ''
+  },
+  framework: {
+    title: 'The Saturno System -- Training Framework',
+    content: '# THE SATURNO SYSTEM\n## A Framework for Intelligent Training\n\n> The goal is not to train hard. The goal is to train smart, consistently, for decades.\n\n### PRINCIPLE 1: PROGRESSIVE OVERLOAD VIA RER\n\n| Week | RER | Intensity | Feel |\n|------|-----|-----------|------|\n| 1 | 4-5 | Easy | Building momentum |\n| 2 | 3-4 | Moderate | Finding groove |\n| 3 | 2-3 | Hard | Pushing boundaries |\n| 4 | 1-2 | Near-max | Testing limits |\n| 5 | -- | DELOAD | Recovery |\n\n### PRINCIPLE 2: MOVEMENT QUALITY FIRST\nOne perfect rep > ten sloppy reps.\n- Full range of motion, always\n- Control the eccentric (3s minimum)\n- Pause at end ranges\n- Breathe with intention\n\n### PRINCIPLE 3: SKILL + STRENGTH = MASTERY\nSkills are not separate from strength.\n- Practice skills when fresh (start of session)\n- Build strength after skill work\n- Connect movements -- planche push-ups, not just planche holds\n- Every session has a skill component\n\n### PRINCIPLE 4: RECOVERY IS TRAINING\nYou do not grow in the gym.\n- Sleep 7-9 hours (non-negotiable)\n- Mobility work daily (10-15 min)\n- Deload every 4-8 weeks\n- Listen to your body -- adjust, do not push through pain',
+    level: ''
+  },
+  transcript: {
+    title: 'Video Transcript -- Key Points',
+    content: '# VIDEO TITLE\n## Channel: Saturno Movement\n\n### KEY POINTS\n- Point one from the video\n- Point two from the video\n- Point three from the video\n- Point four from the video\n\n### SUMMARY\nPaste the full summary here. This section captures the core message of the video in 2-3 paragraphs.\n\nThe second paragraph continues the thought.\n\n### ACTION ITEMS\n1. First action step the viewer should take\n2. Second action step\n3. Third action step\n\n### TIMESTAMPS\n\n| Time | Topic |\n|------|-------|\n| 0:00 | Introduction |\n| 2:15 | Main topic |\n| 5:30 | Key exercise demo |\n| 8:45 | Programming recommendations |\n| 11:00 | Closing thoughts |',
+    level: ''
+  }
+};
+
+function loadPreset(key, el) {
+  const p = PRESETS[key];
+  if (!p) return;
+  document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('f-title').value = p.title;
+  document.getElementById('f-content').value = p.content;
+  if (p.level) { currentLv = p.level; document.querySelectorAll('[data-lv]').forEach(b => b.classList.toggle('active', b.dataset.lv === currentLv)); }
+  renderPreview();
+  toast('Loaded: ' + key);
+}
+
+// ============================================================
+// FILE IMPORT / DROP
+// ============================================================
+function importFile() { document.getElementById('file-input').click(); }
+
+function handleFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const title = file.name.replace(/\.(md|txt|markdown|text)$/i, '').replace(/[_-]/g, ' ');
+    const doc = createDoc(title, text, currentTpl, '');
+    switchDoc(doc.id);
+    renderPreview();
+    toast('Imported: ' + file.name);
+  };
+  reader.readAsText(file);
+}
+
+// Drag-drop on drop zone
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+
+// Global drag-drop
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.dataTransfer.files.length && e.dataTransfer.files[0].name.match(/\.(md|txt|markdown)$/i)) {
+    handleFile(e.dataTransfer.files[0]);
+  }
+});
+
+// ============================================================
+// PDF DOWNLOAD
+// ============================================================
 function downloadPDF() {
-  const canvas = document.getElementById('pdf-canvas');
-  const title = document.getElementById('pdf-title').value || 'document';
+  snapshotActive();
+  const canvas = document.getElementById('canvas');
+  const title = document.getElementById('f-title').value || 'document';
+  setStatus('GENERATING...', 'busy');
 
-  setStatus('GENERATING...', 'working');
-
+  const isDark = currentTpl === 'tpl-saturno' || currentTpl === 'tpl-dark';
   const opt = {
-    margin: [15, 15, 20, 15],
-    filename: title.replace(/[^a-zA-Z0-9_-]/g, '_') + '.pdf',
+    margin: [12, 12, 16, 12],
+    filename: title.replace(/[^a-zA-Z0-9_\- ]/g, '_').replace(/\s+/g, '_') + '.pdf',
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: currentTemplate === 'saturno' || currentTemplate === 'dark' ? '#0a0a0a' : '#ffffff' },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: isDark ? '#0a0a0a' : '#ffffff' },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
   };
 
   html2pdf().set(opt).from(canvas).save().then(() => {
-    toast('PDF downloaded: ' + opt.filename);
-    setStatus('DOWNLOADED', 'ready');
+    toast('Downloaded: ' + opt.filename);
+    setStatus('READY', 'ok');
   }).catch(err => {
     toast('Error: ' + err.message);
-    setStatus('ERROR', 'working');
+    setStatus('ERROR', 'busy');
   });
 }
 
-// === CAPTION MULTIPLIER ===
-function multiplyCaption() {
-  const seed = document.getElementById('seed-input').value.trim();
-  if (!seed) { toast('Enter a seed phrase first'); return; }
-
-  const platforms = [];
-  document.querySelectorAll('[data-platform]:checked').forEach(cb => platforms.push(cb.dataset.platform));
-  if (!platforms.length) { toast('Select at least one platform'); return; }
-
-  const styles = {
-    raw: { prefix: '', suffix: '' },
-    teacher: { prefix: '', suffix: '\n\nSave this for later.' },
-    prophet: { prefix: 'The truth is this:\n\n', suffix: '\n\nThis changes everything.' },
-    rebel: { prefix: 'Most people get this wrong.\n\n', suffix: '\n\nThink different.' },
-    mystic: { prefix: 'In the silence between reps...\n\n', suffix: '' }
-  };
-
-  const formats = {
-    ig: { name: 'Instagram', fn: (s,st) => st.prefix + s + st.suffix + '\n\n#Calisthenics #Movement #Mastery #SaturnoMovement' },
-    email: { name: 'Email', fn: (s,st) => 'Subject: This changed my perspective\n\n' + st.prefix + s + st.suffix + '\n\nReply and tell me what you think.\n\n-- Gabo' },
-    yt: { name: 'YouTube', fn: (s,st) => '[HOOK - 0:00]\n' + s.substring(0,200) + '\n\n[EXPAND - 0:15]\n' + st.prefix + s + st.suffix + '\n\n[CTA - End]\nSubscribe for more movement wisdom.' },
-    twitter: { name: 'Twitter/X', fn: (s,st) => (st.prefix + (s.length>240?s.substring(0,240)+'...':s) + st.suffix) },
-    linkedin: { name: 'LinkedIn', fn: (s,st) => st.prefix + s + st.suffix + '\n\n---\n\nWhat is your experience with this? Share below.' },
-    tiktok: { name: 'TikTok', fn: (s,st) => '[TEXT ON SCREEN]\n"' + s.substring(0,100) + '..."\n\n[VOICEOVER]\n' + st.prefix + s + st.suffix }
-  };
-
-  const style = styles[currentVoice] || styles.teacher;
-  const container = document.getElementById('variants-container');
-  container.innerHTML = platforms.map((p,i) => {
-    const f = formats[p];
-    if (!f) return '';
-    const content = f.fn(seed, style);
-    return '<div class="variant-card ' + p + '">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-      '<span style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">' + f.name + '</span>' +
-      '<button onclick="copyText(this.parentElement.nextElementSibling.innerText)" class="btn btn-sm btn-secondary">Copy</button>' +
-      '</div>' +
-      '<pre style="font-size:11px;color:var(--text-secondary);white-space:pre-wrap;line-height:1.6;font-family:var(--mono)">' + esc(content) + '</pre>' +
-      '</div>';
-  }).join('');
-
-  toast('Generated ' + platforms.length + ' variants');
+function downloadHTML() {
+  const canvas = document.getElementById('canvas');
+  const title = document.getElementById('f-title').value || 'document';
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + esc(title) + '</title><style>body{font-family:Sora,system-ui,sans-serif;max-width:800px;margin:40px auto;padding:20px;line-height:1.7}h1{font-size:28px}h2{color:#666}h3{text-transform:uppercase;letter-spacing:0.04em}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #ddd;text-align:left}th{background:#f8f8f8}</style></head><body>' + canvas.innerHTML + '</body></html>';
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title.replace(/[^a-zA-Z0-9_\- ]/g, '_') + '.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('HTML downloaded');
 }
 
-function copyText(text) {
-  navigator.clipboard.writeText(text);
-  toast('Copied to clipboard');
+// ============================================================
+// CAPTION MULTIPLIER
+// ============================================================
+function setVoice(btn) {
+  currentVoice = btn.dataset.v;
+  document.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('active', b === btn));
 }
 
-// === CHECKBOX TOGGLE ===
-document.querySelectorAll('.checkbox-custom').forEach(label => {
+document.querySelectorAll('.chk').forEach(label => {
   label.addEventListener('click', function(e) {
-    if (e.target.tagName !== 'INPUT') {
-      const cb = this.querySelector('input');
-      cb.checked = !cb.checked;
-    }
-    this.classList.toggle('checked', this.querySelector('input').checked);
+    if (e.target.tagName !== 'INPUT') { const cb = this.querySelector('input'); cb.checked = !cb.checked; }
+    this.classList.toggle('on', this.querySelector('input').checked);
   });
 });
 
-// === UTILITIES ===
+function multiply() {
+  const seed = document.getElementById('seed-input').value.trim();
+  if (!seed) { toast('Enter a seed phrase'); return; }
+  const pls = []; document.querySelectorAll('[data-pl]:checked').forEach(cb => pls.push(cb.dataset.pl));
+  if (!pls.length) { toast('Select a platform'); return; }
+
+  const S = {raw:{p:'',s:''},teacher:{p:'',s:'\n\nSave this for later.'},prophet:{p:'The truth is this:\n\n',s:'\n\nThis changes everything.'},rebel:{p:'Most people get this wrong.\n\n',s:'\n\nThink different.'},mystic:{p:'In the silence between reps...\n\n',s:''}};
+  const F = {
+    ig:{n:'Instagram',f:(s,t)=>t.p+s+t.s+'\n\n#Calisthenics #Movement #Mastery #SaturnoMovement'},
+    email:{n:'Email',f:(s,t)=>'Subject: This changed my perspective\n\n'+t.p+s+t.s+'\n\nReply and tell me what you think.\n\n-- Gabo'},
+    yt:{n:'YouTube',f:(s,t)=>'[HOOK - 0:00]\n'+s.substring(0,200)+'\n\n[EXPAND - 0:15]\n'+t.p+s+t.s+'\n\n[CTA - End]\nSubscribe for more movement wisdom.'},
+    twitter:{n:'Twitter/X',f:(s,t)=>t.p+(s.length>240?s.substring(0,240)+'...':s)+t.s},
+    linkedin:{n:'LinkedIn',f:(s,t)=>t.p+s+t.s+'\n\n---\n\nWhat is your experience with this? Share below.'},
+    tiktok:{n:'TikTok',f:(s,t)=>'[TEXT ON SCREEN]\n"'+s.substring(0,100)+'..."\n\n[VOICEOVER]\n'+t.p+s+t.s}
+  };
+
+  const style = S[currentVoice] || S.teacher;
+  document.getElementById('cap-output').innerHTML = pls.map(p => {
+    const f = F[p]; if (!f) return '';
+    const c = f.f(seed, style);
+    return '<div class="variant-card '+p+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:8px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">'+f.n+'</span><button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText);toast(\'Copied\')" class="btn btn-outline btn-sm">Copy</button></div><pre style="font-size:10px;color:var(--text-secondary);white-space:pre-wrap;line-height:1.6;font-family:var(--mono)">'+esc(c)+'</pre></div>';
+  }).join('');
+  toast(pls.length + ' variants generated');
+}
+
+// ============================================================
+// MODE SWITCH
+// ============================================================
+function setMode(mode) {
+  document.querySelectorAll('.hdr .tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&mode==='pdf')||(i===1&&mode==='caption')));
+  const ws = document.getElementById('workspace');
+  ws.classList.toggle('caption-mode', mode === 'caption');
+
+  document.getElementById('pdf-ctrl').style.display = mode === 'pdf' ? '' : 'none';
+  document.getElementById('cap-ctrl').style.display = mode === 'caption' ? '' : 'none';
+  document.getElementById('pdf-wrap').style.display = mode === 'pdf' ? '' : 'none';
+  document.getElementById('cap-output').style.display = mode === 'caption' ? '' : 'none';
+  document.getElementById('ctrl-title').textContent = mode === 'pdf' ? 'PDF Controls' : 'Caption Multiplier';
+  document.getElementById('preview-title').textContent = mode === 'pdf' ? 'Live Preview' : 'Variants';
+  document.getElementById('preview-toolbar').style.display = mode === 'pdf' ? '' : 'none';
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
 function toast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2000);
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2000);
 }
-
 function setStatus(text, type) {
-  const el = document.getElementById('global-status');
-  el.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block"></span> ' + text;
-  el.className = 'status-badge status-' + type;
+  const el = document.getElementById('status');
+  el.innerHTML = '<span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span> ' + text;
+  el.className = 'status status-' + type;
 }
 
-// === KEYBOARD SHORTCUTS ===
+// ============================================================
+// AUTO-SAVE ON CANVAS EDIT
+// ============================================================
+document.getElementById('canvas').addEventListener('input', scheduleSave);
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey) {
-    if (e.key === 's') { e.preventDefault(); downloadPDF(); }
-    if (e.key === 'm') { e.preventDefault(); multiplyCaption(); }
-    if (e.key === 'p') { e.preventDefault(); window.print(); }
+    if (e.shiftKey && e.key === 's') { e.preventDefault(); downloadPDF(); return; }
+    if (e.key === 's') { e.preventDefault(); saveDocs(); toast('Saved'); return; }
+    if (e.key === 'n') { e.preventDefault(); newDoc(); return; }
+    if (e.key === 'p') { e.preventDefault(); window.print(); return; }
   }
 });
 
-// === INIT ===
-liveUpdate();
+// ============================================================
+// INIT
+// ============================================================
+loadDocs();
 </script>
 </body>
 </html>
