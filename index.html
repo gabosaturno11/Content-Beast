@@ -171,6 +171,45 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 /* PAGE EST */
 .page-est{font-size:8px;color:var(--text-muted);text-align:center;padding:6px;margin-top:8px}
 
+/* ZOOM */
+.zoom-bar{display:flex;align-items:center;gap:4px;margin-left:auto}
+.zoom-bar .zb{font-size:8px;color:var(--text-muted);font-family:var(--mono);min-width:32px;text-align:center}
+
+/* IMAGE IN CANVAS */
+.pdf-canvas img{max-width:100%;height:auto;border-radius:3px;margin:8px 0}
+.pdf-canvas .img-block{position:relative;display:inline-block;margin:8px 0}
+.pdf-canvas .img-block img{display:block}
+
+/* PAGE BREAK MARKER */
+.page-break{border:none;border-top:2px dashed var(--accent);margin:24px 0;position:relative;page-break-after:always}
+.page-break::after{content:'PAGE BREAK';position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);padding:0 8px;font-size:7px;color:var(--accent);font-family:var(--mono);letter-spacing:0.1em}
+
+/* EXPORT SETTINGS PANEL */
+.export-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:20px;width:360px;z-index:1000;display:none}
+.export-panel.open{display:block}
+.export-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;display:none}
+.export-overlay.open{display:block}
+.export-panel h3{font-size:11px;font-weight:600;color:var(--text-primary);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.08em}
+.export-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.export-row label{font-size:9px;color:var(--text-secondary)}
+.export-row select,.export-row input[type="number"]{width:140px;padding:6px 8px;font-size:10px}
+
+/* FULLSCREEN CANVAS */
+.fullscreen-mode .workspace{grid-template-columns:0 0 1fr !important}
+.fullscreen-mode .lib,.fullscreen-mode .ctrl{display:none !important}
+.fullscreen-mode .preview-body{padding:32px 10%}
+
+/* COVER PAGE */
+.cover-page{text-align:center;padding:80px 60px;min-height:500px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.cover-page h1{font-size:42px;margin-bottom:8px;line-height:1.1}
+.cover-page .cover-sub{font-size:16px;color:#06b6d4;margin-bottom:40px;font-weight:300}
+.cover-page .cover-author{font-size:14px;color:#94a3b8;margin-top:auto}
+.cover-page .cover-brand{font-size:10px;color:#334155;margin-top:16px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--mono)}
+.cover-page .cover-line{width:60px;height:2px;background:var(--accent);margin:24px auto}
+
+/* TOOLBAR SEP */
+.tb-sep{width:1px;height:16px;background:var(--border);margin:0 3px}
+
 /* CAPTION */
 .variant-card{background:var(--bg-base);border-left:3px solid var(--accent);padding:10px;margin-bottom:6px;border-radius:0 3px 3px 0}
 .variant-card.ig{border-color:#e1306c}
@@ -200,7 +239,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 <div class="hdr">
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v2.0</span>
+    <span class="ver">v3.0</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -267,6 +306,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
             <div class="preset-card" onclick="loadPreset('level',this)"><div class="pn">Level Guide</div><div class="pd">Foundation to Elite progression</div></div>
             <div class="preset-card" onclick="loadPreset('framework',this)"><div class="pn">Framework</div><div class="pd">Training methodology breakdown</div></div>
             <div class="preset-card" onclick="loadPreset('transcript',this)"><div class="pn">Transcript</div><div class="pd">Video key points + actions</div></div>
+            <div class="preset-card" onclick="loadPreset('cover',this)"><div class="pn">Cover Page</div><div class="pd">Branded title page</div></div>
           </div>
         </div>
 
@@ -280,7 +320,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 
         <div style="display:flex;gap:6px">
           <button onclick="renderPreview()" class="btn btn-outline" style="flex:1">Refresh</button>
-          <button onclick="downloadPDF()" class="btn btn-primary" style="flex:1">Download PDF</button>
+          <button onclick="openExport()" class="btn btn-primary" style="flex:1">Export PDF</button>
           <button onclick="downloadHTML()" class="btn btn-outline" title="Download as HTML">HTML</button>
         </div>
       </div>
@@ -325,13 +365,39 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         <button class="btn-icon" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
         <button class="btn-icon" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
         <button class="btn-icon" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
-        <span style="width:1px;height:16px;background:var(--border);margin:0 2px"></span>
-        <button class="btn-icon" onclick="execBlock('h3')" title="Heading">H</button>
+        <span class="tb-sep"></span>
+        <select onchange="execCmd('fontSize',this.value);this.selectedIndex=0" style="width:50px;padding:3px;font-size:8px;background:var(--bg-base);border:1px solid var(--border);color:var(--text-muted);border-radius:3px;font-family:var(--mono)" title="Font size">
+          <option value="">Size</option>
+          <option value="1">Small</option>
+          <option value="3">Normal</option>
+          <option value="5">Large</option>
+          <option value="7">XL</option>
+        </select>
+        <span class="tb-sep"></span>
+        <button class="btn-icon" onclick="execBlock('h1')" title="H1">1</button>
+        <button class="btn-icon" onclick="execBlock('h2')" title="H2">2</button>
+        <button class="btn-icon" onclick="execBlock('h3')" title="H3">3</button>
+        <span class="tb-sep"></span>
+        <button class="btn-icon" onclick="execCmd('justifyLeft')" title="Align left">L</button>
+        <button class="btn-icon" onclick="execCmd('justifyCenter')" title="Align center">C</button>
+        <button class="btn-icon" onclick="execCmd('justifyRight')" title="Align right">R</button>
+        <span class="tb-sep"></span>
         <button class="btn-icon" onclick="execCmd('insertUnorderedList')" title="Bullet list">*</button>
         <button class="btn-icon" onclick="execCmd('insertOrderedList')" title="Numbered list">#</button>
-        <span style="width:1px;height:16px;background:var(--border);margin:0 2px"></span>
-        <button class="btn-icon" onclick="execCmd('formatBlock','blockquote')" title="Blockquote">"</button>
-        <button class="btn-icon" onclick="insertHR()" title="Horizontal rule">--</button>
+        <button class="btn-icon" onclick="execCmd('formatBlock','blockquote')" title="Quote">"</button>
+        <button class="btn-icon" onclick="insertHR()" title="Rule">--</button>
+        <button class="btn-icon" onclick="insertPageBreak()" title="Page break">||</button>
+        <span class="tb-sep"></span>
+        <button class="btn-icon" onclick="insertImage()" title="Insert image">Img</button>
+        <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(this.files[0])">
+        <span class="tb-sep"></span>
+        <button class="btn-icon" onclick="toggleFullscreen()" title="Fullscreen" id="fs-btn">F</button>
+        <div class="zoom-bar">
+          <button class="btn-icon" onclick="zoom(-10)" title="Zoom out">-</button>
+          <span class="zb" id="zoom-val">100%</span>
+          <button class="btn-icon" onclick="zoom(10)" title="Zoom in">+</button>
+          <button class="btn-icon" onclick="zoom(0)" title="Reset zoom">R</button>
+        </div>
       </div>
     </div>
     <div class="preview-body" id="preview-body">
@@ -351,14 +417,31 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v2.0 — by Saturno Movement</span>
-  <span>Cmd+S: Save / Cmd+Shift+S: Download PDF / Cmd+N: New Doc</span>
+  <span>CONTENT BEAST v3.0 — by Saturno Movement</span>
+  <span>Cmd+S: Save / Cmd+Shift+S: Export PDF / Cmd+N: New Doc / Esc: Exit</span>
 </div>
 
 </div>
 
 <div class="toast" id="toast"></div>
 <input type="file" id="file-input" accept=".md,.txt,.markdown,.text" style="display:none" onchange="handleFile(this.files[0])">
+
+<!-- EXPORT SETTINGS MODAL -->
+<div class="export-overlay" id="export-overlay" onclick="closeExport()"></div>
+<div class="export-panel" id="export-panel">
+  <h3>Export Settings</h3>
+  <div class="export-row"><label>Paper Size</label><select id="ex-paper"><option value="a4">A4 (210x297mm)</option><option value="letter">Letter (8.5x11in)</option><option value="legal">Legal (8.5x14in)</option></select></div>
+  <div class="export-row"><label>Orientation</label><select id="ex-orient"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></div>
+  <div class="export-row"><label>Top Margin (mm)</label><input type="number" id="ex-mt" value="12" min="0" max="50"></div>
+  <div class="export-row"><label>Side Margins (mm)</label><input type="number" id="ex-ms" value="12" min="0" max="50"></div>
+  <div class="export-row"><label>Bottom Margin (mm)</label><input type="number" id="ex-mb" value="16" min="0" max="50"></div>
+  <div class="export-row"><label>Quality</label><select id="ex-quality"><option value="2">High (2x)</option><option value="3">Ultra (3x)</option><option value="1">Standard (1x)</option></select></div>
+  <div class="export-row"><label>Include Page Numbers</label><select id="ex-pagenum"><option value="yes">Yes</option><option value="no">No</option></select></div>
+  <div style="display:flex;gap:6px;margin-top:16px">
+    <button class="btn btn-primary" style="flex:1" onclick="exportPDF()">Export PDF</button>
+    <button class="btn btn-outline" style="flex:1" onclick="closeExport()">Cancel</button>
+  </div>
+</div>
 
 <script>
 // ============================================================
@@ -371,6 +454,7 @@ let currentTpl = 'tpl-saturno';
 let currentLv = '';
 let currentVoice = 'teacher';
 let saveTimer = null;
+let zoomLevel = 100;
 
 // ============================================================
 // PERSISTENCE
@@ -632,6 +716,12 @@ const PRESETS = {
     title: 'Video Transcript -- Key Points',
     content: '# VIDEO TITLE\n## Channel: Saturno Movement\n\n### KEY POINTS\n- Point one from the video\n- Point two from the video\n- Point three from the video\n- Point four from the video\n\n### SUMMARY\nPaste the full summary here. This section captures the core message of the video in 2-3 paragraphs.\n\nThe second paragraph continues the thought.\n\n### ACTION ITEMS\n1. First action step the viewer should take\n2. Second action step\n3. Third action step\n\n### TIMESTAMPS\n\n| Time | Topic |\n|------|-------|\n| 0:00 | Introduction |\n| 2:15 | Main topic |\n| 5:30 | Key exercise demo |\n| 8:45 | Programming recommendations |\n| 11:00 | Closing thoughts |',
     level: ''
+  },
+  cover: {
+    title: 'Saturno Movement',
+    content: '',
+    level: '',
+    isCover: true
   }
 };
 
@@ -641,10 +731,29 @@ function loadPreset(key, el) {
   document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
   document.getElementById('f-title').value = p.title;
-  document.getElementById('f-content').value = p.content;
+  document.getElementById('f-content').value = p.content || '';
   if (p.level) { currentLv = p.level; document.querySelectorAll('[data-lv]').forEach(b => b.classList.toggle('active', b.dataset.lv === currentLv)); }
-  renderPreview();
+  if (p.isCover) {
+    renderCoverPage(p.title);
+  } else {
+    renderPreview();
+  }
   toast('Loaded: ' + key);
+}
+
+function renderCoverPage(title) {
+  const canvas = document.getElementById('canvas');
+  canvas.className = 'pdf-canvas ' + currentTpl;
+  const author = document.getElementById('f-author').value || 'Gabo Saturno';
+  canvas.innerHTML = '<div class="cover-page">' +
+    '<h1>' + esc(title || 'Untitled') + '</h1>' +
+    '<div class="cover-sub">Movement Mastery System</div>' +
+    '<div class="cover-line"></div>' +
+    '<div class="cover-author">' + esc(author) + '</div>' +
+    '<div class="cover-brand">SATURNO MOVEMENT / saturnomovement.com</div>' +
+    '</div>';
+  estPages();
+  scheduleSave();
 }
 
 // ============================================================
@@ -802,14 +911,171 @@ function setStatus(text, type) {
 document.getElementById('canvas').addEventListener('input', scheduleSave);
 
 // ============================================================
+// ZOOM
+// ============================================================
+function zoom(delta) {
+  if (delta === 0) { zoomLevel = 100; }
+  else { zoomLevel = Math.min(200, Math.max(50, zoomLevel + delta)); }
+  document.getElementById('canvas').style.transform = 'scale(' + (zoomLevel / 100) + ')';
+  document.getElementById('canvas').style.transformOrigin = 'top center';
+  document.getElementById('zoom-val').textContent = zoomLevel + '%';
+}
+
+// ============================================================
+// PAGE BREAK
+// ============================================================
+function insertPageBreak() {
+  const canvas = document.getElementById('canvas');
+  if (!canvas.contains(document.activeElement) && document.activeElement !== canvas) { canvas.focus(); }
+  const sel = window.getSelection();
+  if (sel.rangeCount) {
+    const range = sel.getRangeAt(0);
+    const pb = document.createElement('hr');
+    pb.className = 'page-break';
+    range.insertNode(pb);
+    range.setStartAfter(pb);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } else {
+    canvas.insertAdjacentHTML('beforeend', '<hr class="page-break">');
+  }
+  scheduleSave();
+}
+
+// ============================================================
+// IMAGE INSERT
+// ============================================================
+function insertImage() {
+  document.getElementById('img-input').click();
+}
+
+function handleImage(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const canvas = document.getElementById('canvas');
+    const img = document.createElement('img');
+    img.src = e.target.result;
+    img.style.maxWidth = '100%';
+    img.alt = file.name;
+    const sel = window.getSelection();
+    if (sel.rangeCount && canvas.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      range.insertNode(img);
+      range.setStartAfter(img);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      const footer = canvas.querySelector('.pdf-footer');
+      if (footer) { canvas.insertBefore(img, footer); }
+      else { canvas.appendChild(img); }
+    }
+    scheduleSave();
+    toast('Image inserted');
+  };
+  reader.readAsDataURL(file);
+  document.getElementById('img-input').value = '';
+}
+
+// ============================================================
+// FULLSCREEN
+// ============================================================
+function toggleFullscreen() {
+  document.body.classList.toggle('fullscreen-mode');
+  const btn = document.getElementById('fs-btn');
+  if (document.body.classList.contains('fullscreen-mode')) {
+    btn.classList.add('active');
+    btn.title = 'Exit fullscreen';
+    toast('Fullscreen mode — press F to exit');
+  } else {
+    btn.classList.remove('active');
+    btn.title = 'Fullscreen';
+  }
+}
+
+// ============================================================
+// EXPORT SETTINGS
+// ============================================================
+function openExport() {
+  snapshotActive();
+  document.getElementById('export-overlay').classList.add('open');
+  document.getElementById('export-panel').classList.add('open');
+}
+
+function closeExport() {
+  document.getElementById('export-overlay').classList.remove('open');
+  document.getElementById('export-panel').classList.remove('open');
+}
+
+function exportPDF() {
+  const canvas = document.getElementById('canvas');
+  const title = document.getElementById('f-title').value || 'document';
+  const paper = document.getElementById('ex-paper').value;
+  const orient = document.getElementById('ex-orient').value;
+  const mt = parseInt(document.getElementById('ex-mt').value) || 12;
+  const ms = parseInt(document.getElementById('ex-ms').value) || 12;
+  const mb = parseInt(document.getElementById('ex-mb').value) || 16;
+  const quality = parseInt(document.getElementById('ex-quality').value) || 2;
+  const pageNum = document.getElementById('ex-pagenum').value === 'yes';
+
+  closeExport();
+  setStatus('EXPORTING...', 'busy');
+
+  const isDark = currentTpl === 'tpl-saturno' || currentTpl === 'tpl-dark';
+
+  // Reset zoom for clean export
+  const prevZoom = zoomLevel;
+  if (zoomLevel !== 100) {
+    canvas.style.transform = 'scale(1)';
+  }
+
+  const opt = {
+    margin: [mt, ms, mb + (pageNum ? 6 : 0), ms],
+    filename: title.replace(/[^a-zA-Z0-9_\- ]/g, '_').replace(/\s+/g, '_') + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: quality, useCORS: true, backgroundColor: isDark ? '#0a0a0a' : '#ffffff' },
+    jsPDF: { unit: 'mm', format: paper, orientation: orient },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  const worker = html2pdf().set(opt).from(canvas);
+
+  if (pageNum) {
+    worker.toPdf().get('pdf').then(function(pdf) {
+      const totalPages = pdf.internal.getNumberOfPages();
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(150);
+        pdf.text('Page ' + i + ' of ' + totalPages, pageW / 2, pageH - 6, { align: 'center' });
+      }
+    }).save().then(done);
+  } else {
+    worker.save().then(done);
+  }
+
+  function done() {
+    toast('Exported: ' + opt.filename);
+    setStatus('READY', 'ok');
+    if (prevZoom !== 100) { zoom(0); zoom(prevZoom - 100); }
+  }
+}
+
+// ============================================================
 // KEYBOARD SHORTCUTS
 // ============================================================
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey) {
-    if (e.shiftKey && e.key === 's') { e.preventDefault(); downloadPDF(); return; }
+    if (e.shiftKey && e.key === 's') { e.preventDefault(); openExport(); return; }
     if (e.key === 's') { e.preventDefault(); saveDocs(); toast('Saved'); return; }
     if (e.key === 'n') { e.preventDefault(); newDoc(); return; }
     if (e.key === 'p') { e.preventDefault(); window.print(); return; }
+  }
+  if (e.key === 'Escape') {
+    if (document.body.classList.contains('fullscreen-mode')) toggleFullscreen();
+    if (document.getElementById('export-panel').classList.contains('open')) closeExport();
   }
 });
 
