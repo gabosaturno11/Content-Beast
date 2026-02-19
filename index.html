@@ -232,6 +232,19 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:rgba(168,85,247,0.04)}
 .drop-zone .dz-text{font-size:9px;color:var(--text-muted)}
 
+/* SHORTCUTS HELP */
+.shortcuts-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:24px;width:420px;max-height:80vh;overflow-y:auto;z-index:1000;display:none}
+.shortcuts-modal.open{display:block}
+.shortcuts-modal h3{font-size:11px;font-weight:600;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px}
+.sc-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+.sc-key{font-size:9px;color:var(--accent);font-family:var(--mono);background:var(--bg-base);padding:2px 6px;border-radius:2px;border:1px solid var(--border)}
+.sc-desc{font-size:9px;color:var(--text-secondary)}
+
+/* MD CHEATSHEET */
+.md-cheat{display:none;padding:8px;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;margin-bottom:10px;font-size:8px;color:var(--text-muted);line-height:1.8}
+.md-cheat.open{display:block}
+.md-cheat code{background:var(--bg-elevated);padding:1px 4px;border-radius:2px;color:var(--text-secondary)}
+
 /* WORD COUNT BAR */
 .wc-bar{padding:4px 12px;border-top:1px solid var(--border);font-size:8px;color:var(--text-muted);display:flex;gap:12px;flex-shrink:0;font-family:var(--mono)}
 .wc-bar span{display:inline-flex;gap:3px}
@@ -260,6 +273,23 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .ver-item .vi-time{font-size:9px;color:var(--text-primary);font-weight:500}
 .ver-item .vi-meta{font-size:8px;color:var(--text-muted);margin-top:2px}
 .ver-item .vi-preview{font-size:8px;color:var(--text-muted);margin-top:4px;max-height:40px;overflow:hidden;line-height:1.4}
+/* PRINT */
+@media print {
+  body{background:#fff !important;overflow:visible !important}
+  .app{display:block !important;height:auto !important}
+  .hdr,.ftr,.lib,.ctrl,.preview-hdr,.preview-toolbar,.wc-bar,.find-bar,.page-est,.toast,.export-panel,.export-overlay,.tbl-modal,.ver-panel,.shortcuts-modal{display:none !important}
+  .workspace{display:block !important}
+  .preview{display:block !important;overflow:visible !important}
+  .preview-body{overflow:visible !important;padding:0 !important;background:#fff !important}
+  .pdf-canvas{box-shadow:none !important;border-radius:0 !important;transform:none !important}
+  .pdf-canvas.tpl-saturno,.pdf-canvas.tpl-dark{background:#fff !important;color:#1a1a1a !important}
+  .pdf-canvas.tpl-saturno h1,.pdf-canvas.tpl-dark h1{color:#111 !important}
+  .pdf-canvas.tpl-saturno h2,.pdf-canvas.tpl-dark h2{color:#666 !important}
+  .pdf-canvas.tpl-saturno h3,.pdf-canvas.tpl-dark h3{color:#333 !important}
+  .pdf-canvas.tpl-saturno p,.pdf-canvas.tpl-dark p,.pdf-canvas.tpl-saturno li,.pdf-canvas.tpl-dark li{color:#333 !important}
+  .page-break{page-break-after:always !important;border:none !important}
+  .page-break::after{display:none !important}
+}
 </style>
 </head>
 <body>
@@ -287,6 +317,9 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
     <div class="lib-hdr">
       <button class="btn btn-primary btn-sm" style="flex:1" onclick="newDoc()">+ New</button>
       <button class="btn btn-outline btn-sm" onclick="importFile()" title="Import .md or .txt">Import</button>
+    </div>
+    <div style="padding:4px 4px 0">
+      <input type="text" id="lib-search" placeholder="Search docs..." style="padding:5px 8px;font-size:9px;margin-bottom:2px" oninput="filterLibrary()">
     </div>
     <div class="lib-list" id="lib-list">
       <div class="lib-empty">No documents yet.<br>Click + New to start.</div>
@@ -340,7 +373,17 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         </div>
 
         <div class="row">
-          <label class="lbl">Content (Markdown)</label>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <label class="lbl" style="margin-bottom:0">Content (Markdown)</label>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('md-cheat').classList.toggle('open')" style="font-size:7px;padding:2px 6px">Syntax Help</button>
+          </div>
+          <div class="md-cheat" id="md-cheat">
+            <code># H1</code> <code>## H2</code> <code>### H3</code><br>
+            <code>**bold**</code> <code>*italic*</code> <code>`code`</code><br>
+            <code>- bullet</code> <code>1. numbered</code> <code>> quote</code><br>
+            <code>---</code> horizontal rule<br>
+            <code>| Col | Col |</code> table (with separator row)
+          </div>
           <div class="drop-zone" id="drop-zone" onclick="document.getElementById('f-content').focus()">
             <div class="dz-text">Drop .md / .txt file here or type below</div>
           </div>
@@ -487,6 +530,30 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
   <div style="display:flex;gap:6px;margin-top:16px">
     <button class="btn btn-primary" style="flex:1" onclick="exportPDF()">Export PDF</button>
     <button class="btn btn-outline" style="flex:1" onclick="closeExport()">Cancel</button>
+  </div>
+</div>
+
+<!-- SHORTCUTS HELP -->
+<div class="export-overlay" id="sc-overlay" onclick="closeShortcuts()"></div>
+<div class="shortcuts-modal" id="sc-modal">
+  <h3>Keyboard Shortcuts</h3>
+  <div class="sc-row"><span class="sc-desc">Save document</span><span class="sc-key">Cmd+S</span></div>
+  <div class="sc-row"><span class="sc-desc">Export PDF</span><span class="sc-key">Cmd+Shift+S</span></div>
+  <div class="sc-row"><span class="sc-desc">New document</span><span class="sc-key">Cmd+N</span></div>
+  <div class="sc-row"><span class="sc-desc">Find & Replace</span><span class="sc-key">Cmd+F</span></div>
+  <div class="sc-row"><span class="sc-desc">Print</span><span class="sc-key">Cmd+P</span></div>
+  <div class="sc-row"><span class="sc-desc">Show this help</span><span class="sc-key">Cmd+/</span></div>
+  <div class="sc-row"><span class="sc-desc">Close modal / Exit fullscreen</span><span class="sc-key">Esc</span></div>
+  <div style="margin-top:16px">
+    <h3 style="margin-bottom:8px">Canvas Editing</h3>
+    <div class="sc-row"><span class="sc-desc">Bold</span><span class="sc-key">Cmd+B</span></div>
+    <div class="sc-row"><span class="sc-desc">Italic</span><span class="sc-key">Cmd+I</span></div>
+    <div class="sc-row"><span class="sc-desc">Underline</span><span class="sc-key">Cmd+U</span></div>
+    <div class="sc-row"><span class="sc-desc">Undo</span><span class="sc-key">Cmd+Z</span></div>
+    <div class="sc-row"><span class="sc-desc">Redo</span><span class="sc-key">Cmd+Shift+Z</span></div>
+  </div>
+  <div style="text-align:center;margin-top:16px">
+    <button class="btn btn-outline btn-sm" onclick="closeShortcuts()">Close</button>
   </div>
 </div>
 
@@ -1402,6 +1469,30 @@ function restoreVersion(verId) {
 }
 
 // ============================================================
+// LIBRARY SEARCH
+// ============================================================
+function filterLibrary() {
+  const q = (document.getElementById('lib-search').value || '').toLowerCase();
+  const items = document.querySelectorAll('#lib-list .lib-item');
+  items.forEach(item => {
+    const title = (item.querySelector('.li-title') || {}).textContent || '';
+    item.style.display = title.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ============================================================
+// SHORTCUTS HELP
+// ============================================================
+function openShortcuts() {
+  document.getElementById('sc-overlay').classList.add('open');
+  document.getElementById('sc-modal').classList.add('open');
+}
+function closeShortcuts() {
+  document.getElementById('sc-overlay').classList.remove('open');
+  document.getElementById('sc-modal').classList.remove('open');
+}
+
+// ============================================================
 // KEYBOARD SHORTCUTS
 // ============================================================
 document.addEventListener('keydown', e => {
@@ -1410,6 +1501,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 's') { e.preventDefault(); saveDocs(); toast('Saved'); return; }
     if (e.key === 'n') { e.preventDefault(); newDoc(); return; }
     if (e.key === 'f') { e.preventDefault(); toggleFind(); return; }
+    if (e.key === '/') { e.preventDefault(); openShortcuts(); return; }
     if (e.key === 'p') { e.preventDefault(); window.print(); return; }
   }
   if (e.key === 'Escape') {
@@ -1418,6 +1510,7 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('find-bar').classList.contains('open')) toggleFind();
     if (document.getElementById('ver-panel').classList.contains('open')) closeVersions();
     if (document.getElementById('tbl-modal').classList.contains('open')) closeTblModal();
+    if (document.getElementById('sc-modal').classList.contains('open')) closeShortcuts();
   }
 });
 
