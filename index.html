@@ -28,7 +28,7 @@
   --panel-inset:inset 0 1px 0 rgba(255,255,255,0.02);
   --grad-surface:linear-gradient(135deg,rgba(168,85,247,0.03) 0%,transparent 100%);
 }
-body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondary);height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondary);height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(168,85,247,0.03) 0%,transparent 70%)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:4px}
@@ -38,7 +38,8 @@ body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondar
 .app{display:grid;grid-template-rows:48px 1fr 30px;height:100vh}
 
 /* HEADER */
-.hdr{border-bottom:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;padding:0 16px;gap:14px;box-shadow:var(--panel-inset),0 1px 6px rgba(0,0,0,0.2)}
+.hdr{border-bottom:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;padding:0 16px;gap:14px;box-shadow:var(--panel-inset),0 1px 6px rgba(0,0,0,0.2);position:relative}
+.hdr::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(168,85,247,0.2) 30%,rgba(168,85,247,0.2) 70%,transparent);pointer-events:none}
 .hdr-brand{display:flex;align-items:center;gap:10px}
 .hdr-brand h1{color:var(--text-primary);font-size:12px;font-weight:700;letter-spacing:0.02em}
 .hdr-brand .ver{font-size:7px;color:var(--accent);padding:2px 6px;border:1px solid rgba(168,85,247,0.25);border-radius:4px;background:rgba(168,85,247,0.06);font-weight:600;letter-spacing:0.05em}
@@ -55,12 +56,12 @@ body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondar
 .ftr{border-top:1px solid var(--border);background:var(--bg-base);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:8px;color:var(--text-muted);letter-spacing:0.02em}
 
 /* === 3-COLUMN LAYOUT === */
-.workspace{display:grid;grid-template-columns:210px 1fr 1fr;overflow:hidden;transition:grid-template-columns 0.25s cubic-bezier(0.4,0,0.2,1)}
+.workspace{display:grid;grid-template-columns:210px 1fr 1fr;overflow:hidden;transition:grid-template-columns 0.35s cubic-bezier(0.22,1,0.36,1)}
 .workspace.two-col{grid-template-columns:0px 1fr 1fr}
 .workspace.caption-mode{grid-template-columns:210px 340px 1fr}
 
 /* LEFT: LIBRARY */
-.lib{background:var(--bg-base);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:var(--panel-inset)}
+.lib{background:var(--bg-base);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:var(--panel-inset);transition:opacity 0.2s ease}
 .lib-hdr{padding:10px;border-bottom:1px solid var(--border);display:flex;gap:4px;background:rgba(255,255,255,0.01)}
 .lib-list{flex:1;overflow-y:auto;padding:6px}
 .lib-item{padding:9px 12px;border-radius:6px;cursor:pointer;transition:all 0.15s cubic-bezier(0.4,0,0.2,1);margin-bottom:2px;border:1px solid transparent}
@@ -94,6 +95,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
 .btn{padding:7px 14px;border:none;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;cursor:pointer;transition:all 0.15s cubic-bezier(0.4,0,0.2,1);display:inline-flex;align-items:center;gap:5px}
 .btn-primary{background:var(--accent);color:#fff;box-shadow:0 1px 4px rgba(168,85,247,0.2)}
 .btn-primary:hover{background:#9333ea;box-shadow:0 2px 12px rgba(168,85,247,0.3)}
+.btn-primary:active{transform:scale(0.97);box-shadow:0 1px 4px rgba(168,85,247,0.15)}
 .btn-outline{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
 .btn-outline:hover{border-color:var(--border-active);color:#fff;background:rgba(255,255,255,0.02)}
 .btn-green{background:var(--green);color:#111}
@@ -252,8 +254,8 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
 .chk input{display:none}
 
 /* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--bg-surface);border:1px solid var(--border-active);color:var(--text-primary);padding:10px 18px;border-radius:8px;font-size:10px;opacity:0;transform:translateY(12px);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);pointer-events:none;z-index:9999;font-family:var(--mono);box-shadow:var(--shadow-lg),0 0 24px rgba(168,85,247,0.08);backdrop-filter:blur(8px)}
-.toast.show{opacity:1;transform:translateY(0)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg-surface);border:1px solid var(--border-active);color:var(--text-primary);padding:10px 18px;border-radius:8px;font-size:10px;opacity:0;transform:translateY(12px) scale(0.96);transition:all 0.3s cubic-bezier(0.22,1,0.36,1);pointer-events:none;z-index:9999;font-family:var(--mono);box-shadow:var(--shadow-lg),0 0 24px rgba(168,85,247,0.08);backdrop-filter:blur(12px)}
+.toast.show{opacity:1;transform:translateY(0) scale(1)}
 
 /* SAVE PULSE */
 @keyframes savePulse{0%{opacity:1}50%{opacity:0.3}100%{opacity:1}}
@@ -504,10 +506,13 @@ textarea:focus,input:focus,select:focus{box-shadow:inset 0 1px 3px rgba(0,0,0,0.
 @keyframes breathe{0%,100%{opacity:0.6}50%{opacity:1}}
 @keyframes ambientGlow{0%,100%{box-shadow:0 0 16px rgba(168,85,247,0.08)}50%{box-shadow:0 0 24px rgba(168,85,247,0.16)}}
 @keyframes subtlePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-.status-ok span:first-child{animation:breathe 3s ease-in-out infinite}
-.hdr-brand .ver{animation:ambientGlow 4s ease-in-out infinite}
-.tab-btn.active{animation:ambientGlow 3s ease-in-out infinite}
-.btn-primary:not(:hover){animation:ambientGlow 4s ease-in-out infinite}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+.app{animation:fadeIn 0.4s ease}
+.hdr-brand h1{animation:slideInLeft 0.5s ease 0.1s both}
+.status-ok span:first-child{animation:breathe 4s ease-in-out infinite}
+.hdr-brand .ver{animation:ambientGlow 6s ease-in-out infinite}
 
 /* === RANGE SLIDER (Collision Matrix Style) === */
 input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);outline:none;cursor:pointer;border:none;box-shadow:inset 0 1px 2px rgba(0,0,0,0.3);padding:0;margin:6px 0}
@@ -559,18 +564,56 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .canvas-drop-zone{position:relative;min-height:100px}
 .canvas-drop-zone.drag-over{outline:2px dashed var(--accent);outline-offset:-4px;border-radius:8px}
 
+/* === SIDEBAR TOGGLE BUTTON (Astra-style) === */
+.sidebar-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);flex-shrink:0;padding:0}
+.sidebar-btn:hover{border-color:var(--border-hover);color:var(--text-primary);background:rgba(255,255,255,0.04)}
+.sidebar-btn:active{transform:scale(0.92)}
+.sidebar-btn.active{border-color:rgba(168,85,247,0.3);color:var(--accent)}
+.sidebar-btn svg{width:14px;height:14px;stroke:currentColor;fill:none}
+.workspace.two-col .lib{opacity:0;pointer-events:none;overflow:hidden;transition:opacity 0.2s ease}
+
+/* === MOBILE BOTTOM NAV === */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:48px;background:var(--bg-base);border-top:1px solid var(--border);padding:4px;gap:4px;z-index:100;box-shadow:0 -2px 12px rgba(0,0,0,0.3)}
+.mobile-tab{flex:1;border:none;background:transparent;color:var(--text-muted);font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;border-radius:6px;cursor:pointer;transition:all 0.15s}
+.mobile-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(168,85,247,0.3)}
+.mobile-tab:active{transform:scale(0.96)}
+
 /* MOBILE */
 @media (max-width: 768px) {
-  .workspace{grid-template-columns:1fr !important}
-  .lib,.ctrl{display:none}
-  .preview-toolbar{flex-wrap:wrap}
-  .hdr{gap:6px}
+  .app{grid-template-rows:44px 1fr 0px}
+  .ftr{display:none}
+  .mobile-nav{display:flex}
+  .workspace{display:block !important;overflow:auto}
+  .lib,.ctrl{position:fixed;top:44px;left:0;right:0;bottom:48px;z-index:50;display:none !important;background:var(--bg-base);overflow-y:auto;border:none}
+  .lib.mobile-show,.ctrl.mobile-show{display:flex !important;animation:fadeSlideUp 0.25s ease}
+  .preview{height:calc(100vh - 44px - 48px);overflow:auto}
+  .preview-body{padding:12px}
+  .pdf-canvas{padding:24px 20px;min-height:auto}
+  .hdr{padding:0 10px;gap:8px;height:44px}
   .hdr-brand h1{font-size:10px}
-  .tab-btn{padding:4px 6px;font-size:7px}
-  .preview-body{padding:8px}
-  .pdf-canvas{padding:24px 20px}
-  .ftr span:last-child{display:none}
+  .hdr .tab-bar{display:none}
+  .hdr-right .tab-bar{display:none}
+  .hdr-right{gap:6px}
+  .preview-toolbar{flex-wrap:wrap;gap:2px;padding:6px 8px}
+  .preview-toolbar .tb-sep{display:none}
+  .preview-toolbar .zoom-bar{display:none}
+  .btn-icon{width:36px;height:36px;font-size:11px}
   .wc-bar{font-size:7px;gap:6px}
+  .wc-bar span:nth-child(n+3){display:none}
+  .btn{min-height:36px}
+  .mode-btn{min-height:32px;padding:6px 10px}
+  .preset-card{padding:14px}
+  .atom-card,.cl-item{padding:14px}
+  .lib-item{padding:12px 14px}
+  .voice-card{padding:12px}
+  .slider-card{padding:12px 14px}
+  .toast{bottom:60px;right:16px;left:16px;text-align:center}
+  .export-panel,.shortcuts-modal{width:calc(100vw - 32px);max-width:400px}
+  .cmd-palette{top:10%;width:calc(100vw - 24px);max-width:none}
+  .tbl-modal{width:calc(100vw - 32px);max-width:340px}
+  .ver-panel{width:100vw}
+  .ctrl-body{padding:12px}
+  .grid2{grid-template-columns:1fr}
 }
 
 /* PRINT */
@@ -596,9 +639,12 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 <div class="app">
 
 <div class="hdr">
+  <button class="sidebar-btn active" id="sidebar-btn" onclick="toggleSidebar()" title="Toggle sidebar">
+    <svg width="14" height="14" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+  </button>
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v6.3</span>
+    <span class="ver">v6.4</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -606,18 +652,10 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
     <button class="tab-btn" onclick="setMode('atomizer')">Atomizer</button>
   </div>
   <div class="hdr-right">
-    <div class="tab-bar" style="margin-right:8px">
+    <div class="tab-bar" style="margin-right:4px">
       <button class="tab-btn active" id="view-default" onclick="setView('default')" title="3-panel">Full</button>
       <button class="tab-btn" id="view-split" onclick="setView('split')" title="Markdown + Preview">Split</button>
       <button class="tab-btn" id="view-focus" onclick="setView('focus')" title="Controls + Preview">Focus</button>
-    </div>
-    <div class="toggle-wrap" title="Toggle sidebar">
-      <span class="toggle on" id="tog-lib" onclick="togglePanel('lib')"></span>
-      <span class="toggle-label" onclick="togglePanel('lib')">Lib</span>
-    </div>
-    <div class="toggle-wrap" title="Toggle toolbar">
-      <span class="toggle on" id="tog-toolbar" onclick="togglePanel('toolbar')"></span>
-      <span class="toggle-label" onclick="togglePanel('toolbar')">Toolbar</span>
     </div>
     <span id="save-ind" style="font-size:8px;color:var(--text-muted);opacity:0;transition:opacity 0.3s">Saved</span>
     <span id="status" class="status status-ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
@@ -1049,10 +1087,16 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v6.3 — by Saturno Movement</span>
+  <span>CONTENT BEAST v6.4 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
+</div>
+
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mobile-tab active" onclick="mobileTab('preview',this)">Preview</button>
+  <button class="mobile-tab" onclick="mobileTab('ctrl',this)">Controls</button>
+  <button class="mobile-tab" onclick="mobileTab('lib',this)">Library</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2518,7 +2562,7 @@ function runCmd(idx) {
 function backupData() {
   snapshotActive();
   const backup = {
-    version: '3.3',
+    version: '6.4',
     exported: new Date().toISOString(),
     docs: docs,
     versions: getVersions()
@@ -3748,22 +3792,34 @@ function animatePipeline(stages) {
 }
 
 // ============================================================
-// TOGGLE PANELS
+// SIDEBAR TOGGLE (Astra-style + localStorage)
 // ============================================================
+function toggleSidebar() {
+  const ws = document.getElementById('workspace');
+  const btn = document.getElementById('sidebar-btn');
+  const isHidden = ws.classList.toggle('two-col');
+  if (btn) btn.classList.toggle('active', !isHidden);
+  localStorage.setItem('cb-sidebar', isHidden ? '0' : '1');
+}
+
 function togglePanel(panel) {
-  const tog = document.getElementById('tog-' + panel);
-  const isOn = tog.classList.toggle('on');
-  if (panel === 'lib') {
-    const ws = document.getElementById('workspace');
-    if (isOn) {
-      ws.classList.remove('two-col');
-    } else {
-      ws.classList.add('two-col');
-    }
-  } else if (panel === 'toolbar') {
+  if (panel === 'lib') return toggleSidebar();
+  if (panel === 'toolbar') {
     const tb = document.getElementById('preview-toolbar');
-    tb.style.display = isOn ? '' : 'none';
+    tb.style.display = tb.style.display === 'none' ? '' : 'none';
   }
+}
+
+// ============================================================
+// MOBILE NAVIGATION
+// ============================================================
+function mobileTab(tab, btn) {
+  document.getElementById('lib-panel').classList.remove('mobile-show');
+  document.getElementById('ctrl-panel').classList.remove('mobile-show');
+  document.querySelectorAll('.mobile-tab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  if (tab === 'lib') document.getElementById('lib-panel').classList.add('mobile-show');
+  else if (tab === 'ctrl') document.getElementById('ctrl-panel').classList.add('mobile-show');
 }
 
 // ============================================================
@@ -3930,6 +3986,8 @@ renderSeedLibrary();
 initPanelResize();
 initUniversalDragDrop();
 openCaptionDB().then(() => clLoadAll()).catch(e => console.warn('IndexedDB:', e));
+// Restore sidebar state from localStorage
+if(localStorage.getItem('cb-sidebar')==='0'){document.getElementById('workspace').classList.add('two-col');var sb=document.getElementById('sidebar-btn');if(sb)sb.classList.remove('active');}
 </script>
 </body>
 </html>
