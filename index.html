@@ -601,6 +601,21 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .cv-empty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;z-index:1}
 .cv-empty-title{font-size:14px;color:#bbb;font-weight:600;margin-bottom:6px;font-family:var(--sans)}
 .cv-empty-sub{font-size:10px;color:#ccc;line-height:1.6;font-family:var(--mono)}
+/* In-place editing */
+.cv-node .cn-text[contenteditable="true"]{outline:none;background:rgba(139,92,246,0.04);border-radius:4px;padding:4px;margin:-4px;min-height:20px;cursor:text}
+.cv-node .cn-text[contenteditable="true"]:focus{background:rgba(139,92,246,0.08);box-shadow:0 0 0 1px rgba(139,92,246,0.2)}
+/* Selection lasso */
+.cv-lasso{position:absolute;border:1.5px dashed rgba(139,92,246,0.6);background:rgba(139,92,246,0.06);pointer-events:none;z-index:50;border-radius:2px}
+/* Minimap */
+.cv-minimap{position:absolute;bottom:52px;right:10px;width:140px;height:100px;background:rgba(255,255,255,0.96);border:1px solid rgba(0,0,0,0.08);border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.08);z-index:10;overflow:hidden;cursor:pointer}
+.cv-minimap-viewport{position:absolute;border:1.5px solid rgba(139,92,246,0.5);background:rgba(139,92,246,0.06);border-radius:1px;pointer-events:none}
+.cv-minimap-dot{position:absolute;width:4px;height:4px;border-radius:50%;pointer-events:none}
+.cv-minimap-dot.mm-caption{background:#8B5CF6}.cv-minimap-dot.mm-text{background:#4F7CFF}.cv-minimap-dot.mm-image{background:#4ade80}
+/* Undo indicator */
+.cv-toolbar .cv-undo-btn{opacity:0.4;pointer-events:none}.cv-toolbar .cv-undo-btn.has-history{opacity:1;pointer-events:auto}
+/* Node header type label */
+.cv-node .cn-type-label{display:inline-block;font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;opacity:0.5}
+.cv-node.cn-caption .cn-type-label{color:#8B5CF6}.cv-node.cn-text-node .cn-type-label{color:#4F7CFF}.cv-node.cn-image .cn-type-label{color:#4ade80}
 
 /* === SIDEBAR TOGGLE BUTTON (Astra-style) === */
 .sidebar-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);flex-shrink:0;padding:0}
@@ -1189,7 +1204,11 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="font-size:8px;color:var(--text-muted)">Import JSON</button>
         </div>
       </div>
+      <div id="cv-minimap" class="cv-minimap"></div>
       <div class="cv-toolbar" id="cv-toolbar">
+        <button class="cv-undo-btn" id="cv-undo-btn" onclick="cvUndo()" title="Undo (Cmd+Z)">Undo</button>
+        <button class="cv-undo-btn" id="cv-redo-btn" onclick="cvRedo()" title="Redo (Cmd+Shift+Z)">Redo</button>
+        <span class="cv-sep"></span>
         <button onclick="cvZoomBy(-0.1)" title="Zoom out">-</button>
         <span class="cv-zoom-val" id="cv-zoom-val">100%</span>
         <button onclick="cvZoomBy(0.1)" title="Zoom in">+</button>
@@ -1212,7 +1231,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v7.0 — by Saturno Movement</span>
+  <span>CONTENT BEAST v7.2 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -3960,10 +3979,53 @@ let cvPanning = false;
 let cvStartX = 0, cvStartY = 0;
 let cvStartVX = 0, cvStartVY = 0;
 let cvSaveTimer = null;
+// Undo/Redo
+let cvUndoStack = [];
+let cvRedoStack = [];
+const CV_MAX_UNDO = 40;
+// Lasso
+let cvLassoing = false;
+let cvLassoStartX = 0, cvLassoStartY = 0;
+let cvLassoEl = null;
 
 function cvMakeId() { return 'cn_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5); }
 
+function cvPushUndo() {
+  cvUndoStack.push(JSON.stringify(cvNodes));
+  if (cvUndoStack.length > CV_MAX_UNDO) cvUndoStack.shift();
+  cvRedoStack = [];
+  cvUpdateUndoButtons();
+}
+
+function cvUndo() {
+  if (!cvUndoStack.length) return;
+  cvRedoStack.push(JSON.stringify(cvNodes));
+  cvNodes = JSON.parse(cvUndoStack.pop());
+  cvSelectedIds.clear();
+  cvRender();
+  cvScheduleSave();
+  cvUpdateUndoButtons();
+}
+
+function cvRedo() {
+  if (!cvRedoStack.length) return;
+  cvUndoStack.push(JSON.stringify(cvNodes));
+  cvNodes = JSON.parse(cvRedoStack.pop());
+  cvSelectedIds.clear();
+  cvRender();
+  cvScheduleSave();
+  cvUpdateUndoButtons();
+}
+
+function cvUpdateUndoButtons() {
+  var ub = document.getElementById('cv-undo-btn');
+  var rb = document.getElementById('cv-redo-btn');
+  if (ub) ub.classList.toggle('has-history', cvUndoStack.length > 0);
+  if (rb) rb.classList.toggle('has-history', cvRedoStack.length > 0);
+}
+
 function cvAddNode(type, data) {
+  cvPushUndo();
   const node = {
     id: cvMakeId(),
     type: type,
@@ -3983,6 +4045,7 @@ function cvAddNode(type, data) {
 }
 
 function cvDeleteNode(id) {
+  cvPushUndo();
   cvNodes = cvNodes.filter(n => n.id !== id);
   cvSelectedIds.delete(id);
   cvRender();
@@ -4003,14 +4066,36 @@ function cvDuplicateNode(id) {
 }
 
 function cvEditNode(id) {
-  const n = cvNodes.find(x => x.id === id);
-  if (!n) return;
-  if (n.type === 'image') return;
-  const newText = prompt('Edit node text:', n.text);
-  if (newText === null) return;
-  n.text = newText;
-  cvRender();
-  cvScheduleSave();
+  var n = cvNodes.find(function(x) { return x.id === id; });
+  if (!n || n.type === 'image') return;
+  var nodeEl = document.querySelector('.cv-node[data-id="' + id + '"]');
+  if (!nodeEl) return;
+  var textEl = nodeEl.querySelector('.cn-text');
+  if (!textEl || textEl.contentEditable === 'true') return;
+  cvPushUndo();
+  textEl.contentEditable = 'true';
+  textEl.focus();
+  // Select all text
+  var range = document.createRange();
+  range.selectNodeContents(textEl);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  // Prevent node drag while editing
+  nodeEl.style.cursor = 'text';
+  var finishEdit = function() {
+    textEl.contentEditable = 'false';
+    nodeEl.style.cursor = 'move';
+    n.text = textEl.innerText.trim();
+    cvRender();
+    cvScheduleSave();
+  };
+  textEl.addEventListener('blur', finishEdit, { once: true });
+  textEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { textEl.blur(); }
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { textEl.blur(); }
+    e.stopPropagation();
+  });
 }
 
 function cvAddTextNode() {
@@ -4144,22 +4229,26 @@ function cvRender() {
   // Empty state
   var emptyEl = document.getElementById('cv-empty');
   if (emptyEl) emptyEl.style.display = cvNodes.length === 0 ? '' : 'none';
+  var typeLabels = { caption: 'CAPTION', text: 'TEXT', image: 'IMAGE' };
   // Render each node
   cvNodes.forEach(function(n) {
     var el = document.createElement('div');
     var typeClass = n.type === 'image' ? ' cn-image' : n.type === 'caption' ? ' cn-caption' : ' cn-text-node';
     el.className = 'cv-node' + typeClass + (cvSelectedIds.has(n.id) ? ' selected' : '');
+    el.setAttribute('tabindex', '0');
     el.dataset.id = n.id;
     el.style.left = n.x + 'px';
     el.style.top = n.y + 'px';
     var html = '<div class="cn-actions">';
     html += '<button onclick="event.stopPropagation();cvDuplicateNode(\'' + n.id + '\')" title="Duplicate">D</button>';
-    html += '<button onclick="event.stopPropagation();cvEditNode(\'' + n.id + '\')" title="Edit">E</button>';
+    html += '<button onclick="event.stopPropagation();cvEditNode(\'' + n.id + '\')" title="Edit (or double-click)">E</button>';
     html += '<button class="cn-del" onclick="event.stopPropagation();cvDeleteNode(\'' + n.id + '\')" title="Delete">x</button>';
     html += '</div>';
     if (n.type === 'image' && n.imgSrc) {
+      html += '<span class="cn-type-label">' + typeLabels[n.type] + '</span>';
       html += '<img src="' + n.imgSrc + '" alt="" draggable="false">';
     } else {
+      html += '<span class="cn-type-label">' + typeLabels[n.type] + '</span>';
       html += '<div class="cn-text">' + esc(n.text) + '</div>';
       html += '<div class="cn-meta">';
       if (n.theme) html += '<span class="cn-theme">' + esc(n.theme) + '</span>';
@@ -4169,10 +4258,16 @@ function cvRender() {
     }
     el.innerHTML = html;
     surface.appendChild(el);
+    // Double-click to edit
+    el.addEventListener('dblclick', function(e) {
+      e.stopPropagation();
+      cvEditNode(n.id);
+    });
     // Node mouse drag
     el.addEventListener('mousedown', function(e) {
-      if (e.target.closest('.cn-actions')) return;
+      if (e.target.closest('.cn-actions') || e.target.closest('[contenteditable="true"]')) return;
       e.stopPropagation();
+      cvPushUndo();
       cvDragNodeId = n.id;
       cvStartX = e.clientX;
       cvStartY = e.clientY;
@@ -4190,6 +4285,7 @@ function cvRender() {
       if (e.target.closest('.cn-actions')) return;
       e.stopPropagation();
       var touch = e.touches[0];
+      cvPushUndo();
       cvDragNodeId = n.id;
       cvStartX = touch.clientX;
       cvStartY = touch.clientY;
@@ -4206,6 +4302,8 @@ function cvRender() {
   if (countEl) countEl.textContent = cvNodes.length + ' node' + (cvNodes.length !== 1 ? 's' : '');
   var statsEl = document.getElementById('cv-stats');
   if (statsEl) statsEl.textContent = cvNodes.length + ' nodes' + (cvSelectedIds.size > 0 ? ' / ' + cvSelectedIds.size + ' selected' : '');
+  // Update minimap
+  cvUpdateMinimap();
 }
 
 // === ZOOM ===
@@ -4288,18 +4386,40 @@ function cvLoad() {
 function cvInitEvents() {
   var container = document.getElementById('cv-container');
   if (!container) return;
-  // Pan on empty space
+  // Pan on empty space / Lasso on Shift+drag
   container.addEventListener('mousedown', function(e) {
-    if (e.target.closest('.cv-node') || e.target.closest('.cv-toolbar') || e.target.closest('.cn-actions')) return;
-    cvPanning = true;
-    cvStartX = e.clientX;
-    cvStartY = e.clientY;
-    cvStartVX = cvViewport.x;
-    cvStartVY = cvViewport.y;
-    container.style.cursor = 'grabbing';
-    if (!e.shiftKey) { cvSelectedIds.clear(); cvRender(); }
+    if (e.target.closest('.cv-node') || e.target.closest('.cv-toolbar') || e.target.closest('.cn-actions') || e.target.closest('.cv-minimap')) return;
+    if (e.shiftKey) {
+      // Lasso selection
+      cvLassoing = true;
+      cvLassoStartX = e.clientX;
+      cvLassoStartY = e.clientY;
+      cvLassoEl = document.createElement('div');
+      cvLassoEl.className = 'cv-lasso';
+      container.appendChild(cvLassoEl);
+      container.style.cursor = 'crosshair';
+    } else {
+      cvPanning = true;
+      cvStartX = e.clientX;
+      cvStartY = e.clientY;
+      cvStartVX = cvViewport.x;
+      cvStartVY = cvViewport.y;
+      container.style.cursor = 'grabbing';
+      cvSelectedIds.clear(); cvRender();
+    }
   });
   document.addEventListener('mousemove', function(e) {
+    if (cvLassoing && cvLassoEl) {
+      var rect = container.getBoundingClientRect();
+      var lx = Math.min(e.clientX, cvLassoStartX) - rect.left;
+      var ly = Math.min(e.clientY, cvLassoStartY) - rect.top;
+      var lw = Math.abs(e.clientX - cvLassoStartX);
+      var lh = Math.abs(e.clientY - cvLassoStartY);
+      cvLassoEl.style.left = lx + 'px';
+      cvLassoEl.style.top = ly + 'px';
+      cvLassoEl.style.width = lw + 'px';
+      cvLassoEl.style.height = lh + 'px';
+    }
     if (cvPanning) {
       cvViewport.x = cvStartVX + (e.clientX - cvStartX);
       cvViewport.y = cvStartVY + (e.clientY - cvStartY);
@@ -4318,7 +4438,26 @@ function cvInitEvents() {
       }
     }
   });
-  document.addEventListener('mouseup', function() {
+  document.addEventListener('mouseup', function(e) {
+    // Finalize lasso
+    if (cvLassoing && cvLassoEl) {
+      var rect = container.getBoundingClientRect();
+      var lx1 = (Math.min(e.clientX, cvLassoStartX) - rect.left - cvViewport.x) / cvViewport.zoom;
+      var ly1 = (Math.min(e.clientY, cvLassoStartY) - rect.top - cvViewport.y) / cvViewport.zoom;
+      var lx2 = (Math.max(e.clientX, cvLassoStartX) - rect.left - cvViewport.x) / cvViewport.zoom;
+      var ly2 = (Math.max(e.clientY, cvLassoStartY) - rect.top - cvViewport.y) / cvViewport.zoom;
+      cvSelectedIds.clear();
+      cvNodes.forEach(function(n) {
+        if (n.x >= lx1 && n.x <= lx2 && n.y >= ly1 && n.y <= ly2) {
+          cvSelectedIds.add(n.id);
+        }
+      });
+      cvLassoEl.remove();
+      cvLassoEl = null;
+      cvLassoing = false;
+      container.style.cursor = 'grab';
+      cvRender();
+    }
     if (cvPanning) {
       cvPanning = false;
       var c = document.getElementById('cv-container');
@@ -4390,18 +4529,32 @@ function cvInitEvents() {
     cvPanning = false;
     cvScheduleSave();
   });
-  // Keyboard (delete, select all)
+  // Keyboard (delete, select all, undo/redo)
   container.addEventListener('keydown', function(e) {
+    // Skip if editing text in a node
+    if (e.target.closest('[contenteditable="true"]')) return;
     if ((e.key === 'Delete' || e.key === 'Backspace') && cvSelectedIds.size > 0) {
       e.preventDefault();
-      cvSelectedIds.forEach(function(id) { cvDeleteNode(id); });
+      cvPushUndo();
+      cvSelectedIds.forEach(function(id) {
+        cvNodes = cvNodes.filter(function(n) { return n.id !== id; });
+      });
       cvSelectedIds.clear();
       cvRender();
+      cvScheduleSave();
     }
     if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       cvNodes.forEach(function(n) { cvSelectedIds.add(n.id); });
       cvRender();
+    }
+    if (e.key === 'z' && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
+      e.preventDefault();
+      cvUndo();
+    }
+    if (e.key === 'z' && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+      e.preventDefault();
+      cvRedo();
     }
   });
   // HTML5 drop from caption library
@@ -4462,47 +4615,143 @@ function cvInitEvents() {
   });
 }
 
+// === MINIMAP ===
+function cvUpdateMinimap() {
+  var mm = document.getElementById('cv-minimap');
+  if (!mm) return;
+  if (!cvNodes.length) { mm.style.display = 'none'; return; }
+  mm.style.display = '';
+  var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  cvNodes.forEach(function(n) {
+    if (n.x < minX) minX = n.x;
+    if (n.y < minY) minY = n.y;
+    if (n.x + 200 > maxX) maxX = n.x + 200;
+    if (n.y + 100 > maxY) maxY = n.y + 100;
+  });
+  var pad = 40;
+  minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+  var cw = maxX - minX, ch = maxY - minY;
+  var mmW = 140, mmH = 100;
+  var scale = Math.min(mmW / cw, mmH / ch);
+  var html = '';
+  cvNodes.forEach(function(n) {
+    var dx = (n.x - minX) * scale;
+    var dy = (n.y - minY) * scale;
+    var cls = n.type === 'caption' ? 'mm-caption' : n.type === 'image' ? 'mm-image' : 'mm-text';
+    html += '<div class="cv-minimap-dot ' + cls + '" style="left:' + dx + 'px;top:' + dy + 'px"></div>';
+  });
+  // Viewport rectangle
+  var container = document.getElementById('cv-container');
+  if (container) {
+    var rect = container.getBoundingClientRect();
+    var vx = (-cvViewport.x / cvViewport.zoom - minX) * scale;
+    var vy = (-cvViewport.y / cvViewport.zoom - minY) * scale;
+    var vw = (rect.width / cvViewport.zoom) * scale;
+    var vh = (rect.height / cvViewport.zoom) * scale;
+    html += '<div class="cv-minimap-viewport" style="left:' + vx + 'px;top:' + vy + 'px;width:' + vw + 'px;height:' + vh + 'px"></div>';
+  }
+  mm.innerHTML = html;
+}
+
 // === TEMPLATES ===
 function cvLoadTemplate(tpl) {
   if (cvNodes.length > 0 && !confirm('This will replace current canvas. Continue?')) return;
+  cvPushUndo();
   cvNodes = [];
   cvSelectedIds.clear();
-  var gap = 40, col = 0, row = 0, w = 200;
+  var gap = 40, w = 200, N = cvMakeId;
+  var T = function(type, x, y, text, theme) {
+    cvNodes.push({ id: N(), type: type, x: x, y: y, text: text, theme: theme || '', captionId: null, imgSrc: null, created: new Date().toISOString() });
+  };
   if (tpl === 'social-calendar') {
     var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var slots = [
+      ['IG Reel\nHook + value bomb\n30-60s vertical','Story Poll\nEngagement driver\n2-3 frames','Carousel\n5-10 slides\nEducational deep-dive','Thread/Caption\nStorytelling post\nLong-form','IG Reel\nBTS / personal\nAuthenticity play','Community\nRepost + engage\nRelationship building','Rest / Batch\nPlan next week\nContent review'],
+      ['TikTok\nTrending audio\nQuick tip format','Email\nNewsletter send\nValue + CTA','Carousel\nMyth-busting\n"Most people think..."','Caption\nVulnerability post\nReal talk','Collab\nDuet or stitch\nCross-pollinate','IG Live / Q&A\nDirect connection\n15-30 min','Repurpose\nBest of the week\nRecycle top content'],
+      ['Short-form\nContrarian take\nPattern interrupt','Story Series\n3-5 frame teach\nSwipe-through','Long-form\nPillar content\nSEO-friendly','Quote Graphic\nOriginal quote\nShareable asset','Behind the scenes\nProcess reveal\nBuild trust','User content\nTestimonials\nSocial proof','Reflect\nAnalyze metrics\nDouble down on wins'],
+      ['Reel/TikTok\nTransformation\nBefore/after','Story CTA\nDrive to link\nConversion focus','Educational\nStep-by-step\nHow-to format','Personal story\nLesson learned\nConnect deeper','Trending\nJump on trend\nBrand twist','Engage\nComment threads\nDM conversations','Plan + Batch\nScript next week\nShoot content']
+    ];
     days.forEach(function(d, i) {
-      cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + i * (w + gap), y: 60, text: d.toUpperCase(), theme: 'header', captionId: null, imgSrc: null, created: new Date().toISOString() });
+      T('text', 80 + i * (w + gap), 50, d.toUpperCase(), 'header');
       for (var r = 0; r < 4; r++) {
-        cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + i * (w + gap), y: 160 + r * 120, text: 'Week ' + (r+1) + ' - ' + d + '\nAdd content here...', theme: 'calendar', captionId: null, imgSrc: null, created: new Date().toISOString() });
+        T('text', 80 + i * (w + gap), 150 + r * 130, 'WK' + (r+1) + ': ' + slots[r][i], 'calendar');
       }
     });
   } else if (tpl === 'carousel') {
-    for (var s = 0; s < 10; s++) {
-      cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + s * (w + gap), y: 100, text: 'Slide ' + (s+1) + '\n\nAdd your content here.\nDrag captions from the library.', theme: 'slide', captionId: null, imgSrc: null, created: new Date().toISOString() });
-    }
+    var slideContent = [
+      'SLIDE 1: HOOK\n\nBold claim or question\nthat stops the scroll.\n\n"Most people fail at X\nbecause they ignore Y"',
+      'SLIDE 2: PROBLEM\n\nName the pain point.\nMake them feel seen.\n\n"You\'ve tried everything\nbut nothing sticks..."',
+      'SLIDE 3: AGITATE\n\nWhy is this a problem?\nWhat happens if ignored?\n\nRaise the stakes.',
+      'SLIDE 4: REFRAME\n\nIntroduce your perspective.\nThe shift they need.\n\n"What if the problem\nisn\'t what you think?"',
+      'SLIDE 5: POINT 1\n\nFirst key insight.\nClear and specific.\nOne idea per slide.',
+      'SLIDE 6: POINT 2\n\nSecond key insight.\nBuild on the previous.\nEscalate value.',
+      'SLIDE 7: POINT 3\n\nThird key insight.\nThis should be your\nstrongest point.',
+      'SLIDE 8: PROOF\n\nShow evidence.\nResults, testimonials,\nor personal experience.',
+      'SLIDE 9: SUMMARY\n\nRecap the 3 points.\nReinforce the message.\nMake it memorable.',
+      'SLIDE 10: CTA\n\nWhat should they do?\nSave / Share / Follow\nComment below / Link in bio'
+    ];
+    slideContent.forEach(function(text, i) {
+      T('text', 80 + i * (w + gap), 80, text, 'slide');
+    });
   } else if (tpl === 'mood-board') {
-    var positions = [[100,80],[340,80],[580,80],[100,300],[340,300],[580,300],[220,520],[460,520]];
-    positions.forEach(function(p, i) {
-      cvNodes.push({ id: cvMakeId(), type: 'text', x: p[0], y: p[1], text: 'Mood ' + (i+1) + '\nDrop an image or caption here', theme: 'mood', captionId: null, imgSrc: null, created: new Date().toISOString() });
+    var moods = [
+      ['Visual Tone','Colors, textures, lighting\nthat define the brand feel'],
+      ['Typography','Font pairings\nHeadline + body styles'],
+      ['Hero Image','Cover photo / banner\nDrop an image here'],
+      ['Color Palette','Primary + secondary\n+ accent colors'],
+      ['Brand Voice','Keywords that describe\nhow you communicate'],
+      ['Inspiration','Reference accounts\nor creators you admire'],
+      ['Target Audience','Who are you speaking to?\nDemographics + psychographics'],
+      ['Content Pillars','3-5 core topics\nyou create around']
+    ];
+    var positions = [[100,80],[340,80],[580,80],[820,80],[100,280],[340,280],[580,280],[820,280]];
+    moods.forEach(function(m, i) {
+      T('text', positions[i][0], positions[i][1], m[0] + '\n\n' + m[1], 'mood');
     });
   } else if (tpl === 'infographic') {
-    var sections = ['Title / Hook','Problem','Solution','Data Point 1','Data Point 2','Data Point 3','Call to Action'];
-    sections.forEach(function(s, i) {
-      cvNodes.push({ id: cvMakeId(), type: 'text', x: 200, y: 60 + i * 130, text: s + '\n\nAdd detail here...', theme: 'infographic', captionId: null, imgSrc: null, created: new Date().toISOString() });
+    var infoSections = [
+      ['HEADLINE', 'Your attention-grabbing title\nthat summarizes the whole piece', 'title'],
+      ['SUBHEAD', 'Supporting context line\nthat frames the content', 'subtitle'],
+      ['THE PROBLEM', 'What challenge does\nyour audience face?\nBe specific and relatable.', 'problem'],
+      ['KEY STAT', '73% of people\nexperience this.\n[Replace with real data]', 'data'],
+      ['THE SOLUTION', 'Your unique approach.\nWhat makes it different\nfrom what they\'ve tried?', 'solution'],
+      ['STEP 1', 'First action item.\nMake it concrete\nand achievable today.', 'step'],
+      ['STEP 2', 'Second action item.\nBuild momentum\nfrom step 1.', 'step'],
+      ['STEP 3', 'Third action item.\nThis is where\ntransformation happens.', 'step'],
+      ['RESULT', 'What outcome can\nthey expect? Paint\nthe after picture.', 'result'],
+      ['CTA', 'Save this for later.\nShare with someone\nwho needs to see this.', 'cta']
+    ];
+    infoSections.forEach(function(s, i) {
+      T('text', 200, 50 + i * 120, s[0] + '\n\n' + s[1], s[2]);
     });
   } else if (tpl === 'quote-grid') {
+    // Pull actual captions from library if available
+    var libQuotes = clCaptions.filter(function(c) { return c.text && c.text.length < 200; }).slice(0, 9);
     for (var r2 = 0; r2 < 3; r2++) {
       for (var c2 = 0; c2 < 3; c2++) {
-        cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + c2 * (w + gap), y: 80 + r2 * 160, text: 'Quote ' + (r2*3+c2+1) + '\nDrag a caption here', theme: 'quote', captionId: null, imgSrc: null, created: new Date().toISOString() });
+        var qi = r2 * 3 + c2;
+        var qText = libQuotes[qi] ? libQuotes[qi].text : 'Quote ' + (qi + 1) + '\nDrag a caption from\nthe library here';
+        var qTheme = libQuotes[qi] ? (libQuotes[qi].theme || 'quote') : 'quote';
+        if (libQuotes[qi]) {
+          cvNodes.push({ id: N(), type: 'caption', x: 80 + c2 * (w + gap), y: 80 + r2 * 160, text: qText, theme: qTheme, captionId: libQuotes[qi].id, imgSrc: null, created: new Date().toISOString() });
+        } else {
+          T('text', 80 + c2 * (w + gap), 80 + r2 * 160, qText, 'quote');
+        }
       }
     }
   } else if (tpl === 'content-plan') {
-    var cols2 = ['Ideas','Drafting','Review','Scheduled','Published'];
-    cols2.forEach(function(label, ci) {
-      cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + ci * (w + gap), y: 60, text: label.toUpperCase(), theme: 'header', captionId: null, imgSrc: null, created: new Date().toISOString() });
-      for (var ri = 0; ri < 3; ri++) {
-        cvNodes.push({ id: cvMakeId(), type: 'text', x: 80 + ci * (w + gap), y: 160 + ri * 120, text: 'Card ' + (ri+1) + '\nDrag content here...', theme: 'plan', captionId: null, imgSrc: null, created: new Date().toISOString() });
-      }
+    var cols2 = [
+      { label: 'IDEAS', cards: ['Brain dump\nRaw topic ideas\nNo filter needed','Audience question\nWhat are they asking?','Trending topic\nCan you add\nyour perspective?'] },
+      { label: 'DRAFTING', cards: ['Write first draft\nDon\'t edit yet\nJust get it out','Script the hook\nFirst 3 seconds\nmake or break it','Outline structure\nIntro > Body > CTA'] },
+      { label: 'REVIEW', cards: ['Read aloud\nDoes it flow?\nDoes it sound like you?','Check hook strength\nWould YOU stop scrolling?','Verify CTA\nIs the ask clear\nand compelling?'] },
+      { label: 'SCHEDULED', cards: ['Set date + time\nBest posting hours\nfor your audience','Prepare hashtags\n+ alt text','Queue story teasers\nBuild anticipation'] },
+      { label: 'PUBLISHED', cards: ['Engage in comments\nFirst 30 min = critical','Cross-post\nRepurpose for\nother platforms','Track metrics\nSave + share rate\n> likes'] }
+    ];
+    cols2.forEach(function(col, ci) {
+      T('text', 80 + ci * (w + gap), 50, col.label, 'header');
+      col.cards.forEach(function(cardText, ri) {
+        T('text', 80 + ci * (w + gap), 150 + ri * 130, cardText, 'plan');
+      });
     });
   }
   cvFitView();
