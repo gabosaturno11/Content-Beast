@@ -500,6 +500,50 @@ textarea:focus,input:focus,select:focus{box-shadow:inset 0 1px 3px rgba(0,0,0,0.
 .section-content{overflow:hidden;transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1),opacity 0.2s ease;max-height:1000px;opacity:1}
 .section-content.collapsed{max-height:0;opacity:0;overflow:hidden}
 
+/* === ALIVE: BREATHING & ORGANIC === */
+@keyframes breathe{0%,100%{opacity:0.6}50%{opacity:1}}
+@keyframes ambientGlow{0%,100%{box-shadow:0 0 16px rgba(168,85,247,0.08)}50%{box-shadow:0 0 24px rgba(168,85,247,0.16)}}
+@keyframes subtlePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+.status-ok span:first-child{animation:breathe 3s ease-in-out infinite}
+.hdr-brand .ver{animation:ambientGlow 4s ease-in-out infinite}
+.tab-btn.active{animation:ambientGlow 3s ease-in-out infinite}
+.btn-primary:not(:hover){animation:ambientGlow 4s ease-in-out infinite}
+
+/* === RANGE SLIDER (Collision Matrix Style) === */
+input[type="range"]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);outline:none;cursor:pointer;border:none;box-shadow:inset 0 1px 2px rgba(0,0,0,0.3);padding:0;margin:6px 0}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 6px rgba(168,85,247,0.4),0 0 12px rgba(168,85,247,0.2);border:2px solid rgba(255,255,255,0.15);transition:all 0.15s cubic-bezier(0.4,0,0.2,1);margin-top:0}
+input[type="range"]::-webkit-slider-thumb:hover{transform:scale(1.2);box-shadow:0 2px 12px rgba(168,85,247,0.5),0 0 20px rgba(168,85,247,0.25)}
+input[type="range"]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 1px 6px rgba(168,85,247,0.4);border:2px solid rgba(255,255,255,0.15)}
+input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
+
+/* SLIDER CARD */
+.slider-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;transition:all 0.2s cubic-bezier(0.4,0,0.2,1)}
+.slider-card:hover{border-color:var(--border-hover);box-shadow:var(--shadow-sm)}
+.slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.slider-name{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary)}
+.slider-value{font-size:11px;font-weight:700;color:var(--accent);font-family:var(--mono);min-width:24px;text-align:right}
+.slider-labels{display:flex;justify-content:space-between;font-size:7px;color:var(--text-muted);margin-top:2px;padding:0 2px}
+.slider-level{font-size:7px;color:var(--text-muted);text-align:center;margin-top:3px;font-style:italic}
+
+/* === PIPELINE STAGES === */
+.pipeline{display:flex;gap:3px;padding:8px 10px;background:rgba(0,0,0,0.15);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.pipeline-stage{flex:1;min-width:60px;padding:6px 4px;text-align:center;border-radius:5px;font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;background:rgba(255,255,255,0.03);border:1px solid var(--border);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);cursor:default;color:var(--text-muted)}
+.pipeline-stage.active{background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.35);color:var(--accent);animation:ambientGlow 2s ease-in-out infinite}
+.pipeline-stage.complete{background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.25);color:var(--green)}
+.pipeline-stage .ps-icon{display:block;font-size:10px;margin-bottom:2px;font-family:var(--mono)}
+.pipeline-stage .ps-label{display:block;font-size:7px}
+
+/* === VOICE CARDS (Rich) === */
+.voice-card{background:var(--bg-elevated);border:2px solid transparent;border-radius:8px;padding:10px;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden}
+.voice-card::after{content:'';position:absolute;inset:0;background:var(--grad-surface);opacity:0;transition:opacity 0.3s}
+.voice-card:hover{transform:translateY(-2px);border-color:var(--border-hover);box-shadow:var(--shadow-md)}
+.voice-card:hover::after{opacity:1}
+.voice-card.selected{border-color:var(--accent);background:rgba(168,85,247,0.06);box-shadow:var(--glow-accent)}
+.voice-card .vc-name{font-size:10px;font-weight:700;color:var(--text-primary);margin-bottom:2px;position:relative;z-index:1}
+.voice-card .vc-desc{font-size:7px;color:var(--text-muted);line-height:1.4;position:relative;z-index:1}
+.voice-card .vc-bar{margin-top:6px;height:3px;border-radius:2px;background:rgba(168,85,247,0.15);position:relative;z-index:1}
+.voice-card .vc-bar-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.3s ease}
+
 /* === UNIVERSAL DRAG-DROP === */
 .drag-ghost{position:fixed;pointer-events:none;z-index:2000;padding:8px 14px;background:var(--bg-surface);border:1px solid var(--border-active);border-radius:8px;font-size:9px;color:var(--text-primary);font-family:var(--mono);box-shadow:var(--shadow-lg),0 0 24px rgba(168,85,247,0.15);max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.92;backdrop-filter:blur(8px)}
 .drop-target{transition:all 0.2s cubic-bezier(0.4,0,0.2,1)}
@@ -554,7 +598,7 @@ textarea:focus,input:focus,select:focus{box-shadow:inset 0 1px 3px rgba(0,0,0,0.
 <div class="hdr">
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v6.2</span>
+    <span class="ver">v6.3</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -746,16 +790,79 @@ textarea:focus,input:focus,select:focus{box-shadow:inset 0 1px 3px rgba(0,0,0,0.
           </div>
 
           <div class="row">
-            <label class="lbl">Voice Mode (V2)</label>
-            <div style="display:flex;gap:3px;flex-wrap:wrap">
-              <button class="mode-btn active" data-v="teacher" onclick="setVoice(this)">Teacher</button>
-              <button class="mode-btn" data-v="raw" onclick="setVoice(this)">Raw</button>
-              <button class="mode-btn" data-v="prophet" onclick="setVoice(this)">Prophet</button>
-              <button class="mode-btn" data-v="rebel" onclick="setVoice(this)">Rebel</button>
-              <button class="mode-btn" data-v="mystic" onclick="setVoice(this)">Mystic</button>
-              <button class="mode-btn" data-v="philosopher" onclick="setVoice(this)">Philosopher</button>
-              <button class="mode-btn" data-v="companion" onclick="setVoice(this)">Companion</button>
-              <button class="mode-btn" data-v="confessor" onclick="setVoice(this)">Confessor</button>
+            <label class="lbl">Voice Mode</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="voice-grid">
+              <div class="voice-card selected" data-v="teacher" onclick="setVoiceCard(this)">
+                <div class="vc-name">Teacher</div>
+                <div class="vc-desc">Warm, clear, guiding</div>
+                <div class="vc-bar"><div class="vc-bar-fill" style="width:50%"></div></div>
+              </div>
+              <div class="voice-card" data-v="raw" onclick="setVoiceCard(this)">
+                <div class="vc-name">Raw</div>
+                <div class="vc-desc">Unfiltered, street, real</div>
+                <div class="vc-bar"><div class="vc-bar-fill" style="width:85%"></div></div>
+              </div>
+              <div class="voice-card" data-v="prophet" onclick="setVoiceCard(this)">
+                <div class="vc-name">Prophet</div>
+                <div class="vc-desc">Certain, visionary, bold</div>
+                <div class="vc-bar"><div class="vc-bar-fill" style="width:75%"></div></div>
+              </div>
+              <div class="voice-card" data-v="rebel" onclick="setVoiceCard(this)">
+                <div class="vc-name">Rebel</div>
+                <div class="vc-desc">Against the grain, edgy</div>
+                <div class="vc-bar"><div class="vc-bar-fill" style="width:90%"></div></div>
+              </div>
+              <div class="voice-card" data-v="mystic" onclick="setVoiceCard(this)">
+                <div class="vc-name">Mystic</div>
+                <div class="vc-desc">Cosmic, transcendent</div>
+                <div class="vc-bar"><div class="vc-bar-fill" style="width:60%"></div></div>
+              </div>
+              <div class="voice-card" data-v="philosopher" onclick="setVoiceCard(this)">
+                <div class="vc-name">Philosopher</div>
+                <div class="vc-desc">Deep, layered, abstract</div>
+                <div class="vc-bar"><div class="vc-bar-fill" style="width:55%"></div></div>
+              </div>
+              <div class="voice-card" data-v="companion" onclick="setVoiceCard(this)">
+                <div class="vc-name">Companion</div>
+                <div class="vc-desc">Beside you, intimate</div>
+                <div class="vc-bar"><div class="vc-bar-fill" style="width:30%"></div></div>
+              </div>
+              <div class="voice-card" data-v="confessor" onclick="setVoiceCard(this)">
+                <div class="vc-name">Confessor</div>
+                <div class="vc-desc">Honest, vulnerable, no BS</div>
+                <div class="vc-bar"><div class="vc-bar-fill" style="width:80%"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="lbl">Intensity & Tone</label>
+            <div class="slider-card">
+              <div class="slider-header">
+                <span class="slider-name">Intensity</span>
+                <span class="slider-value" id="sl-intensity-val">5</span>
+              </div>
+              <input type="range" id="sl-intensity" min="1" max="10" value="5" oninput="updateSliderUI('intensity',this.value)" style="background:linear-gradient(to right,rgba(168,85,247,0.2) 50%,rgba(255,255,255,0.06) 50%)">
+              <div class="slider-labels"><span>whisper</span><span>nuclear</span></div>
+              <div class="slider-level" id="sl-intensity-level">confident</div>
+            </div>
+            <div class="slider-card">
+              <div class="slider-header">
+                <span class="slider-name">Vulnerability</span>
+                <span class="slider-value" id="sl-vuln-val">4</span>
+              </div>
+              <input type="range" id="sl-vuln" min="1" max="10" value="4" oninput="updateSliderUI('vuln',this.value)" style="background:linear-gradient(to right,rgba(168,85,247,0.2) 40%,rgba(255,255,255,0.06) 40%)">
+              <div class="slider-labels"><span>guarded</span><span>exposed</span></div>
+              <div class="slider-level" id="sl-vuln-level">open</div>
+            </div>
+            <div class="slider-card">
+              <div class="slider-header">
+                <span class="slider-name">Abstraction</span>
+                <span class="slider-value" id="sl-abstract-val">4</span>
+              </div>
+              <input type="range" id="sl-abstract" min="1" max="10" value="4" oninput="updateSliderUI('abstract',this.value)" style="background:linear-gradient(to right,rgba(168,85,247,0.2) 40%,rgba(255,255,255,0.06) 40%)">
+              <div class="slider-labels"><span>concrete</span><span>cosmic</span></div>
+              <div class="slider-level" id="sl-abstract-level">practical</div>
             </div>
           </div>
 
@@ -791,6 +898,13 @@ textarea:focus,input:focus,select:focus{box-shadow:inset 0 1px 3px rgba(0,0,0,0.
 
       <!-- ATOMIZER CONTROLS -->
       <div id="atom-ctrl" style="display:none">
+        <div class="pipeline" id="atom-pipeline">
+          <div class="pipeline-stage active" id="ps-ingest"><span class="ps-icon">/</span><span class="ps-label">Ingest</span></div>
+          <div class="pipeline-stage" id="ps-parse"><span class="ps-icon">{ }</span><span class="ps-label">Parse</span></div>
+          <div class="pipeline-stage" id="ps-classify"><span class="ps-icon">T</span><span class="ps-label">Classify</span></div>
+          <div class="pipeline-stage" id="ps-index"><span class="ps-icon">#</span><span class="ps-label">Index</span></div>
+          <div class="pipeline-stage" id="ps-ready"><span class="ps-icon">*</span><span class="ps-label">Ready</span></div>
+        </div>
         <div class="atom-import" id="atom-drop" onclick="document.getElementById('atom-file').click()">
           <div class="ai-icon">/</div>
           <div class="ai-title">Drop any document to atomize</div>
@@ -935,7 +1049,7 @@ textarea:focus,input:focus,select:focus{box-shadow:inset 0 1px 3px rgba(0,0,0,0.
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v6.2 — by Saturno Movement</span>
+  <span>CONTENT BEAST v6.3 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -1669,7 +1783,13 @@ function multiply() {
   };
 
   const style = S[currentVoice] || S.teacher;
-  document.getElementById('cap-output').innerHTML = pls.map(p => {
+  // Apply voice dials modifiers
+  const iLvl = voiceDials.intensity || 5;
+  const vLvl = voiceDials.vuln || 4;
+  const aLvl = voiceDials.abstract || 4;
+  // Dial context badge
+  const dialBadge = '[' + SLIDER_LEVELS.intensity[iLvl-1] + ' / ' + SLIDER_LEVELS.vuln[vLvl-1] + ' / ' + SLIDER_LEVELS.abstract[aLvl-1] + ']';
+  document.getElementById('cap-output').innerHTML = '<div style="padding:8px 0;margin-bottom:8px;font-size:8px;color:var(--text-muted);border-bottom:1px solid var(--border)"><b style="color:var(--accent)">' + currentVoice.toUpperCase() + '</b> ' + dialBadge + '</div>' + pls.map(p => {
     const f = F[p]; if (!f) return '';
     const c = f.f(seed, style);
     return '<div class="variant-card '+p+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:8px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">'+f.n+'</span><button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText);toast(\'Copied\')" class="btn btn-outline btn-sm">Copy</button></div><pre style="font-size:10px;color:var(--text-secondary);white-space:pre-wrap;line-height:1.6;font-family:var(--mono)">'+esc(c)+'</pre></div>';
@@ -2655,6 +2775,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function atomizeFile(file) {
   if (!file) return;
   setStatus('ATOMIZING...', 'busy');
+  animatePipeline(['active','','','','']);
   let text = '';
   const ext = file.name.split('.').pop().toLowerCase();
 
@@ -2674,9 +2795,16 @@ async function atomizeFile(file) {
     text = await file.text();
   }
 
-  // Clean the text
+  // Pipeline: parse
+  animatePipeline(['complete','active','','','']);
   text = cleanText(text);
+  // Pipeline: classify
+  setTimeout(() => animatePipeline(['complete','complete','active','','']), 100);
   atoms = parseAtoms(text, file.name);
+  // Pipeline: index + ready
+  setTimeout(() => animatePipeline(['complete','complete','complete','active','']), 200);
+  setTimeout(() => animatePipeline(['complete','complete','complete','complete','active']), 400);
+  setTimeout(() => animatePipeline(['complete','complete','complete','complete','complete']), 600);
 
   // Show source info
   document.getElementById('atom-source-info').style.display = '';
@@ -3570,6 +3698,54 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('cmd-palette').classList.contains('open')) closeCmd();
   }
 });
+
+// ============================================================
+// VOICE CARDS (Rich Selection)
+// ============================================================
+function setVoiceCard(el) {
+  currentVoice = el.dataset.v;
+  document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ============================================================
+// SLIDER UI (Collision Matrix Style)
+// ============================================================
+const SLIDER_LEVELS = {
+  intensity: ['whisper','soft','gentle','measured','confident','passionate','urgent','explosive','volcanic','nuclear'],
+  vuln: ['guarded','professional','measured','open','honest','exposed','raw','bleeding','shattered','naked'],
+  abstract: ['concrete','specific','grounded','practical','balanced','conceptual','abstract','philosophical','cosmic','transcendent']
+};
+
+let voiceDials = { intensity: 5, vuln: 4, abstract: 4 };
+
+function updateSliderUI(key, val) {
+  val = parseInt(val);
+  voiceDials[key] = val;
+  document.getElementById('sl-' + key + '-val').textContent = val;
+  document.getElementById('sl-' + key + '-level').textContent = SLIDER_LEVELS[key][val - 1] || '';
+  // Update track gradient
+  const pct = ((val - 1) / 9) * 100;
+  const slider = document.getElementById('sl-' + key);
+  slider.style.background = 'linear-gradient(to right, rgba(168,85,247,0.3) ' + pct + '%, rgba(255,255,255,0.06) ' + pct + '%)';
+}
+
+// ============================================================
+// PIPELINE ANIMATION
+// ============================================================
+function animatePipeline(stages) {
+  const ids = ['ps-ingest','ps-parse','ps-classify','ps-index','ps-ready'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.className = 'pipeline-stage'; }
+  });
+  stages.forEach((s, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(ids[i]);
+      if (el) el.className = 'pipeline-stage ' + s;
+    }, i * 300);
+  });
+}
 
 // ============================================================
 // TOGGLE PANELS
