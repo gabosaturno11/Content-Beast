@@ -456,6 +456,65 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
 .cmd-item .ci-desc{font-size:8px;color:var(--text-muted);margin-left:auto}
 .cmd-item .ci-key{font-size:8px;color:var(--text-muted);background:var(--bg-base);padding:2px 5px;border-radius:2px;border:1px solid var(--border);margin-left:auto}
 
+/* === 3D PANEL ELEVATION SYSTEM === */
+.lib{box-shadow:var(--panel-inset),4px 0 16px rgba(0,0,0,0.3),inset -1px 0 0 rgba(255,255,255,0.02)}
+.ctrl{box-shadow:var(--panel-inset),4px 0 20px rgba(0,0,0,0.25),inset 1px 0 0 rgba(255,255,255,0.015),inset -1px 0 0 rgba(255,255,255,0.015)}
+.preview{box-shadow:inset 4px 0 24px rgba(0,0,0,0.15)}
+.hdr{box-shadow:var(--panel-inset),0 2px 12px rgba(0,0,0,0.35),0 1px 0 rgba(168,85,247,0.04)}
+.ftr{box-shadow:inset 0 1px 0 rgba(255,255,255,0.02),0 -2px 12px rgba(0,0,0,0.2)}
+.ctrl-hdr{box-shadow:0 2px 8px rgba(0,0,0,0.2),inset 0 -1px 0 rgba(255,255,255,0.02)}
+.preview-hdr{box-shadow:0 2px 8px rgba(0,0,0,0.15),inset 0 -1px 0 rgba(255,255,255,0.02)}
+.lib-hdr{box-shadow:0 2px 6px rgba(0,0,0,0.15)}
+.atom-card,.cl-item{box-shadow:0 1px 4px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.03)}
+.atom-card:hover,.cl-item:hover{box-shadow:0 4px 16px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.04);transform:translateY(-1px)}
+.atom-card.selected,.cl-item.selected{box-shadow:0 4px 20px rgba(168,85,247,0.15),inset 0 1px 0 rgba(255,255,255,0.04);transform:translateY(-1px)}
+.preset-card{box-shadow:0 1px 3px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.02)}
+.preset-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.3);transform:translateY(-1px)}
+.lib-item{transition:all 0.15s cubic-bezier(0.4,0,0.2,1)}
+.lib-item:hover{box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.lib-item.active{box-shadow:inset 3px 0 0 var(--accent),0 2px 8px rgba(168,85,247,0.1)}
+.btn-primary{box-shadow:0 2px 8px rgba(168,85,247,0.25),inset 0 1px 0 rgba(255,255,255,0.1)}
+.btn-primary:hover{box-shadow:0 4px 16px rgba(168,85,247,0.35),inset 0 1px 0 rgba(255,255,255,0.12);transform:translateY(-1px)}
+.btn-icon{box-shadow:0 1px 2px rgba(0,0,0,0.15)}
+.btn-icon:hover{box-shadow:0 2px 6px rgba(0,0,0,0.25);transform:translateY(-1px)}
+.mode-btn{box-shadow:0 1px 2px rgba(0,0,0,0.1)}
+.mode-btn.active{box-shadow:0 2px 10px rgba(168,85,247,0.2),inset 0 1px 0 rgba(255,255,255,0.05)}
+.tab-btn{box-shadow:none;transition:all 0.2s cubic-bezier(0.4,0,0.2,1)}
+.tab-btn.active{box-shadow:0 2px 12px rgba(168,85,247,0.35),inset 0 1px 0 rgba(255,255,255,0.1)}
+textarea,input[type="text"],select{box-shadow:inset 0 2px 4px rgba(0,0,0,0.15)}
+textarea:focus,input:focus,select:focus{box-shadow:inset 0 1px 3px rgba(0,0,0,0.1),0 0 0 3px rgba(168,85,247,0.1),0 0 16px rgba(168,85,247,0.05)}
+
+/* === TOGGLE SWITCH === */
+.toggle-wrap{display:flex;align-items:center;gap:8px;padding:4px 0}
+.toggle-label{font-size:8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;cursor:pointer;user-select:none}
+.toggle{position:relative;width:32px;height:18px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:9px;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--text-muted);transition:all 0.25s cubic-bezier(0.4,0,0.2,1);box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.toggle.on{background:rgba(168,85,247,0.25);border-color:rgba(168,85,247,0.4)}
+.toggle.on::after{transform:translateX(14px);background:var(--accent);box-shadow:0 1px 6px rgba(168,85,247,0.4)}
+
+/* === COLLAPSIBLE SECTION === */
+.section-toggle{display:flex;align-items:center;justify-content:space-between;padding:8px 0;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);margin-bottom:8px}
+.section-toggle .lbl{margin:0;cursor:pointer}
+.section-toggle .section-arrow{font-size:8px;color:var(--text-muted);transition:transform 0.2s cubic-bezier(0.4,0,0.2,1);font-family:var(--mono)}
+.section-toggle.collapsed .section-arrow{transform:rotate(-90deg)}
+.section-content{overflow:hidden;transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1),opacity 0.2s ease;max-height:1000px;opacity:1}
+.section-content.collapsed{max-height:0;opacity:0;overflow:hidden}
+
+/* === UNIVERSAL DRAG-DROP === */
+.drag-ghost{position:fixed;pointer-events:none;z-index:2000;padding:8px 14px;background:var(--bg-surface);border:1px solid var(--border-active);border-radius:8px;font-size:9px;color:var(--text-primary);font-family:var(--mono);box-shadow:var(--shadow-lg),0 0 24px rgba(168,85,247,0.15);max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.92;backdrop-filter:blur(8px)}
+.drop-target{transition:all 0.2s cubic-bezier(0.4,0,0.2,1)}
+.drop-target.drag-over{border-color:var(--accent) !important;background:rgba(168,85,247,0.06) !important;box-shadow:0 0 24px rgba(168,85,247,0.12),inset 0 0 20px rgba(168,85,247,0.04) !important}
+.drop-target.drag-over::before{content:'Drop here';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent);font-family:var(--mono);z-index:5;background:var(--bg-base);padding:4px 12px;border-radius:4px;border:1px solid rgba(168,85,247,0.3);box-shadow:0 2px 8px rgba(168,85,247,0.15)}
+.draggable-item{cursor:grab}
+.draggable-item:active{cursor:grabbing}
+.draggable-item.dragging{opacity:0.4;transform:scale(0.97)}
+.drag-handle{width:12px;height:16px;display:flex;flex-direction:column;gap:2px;justify-content:center;cursor:grab;opacity:0.3;transition:opacity 0.15s;flex-shrink:0;padding:0 2px}
+.drag-handle:hover{opacity:0.7}
+.drag-handle::before,.drag-handle::after{content:'';display:block;width:8px;height:1.5px;background:var(--text-muted);border-radius:1px}
+.drag-handle span{display:block;width:8px;height:1.5px;background:var(--text-muted);border-radius:1px}
+.canvas-drop-zone{position:relative;min-height:100px}
+.canvas-drop-zone.drag-over{outline:2px dashed var(--accent);outline-offset:-4px;border-radius:8px}
+
 /* MOBILE */
 @media (max-width: 768px) {
   .workspace{grid-template-columns:1fr !important}
@@ -495,7 +554,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
 <div class="hdr">
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v6.0</span>
+    <span class="ver">v6.2</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -507,6 +566,14 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
       <button class="tab-btn active" id="view-default" onclick="setView('default')" title="3-panel">Full</button>
       <button class="tab-btn" id="view-split" onclick="setView('split')" title="Markdown + Preview">Split</button>
       <button class="tab-btn" id="view-focus" onclick="setView('focus')" title="Controls + Preview">Focus</button>
+    </div>
+    <div class="toggle-wrap" title="Toggle sidebar">
+      <span class="toggle on" id="tog-lib" onclick="togglePanel('lib')"></span>
+      <span class="toggle-label" onclick="togglePanel('lib')">Lib</span>
+    </div>
+    <div class="toggle-wrap" title="Toggle toolbar">
+      <span class="toggle on" id="tog-toolbar" onclick="togglePanel('toolbar')"></span>
+      <span class="toggle-label" onclick="togglePanel('toolbar')">Toolbar</span>
     </div>
     <span id="save-ind" style="font-size:8px;color:var(--text-muted);opacity:0;transition:opacity 0.3s">Saved</span>
     <span id="status" class="status status-ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
@@ -549,8 +616,12 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
           <div><label class="lbl">Author</label><input type="text" id="f-author" value="Gabo Saturno" oninput="onFieldChange()"></div>
         </div>
 
+        <div class="section-toggle" onclick="toggleSection(this)">
+          <label class="lbl">Template & Style</label>
+          <span class="section-arrow">v</span>
+        </div>
+        <div class="section-content">
         <div class="row">
-          <label class="lbl">Template</label>
           <div style="display:flex;gap:3px;flex-wrap:wrap">
             <button class="mode-btn active" data-tpl="tpl-saturno" onclick="setTpl(this)">Saturno</button>
             <button class="mode-btn" data-tpl="tpl-dark" onclick="setTpl(this)">Dark</button>
@@ -558,9 +629,8 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
             <button class="mode-btn" data-tpl="" onclick="setTpl(this)">White</button>
           </div>
         </div>
-
         <div class="row">
-          <label class="lbl">Level Badge</label>
+          <label class="lbl" style="font-size:7px;margin-bottom:3px">Level Badge</label>
           <div style="display:flex;gap:3px;flex-wrap:wrap">
             <button class="mode-btn active" data-lv="" onclick="setLv(this)">None</button>
             <button class="mode-btn" data-lv="foundation" onclick="setLv(this)" style="color:#4ade80">Foundation</button>
@@ -569,9 +639,14 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
             <button class="mode-btn" data-lv="elite" onclick="setLv(this)" style="color:#fbbf24">Elite</button>
           </div>
         </div>
+        </div>
 
-        <div class="row">
+        <div class="section-toggle" onclick="toggleSection(this)">
           <label class="lbl">Presets</label>
+          <span class="section-arrow">v</span>
+        </div>
+        <div class="section-content">
+        <div class="row">
           <div class="preset-grid">
             <div class="preset-card" onclick="loadPreset('program',this)"><div class="pn">Program PDF</div><div class="pd">Workout with exercises, sets, reps</div></div>
             <div class="preset-card" onclick="loadPreset('level',this)"><div class="pn">Level Guide</div><div class="pd">Foundation to Elite progression</div></div>
@@ -580,7 +655,13 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
             <div class="preset-card" onclick="loadPreset('cover',this)"><div class="pn">Cover Page</div><div class="pd">Branded title page</div></div>
           </div>
         </div>
+        </div>
 
+        <div class="section-toggle" onclick="toggleSection(this)">
+          <label class="lbl">Content</label>
+          <span class="section-arrow">v</span>
+        </div>
+        <div class="section-content">
         <div class="row">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <label class="lbl" style="margin-bottom:0">Content (Markdown)</label>
@@ -597,6 +678,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
             <div class="dz-text">Drop .md / .txt file here or type below</div>
           </div>
           <textarea id="f-content" style="height:200px" placeholder="# Heading&#10;## Subheading&#10;### Section&#10;- Bullet points&#10;**Bold** *italic*&#10;> Blockquote&#10;---&#10;| Col1 | Col2 |&#10;|------|------|&#10;| data | data |" oninput="onFieldChange()"></textarea>
+        </div>
         </div>
 
         <div style="display:flex;gap:6px">
@@ -645,7 +727,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
         <div id="cap-multiplier" style="display:none">
           <div class="row">
             <label class="lbl">Seed Phrase</label>
-            <textarea id="seed-input" style="height:100px" placeholder="Enter your core idea or pick from the Seed Library below..."></textarea>
+            <textarea id="seed-input" class="drop-target" data-drop="seed" style="height:100px" placeholder="Enter your core idea or pick from the Seed Library below... (or drag a caption here)"></textarea>
           </div>
 
           <div class="row">
@@ -822,7 +904,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
       <button class="btn-icon" onclick="toggleFind()" style="margin-left:auto;font-size:8px">x</button>
     </div>
     <div class="preview-body" id="preview-body">
-      <div id="pdf-wrap">
+      <div id="pdf-wrap" class="drop-target canvas-drop-zone" data-drop="canvas">
         <div class="pdf-canvas tpl-saturno" id="canvas" contenteditable="true" data-placeholder="Start writing... or paste content here. Everything you type becomes exportable as PDF, HTML, Markdown, or plain text.">
           <h1>Content Beast</h1>
           <h2>By Gabo Saturno</h2>
@@ -853,7 +935,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(168,85,24
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v6.0 — by Saturno Movement</span>
+  <span>CONTENT BEAST v6.2 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -2248,7 +2330,9 @@ const CMD_ACTIONS = [
   { icon: 'CL', text: 'Export All Captions (JSON)', desc: 'Full library backup', fn: () => clExportAll('json') },
   { icon: 'CL', text: 'Export All Captions (Markdown)', desc: 'Library as MD', fn: () => clExportAll('md') },
   { icon: 'CL', text: 'Import Seeds to Library', desc: 'Add built-in quotes to library', fn: () => importSeedsToLibrary() },
-  { icon: 'CL', text: 'Add Caption', desc: 'Add manually', fn: () => { setMode('caption'); setCapSub('library'); addCaptionManual(); } }
+  { icon: 'CL', text: 'Add Caption', desc: 'Add manually', fn: () => { setMode('caption'); setCapSub('library'); addCaptionManual(); } },
+  { icon: 'T', text: 'Toggle Library Panel', desc: 'Show/hide sidebar', fn: () => togglePanel('lib') },
+  { icon: 'T', text: 'Toggle Toolbar', desc: 'Show/hide formatting bar', fn: () => togglePanel('toolbar') }
 ];
 let cmdSelIdx = 0;
 
@@ -2735,7 +2819,10 @@ function renderAtoms() {
     return;
   }
   el.innerHTML = filtered.map(a =>
-    '<div class="atom-card" data-atom-id="' + a.id + '" onclick="toggleAtomSelect(this,' + a.id + ')">' +
+    '<div class="atom-card draggable-item" data-atom-id="' + a.id + '" draggable="true" onclick="toggleAtomSelect(this,' + a.id + ')">' +
+    '<div style="display:flex;align-items:flex-start;gap:6px">' +
+    '<div class="drag-handle" title="Drag to canvas or seed"><span></span></div>' +
+    '<div style="flex:1;min-width:0">' +
     '<span class="ac-type t-' + a.type + '">' + a.type + (a.level ? ' H' + a.level : '') + '</span>' +
     '<div class="ac-meta">#' + a.id + ' / ' + a.text.split(/\s+/).length + ' words</div>' +
     '<div class="ac-text">' + esc(a.text) + '</div>' +
@@ -2745,8 +2832,21 @@ function renderAtoms() {
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();atomCopy(' + a.id + ')">Copy</button>' +
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();atomNewDoc(' + a.id + ')">New Doc</button>' +
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();previewAtom(' + a.id + ')" style="color:var(--green)">Preview</button>' +
-    '</div></div>'
+    '</div></div></div></div>'
   ).join('');
+  // Wire HTML5 drag events for atom items
+  el.querySelectorAll('.atom-card[draggable]').forEach(item => {
+    item.addEventListener('dragstart', function(e) {
+      const aid = parseInt(this.dataset.atomId);
+      const atom = atoms.find(x => x.id === aid);
+      if (!atom) return;
+      e.dataTransfer.setData('application/x-cb-atom', JSON.stringify(atom));
+      e.dataTransfer.setData('text/plain', atom.text);
+      e.dataTransfer.effectAllowed = 'copyMove';
+      this.classList.add('dragging');
+    });
+    item.addEventListener('dragend', function() { this.classList.remove('dragging'); });
+  });
 
   // Stats
   const stats = document.getElementById('atom-stats');
@@ -3017,7 +3117,10 @@ function renderCaptionLibrary() {
   }
 
   el.innerHTML = filtered.map(c =>
-    '<div class="cl-item" data-cl-id="' + c.id + '" onclick="toggleClSelect(this,\'' + c.id + '\')">' +
+    '<div class="cl-item draggable-item" data-cl-id="' + c.id + '" draggable="true" onclick="toggleClSelect(this,\'' + c.id + '\')">' +
+    '<div style="display:flex;align-items:flex-start;gap:6px">' +
+    '<div class="drag-handle" title="Drag to canvas or seed"><span></span></div>' +
+    '<div style="flex:1;min-width:0">' +
     (c.voice ? '<span class="cl-voice">' + esc(c.voice) + '</span>' : '') +
     '<span class="cl-theme">' + esc(c.theme) + '</span>' +
     '<div class="cl-text">' + esc(c.text) + '</div>' +
@@ -3033,8 +3136,21 @@ function renderCaptionLibrary() {
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clCopy(\'' + c.id + '\')">Copy</button>' +
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clEdit(\'' + c.id + '\')">Edit</button>' +
     '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();clRemove(\'' + c.id + '\')" style="color:var(--red)">x</button>' +
-    '</div></div>'
+    '</div></div></div></div>'
   ).join('');
+  // Wire HTML5 drag events for caption items
+  el.querySelectorAll('.cl-item[draggable]').forEach(item => {
+    item.addEventListener('dragstart', function(e) {
+      const cid = this.dataset.clId;
+      const cap = clCaptions.find(x => x.id === cid);
+      if (!cap) return;
+      e.dataTransfer.setData('application/x-cb-caption', JSON.stringify(cap));
+      e.dataTransfer.setData('text/plain', cap.text);
+      e.dataTransfer.effectAllowed = 'copyMove';
+      this.classList.add('dragging');
+    });
+    item.addEventListener('dragend', function() { this.classList.remove('dragging'); });
+  });
 
   // Stats
   const stats = document.getElementById('cl-stats');
@@ -3456,12 +3572,187 @@ document.addEventListener('keydown', e => {
 });
 
 // ============================================================
+// TOGGLE PANELS
+// ============================================================
+function togglePanel(panel) {
+  const tog = document.getElementById('tog-' + panel);
+  const isOn = tog.classList.toggle('on');
+  if (panel === 'lib') {
+    const ws = document.getElementById('workspace');
+    if (isOn) {
+      ws.classList.remove('two-col');
+    } else {
+      ws.classList.add('two-col');
+    }
+  } else if (panel === 'toolbar') {
+    const tb = document.getElementById('preview-toolbar');
+    tb.style.display = isOn ? '' : 'none';
+  }
+}
+
+// ============================================================
+// COLLAPSIBLE SECTIONS
+// ============================================================
+function toggleSection(el) {
+  el.classList.toggle('collapsed');
+  const content = el.nextElementSibling;
+  if (content && content.classList.contains('section-content')) {
+    content.classList.toggle('collapsed');
+  }
+}
+
+// ============================================================
+// UNIVERSAL DRAG-DROP SYSTEM
+// ============================================================
+let dragPayload = null;
+let dragGhost = null;
+
+function initUniversalDragDrop() {
+  // Create reusable ghost element
+  dragGhost = document.createElement('div');
+  dragGhost.className = 'drag-ghost';
+  dragGhost.style.display = 'none';
+  document.body.appendChild(dragGhost);
+
+  // Setup drop targets
+  setupDropTarget(document.getElementById('pdf-wrap'), 'canvas');
+  setupDropTarget(document.getElementById('seed-input'), 'seed');
+
+  // Setup caption library import zone as drop target
+  const clImport = document.querySelector('.cl-import-zone');
+  if (clImport) setupDropTarget(clImport, 'cl-import');
+}
+
+function startDrag(e, type, data, text) {
+  e.preventDefault();
+  dragPayload = { type: type, data: data, text: text };
+  dragGhost.textContent = text.length > 50 ? text.substring(0, 50) + '...' : text;
+  dragGhost.style.display = 'block';
+  dragGhost.style.left = e.clientX + 12 + 'px';
+  dragGhost.style.top = e.clientY + 12 + 'px';
+
+  // Highlight all valid drop targets
+  document.querySelectorAll('.drop-target').forEach(dt => {
+    dt.style.transition = 'all 0.2s ease';
+  });
+
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup', onDragEnd);
+  document.body.style.cursor = 'grabbing';
+  document.body.style.userSelect = 'none';
+}
+
+function onDragMove(e) {
+  if (!dragPayload) return;
+  dragGhost.style.left = e.clientX + 12 + 'px';
+  dragGhost.style.top = e.clientY + 12 + 'px';
+
+  // Check drop targets under cursor
+  document.querySelectorAll('.drop-target').forEach(dt => {
+    const r = dt.getBoundingClientRect();
+    const over = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    dt.classList.toggle('drag-over', over);
+  });
+}
+
+function onDragEnd(e) {
+  if (!dragPayload) return;
+  document.removeEventListener('mousemove', onDragMove);
+  document.removeEventListener('mouseup', onDragEnd);
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+  dragGhost.style.display = 'none';
+
+  // Find the drop target under cursor
+  const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
+  const dt = dropTarget ? dropTarget.closest('.drop-target') : null;
+
+  if (dt) {
+    const dropType = dt.dataset.drop;
+    handleDrop(dropType, dragPayload);
+  }
+
+  // Clean up
+  document.querySelectorAll('.drop-target.drag-over').forEach(el => el.classList.remove('drag-over'));
+  dragPayload = null;
+}
+
+function handleDrop(dropType, payload) {
+  if (dropType === 'canvas') {
+    const canvas = document.getElementById('canvas');
+    const footer = canvas.querySelector('.pdf-footer');
+    let html = '';
+    if (payload.type === 'atom') {
+      const a = payload.data;
+      if (a.type === 'heading') html = '<h' + (a.level || 2) + '>' + esc(a.text) + '</h' + (a.level || 2) + '>';
+      else if (a.type === 'quote') html = '<blockquote>' + esc(a.text) + '</blockquote>';
+      else if (a.type === 'list') html = '<li>' + esc(a.text) + '</li>';
+      else if (a.type === 'code') html = '<pre style="background:#f4f4f5;padding:12px;border-radius:4px;font-family:JetBrains Mono,monospace;font-size:11px;margin:12px 0">' + esc(a.text) + '</pre>';
+      else html = '<p>' + esc(a.text) + '</p>';
+    } else {
+      html = '<p>' + esc(payload.text) + '</p>';
+    }
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    if (footer) canvas.insertBefore(el.firstChild, footer);
+    else canvas.appendChild(el.firstChild);
+    setMode('pdf');
+    scheduleSave();
+    toast('Dropped to canvas');
+  } else if (dropType === 'seed') {
+    const seedInput = document.getElementById('seed-input');
+    seedInput.value = (seedInput.value ? seedInput.value + '\n\n' : '') + payload.text;
+    setMode('caption');
+    setCapSub('multiplier');
+    toast('Dropped to seed');
+  }
+}
+
+function setupDropTarget(el, type) {
+  if (!el) return;
+  el.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('drag-over');
+  });
+  el.addEventListener('dragleave', function() {
+    this.classList.remove('drag-over');
+  });
+  el.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    // Handle native HTML5 drag-drop (for file drops or text)
+    const text = e.dataTransfer.getData('text/plain');
+    const cbText = e.dataTransfer.getData('application/x-cb-caption');
+    const abText = e.dataTransfer.getData('application/x-cb-atom');
+
+    if (cbText) {
+      try {
+        const payload = JSON.parse(cbText);
+        handleDrop(type, { type: 'caption', data: payload, text: payload.text });
+      } catch(err) {}
+    } else if (abText) {
+      try {
+        const payload = JSON.parse(abText);
+        handleDrop(type, { type: 'atom', data: payload, text: payload.text });
+      } catch(err) {}
+    } else if (text && type === 'seed') {
+      const seedInput = document.getElementById('seed-input');
+      seedInput.value = (seedInput.value ? seedInput.value + '\n\n' : '') + text;
+      toast('Text dropped to seed');
+    } else if (e.dataTransfer.files.length) {
+      if (type === 'canvas') handleFile(e.dataTransfer.files[0]);
+    }
+  });
+}
+
+// ============================================================
 // INIT
 // ============================================================
 loadDocs();
 updateWordCount();
 renderSeedLibrary();
 initPanelResize();
+initUniversalDragDrop();
 openCaptionDB().then(() => clLoadAll()).catch(e => console.warn('IndexedDB:', e));
 </script>
 </body>
