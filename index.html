@@ -573,10 +573,16 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .cv-container:active{cursor:grabbing}
 .cv-surface{position:absolute;top:0;left:0;transform-origin:0 0}
 .cv-grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(0,0,0,0.05) 1px,transparent 1px);background-size:24px 24px;pointer-events:none;z-index:0}
-.cv-node{position:absolute;min-width:160px;max-width:300px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:14px;cursor:move;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:box-shadow 0.2s,border-color 0.2s;z-index:1;font-family:var(--sans)}
+.cv-node{position:absolute;min-width:160px;max-width:300px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:14px;padding-left:18px;cursor:move;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:box-shadow 0.2s,border-color 0.2s;z-index:1;font-family:var(--sans);border-left:4px solid #ddd}
+.cv-node.cn-caption{border-left-color:#8B5CF6}
+.cv-node.cn-text-node{border-left-color:#4F7CFF}
+.cv-node.cn-image{border-left-color:#4ade80}
 .cv-node:hover{box-shadow:0 4px 16px rgba(0,0,0,0.10);border-color:rgba(0,0,0,0.15)}
+.cv-node:hover.cn-caption{border-left-color:#8B5CF6}.cv-node:hover.cn-text-node{border-left-color:#4F7CFF}.cv-node:hover.cn-image{border-left-color:#4ade80}
 .cv-node.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(139,92,246,0.2),0 4px 16px rgba(0,0,0,0.10)}
+.cv-node.selected.cn-caption{border-left-color:#8B5CF6}.cv-node.selected.cn-text-node{border-left-color:#4F7CFF}.cv-node.selected.cn-image{border-left-color:#4ade80}
 .cv-node.dragging{opacity:0.7;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.15)}
+.cv-node:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .cv-node .cn-text{font-size:11px;line-height:1.65;color:#1a1a1a;word-break:break-word;white-space:pre-line}
 .cv-node .cn-meta{margin-top:8px;font-size:7px;color:#999;display:flex;gap:6px;align-items:center}
 .cv-node .cn-theme{background:rgba(139,92,246,0.10);color:#8b5cf6;padding:1px 5px;border-radius:3px;font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
@@ -827,8 +833,9 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           <div class="cl-filters" id="cl-filters"></div>
           <div class="cl-bulk" id="cl-bulk">
             <span style="font-size:8px;color:var(--text-muted)"><b id="cl-sel-count">0</b> selected</span>
-            <button class="btn btn-primary btn-sm" onclick="clBulkToCanvas()">To Canvas</button>
-            <button class="btn btn-outline btn-sm" onclick="clBulkToSeed()">To Seed</button>
+            <button class="btn btn-primary btn-sm" onclick="clBulkToCanvas()">To PDF</button>
+            <button class="btn btn-outline btn-sm" onclick="cvBulkAddFromLibrary()" style="color:var(--accent)">To Board</button>
+            <button class="btn btn-outline btn-sm" onclick="clBulkToSeed()">Seed</button>
             <button class="btn btn-outline btn-sm" onclick="clBulkCopy()">Copy</button>
             <button class="btn btn-outline btn-sm" onclick="clBulkExport()">Export</button>
             <button class="btn btn-outline btn-sm" onclick="clDeselectAll()" style="margin-left:auto">x</button>
@@ -1004,8 +1011,9 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <div class="row">
           <label class="lbl">Actions</label>
           <div style="display:flex;gap:4px;flex-wrap:wrap">
-            <button class="btn btn-outline btn-sm" onclick="cvExportJSON()" style="flex:1;color:var(--green)">Export JSON</button>
-            <button class="btn btn-outline btn-sm" onclick="cvClearAll()" style="flex:1;color:var(--red)">Clear All</button>
+            <button class="btn btn-outline btn-sm" onclick="cvExportJSON()" style="flex:1;color:var(--green)">Export</button>
+            <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="flex:1;color:var(--cyan)">Import</button>
+            <button class="btn btn-outline btn-sm" onclick="cvClearAll()" style="flex:1;color:var(--red)">Clear</button>
           </div>
         </div>
 
@@ -1172,7 +1180,14 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       </div>
       <div id="cv-empty" class="cv-empty">
         <div class="cv-empty-title">Canvas</div>
-        <div class="cv-empty-sub">Drag captions from the library<br>or use + buttons to add nodes</div>
+        <div class="cv-empty-sub">Drag captions from the library, or start with a template</div>
+        <div style="display:flex;gap:6px;margin-top:12px;pointer-events:auto;flex-wrap:wrap;justify-content:center">
+          <button class="btn btn-outline btn-sm" onclick="cvAddTextNode()" style="font-size:8px;color:#4F7CFF;border-color:rgba(79,124,255,0.2)">+ Text</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('cv-img-input').click()" style="font-size:8px;color:#4ade80;border-color:rgba(74,222,128,0.2)">+ Image</button>
+          <button class="btn btn-outline btn-sm" onclick="cvLoadTemplate('social-calendar')" style="font-size:8px;color:#8B5CF6;border-color:rgba(139,92,246,0.2)">Social Calendar</button>
+          <button class="btn btn-outline btn-sm" onclick="cvLoadTemplate('carousel')" style="font-size:8px;color:#8B5CF6;border-color:rgba(139,92,246,0.2)">Carousel</button>
+          <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="font-size:8px;color:var(--text-muted)">Import JSON</button>
+        </div>
       </div>
       <div class="cv-toolbar" id="cv-toolbar">
         <button onclick="cvZoomBy(-0.1)" title="Zoom out">-</button>
@@ -2735,6 +2750,7 @@ const CMD_ACTIONS = [
   { icon: 'CV', text: 'Canvas: Add Text Node', desc: 'Add text to canvas', fn: () => { setMode('canvas'); cvAddTextNode(); } },
   { icon: 'CV', text: 'Canvas: Add Image', desc: 'Upload image to canvas', fn: () => { setMode('canvas'); document.getElementById('cv-img-input').click(); } },
   { icon: 'CV', text: 'Canvas: Export JSON', desc: 'Export canvas graph', fn: () => cvExportJSON() },
+  { icon: 'CV', text: 'Canvas: Import JSON', desc: 'Load canvas from file', fn: () => { setMode('canvas'); cvImportJSON(); } },
   { icon: 'CV', text: 'Canvas: Fit View', desc: 'Zoom to fit all nodes', fn: () => { setMode('canvas'); cvFitView(); } },
   { icon: 'CV', text: 'Canvas: Social Calendar', desc: 'Load social media calendar template', fn: () => { setMode('canvas'); cvLoadTemplate('social-calendar'); } },
   { icon: 'CV', text: 'Canvas: Carousel', desc: 'Load carousel slides template', fn: () => { setMode('canvas'); cvLoadTemplate('carousel'); } },
@@ -4058,6 +4074,66 @@ function cvExportJSON() {
   toast('Canvas exported as JSON');
 }
 
+function cvImportJSON() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function() {
+    if (!input.files.length) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var data = JSON.parse(ev.target.result);
+        if (data.nodes && Array.isArray(data.nodes)) {
+          if (cvNodes.length > 0 && !confirm('Replace current canvas with imported data?')) return;
+          cvNodes = data.nodes;
+          if (data.viewport) {
+            cvViewport.x = data.viewport.x || 0;
+            cvViewport.y = data.viewport.y || 0;
+            cvViewport.zoom = data.viewport.zoom || 1;
+          }
+          cvSelectedIds.clear();
+          cvRender();
+          cvScheduleSave();
+          toast('Imported ' + cvNodes.length + ' nodes');
+        } else { toast('Invalid canvas JSON'); }
+      } catch(e) { toast('Parse error: ' + e.message); }
+    };
+    reader.readAsText(input.files[0]);
+  };
+  input.click();
+}
+
+// Bulk add selected captions to canvas
+function cvBulkAddFromLibrary() {
+  var sel = getSelectedCaptions();
+  if (!sel.length) { toast('Select captions first'); return; }
+  var container = document.getElementById('cv-container');
+  var rect = container.getBoundingClientRect();
+  var baseX = (rect.width / 2 - cvViewport.x) / cvViewport.zoom - 80;
+  var baseY = (rect.height / 2 - cvViewport.y) / cvViewport.zoom - 60;
+  sel.forEach(function(c, i) {
+    var col = i % 3;
+    var row = Math.floor(i / 3);
+    cvNodes.push({
+      id: cvMakeId(),
+      type: 'caption',
+      x: baseX + col * 220,
+      y: baseY + row * 140,
+      text: c.text,
+      theme: c.theme || '',
+      captionId: c.id,
+      imgSrc: null,
+      created: new Date().toISOString()
+    });
+  });
+  clDeselectAll();
+  cvRender();
+  cvScheduleSave();
+  setMode('canvas');
+  toast(sel.length + ' captions added to canvas');
+}
+
 // === RENDER ===
 function cvRender() {
   const surface = document.getElementById('cv-surface');
@@ -4071,7 +4147,8 @@ function cvRender() {
   // Render each node
   cvNodes.forEach(function(n) {
     var el = document.createElement('div');
-    el.className = 'cv-node' + (n.type === 'image' ? ' cn-image' : '') + (cvSelectedIds.has(n.id) ? ' selected' : '');
+    var typeClass = n.type === 'image' ? ' cn-image' : n.type === 'caption' ? ' cn-caption' : ' cn-text-node';
+    el.className = 'cv-node' + typeClass + (cvSelectedIds.has(n.id) ? ' selected' : '');
     el.dataset.id = n.id;
     el.style.left = n.x + 'px';
     el.style.top = n.y + 'px';
