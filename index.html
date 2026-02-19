@@ -503,6 +503,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         <button class="btn-icon" onclick="execCmd('bold')" title="Bold"><b>B</b></button>
         <button class="btn-icon" onclick="execCmd('italic')" title="Italic"><i>I</i></button>
         <button class="btn-icon" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+        <button class="btn-icon" onclick="execCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
         <span class="tb-sep"></span>
         <select onchange="execCmd('fontSize',this.value);this.selectedIndex=0" style="width:50px;padding:3px;font-size:8px;background:var(--bg-base);border:1px solid var(--border);color:var(--text-muted);border-radius:3px;font-family:var(--mono)" title="Font size">
           <option value="">Size</option>
@@ -523,6 +524,9 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         <button class="btn-icon" onclick="execCmd('insertUnorderedList')" title="Bullet list">*</button>
         <button class="btn-icon" onclick="execCmd('insertOrderedList')" title="Numbered list">#</button>
         <button class="btn-icon" onclick="execCmd('formatBlock','blockquote')" title="Quote">"</button>
+        <button class="btn-icon" onclick="execCmd('indent')" title="Indent">-></button>
+        <button class="btn-icon" onclick="execCmd('outdent')" title="Outdent"><-</button>
+        <button class="btn-icon" onclick="insertLink()" title="Insert link">Lnk</button>
         <button class="btn-icon" onclick="insertHR()" title="Rule">--</button>
         <button class="btn-icon" onclick="insertPageBreak()" title="Page break">||</button>
         <span class="tb-sep"></span>
@@ -548,6 +552,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
         <button class="btn-icon" onclick="generateTOC()" title="Insert Table of Contents">TOC</button>
         <button class="btn-icon" onclick="openVersions()" title="Version history">H</button>
         <span class="tb-sep"></span>
+        <button class="btn-icon" onclick="execCmd('removeFormat')" title="Clear formatting">Clr</button>
         <button class="btn-icon" onclick="toggleFullscreen()" title="Fullscreen" id="fs-btn">FS</button>
         <div class="zoom-bar">
           <button class="btn-icon" onclick="zoom(-10)" title="Zoom out">-</button>
@@ -581,6 +586,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
       <span>Words: <b id="wc-words">0</b></span>
       <span>Chars: <b id="wc-chars">0</b></span>
       <span>Pages: <b id="wc-pages">~1</b></span>
+      <span>Read: <b id="wc-read">~1 min</b></span>
     </div>
   </div>
 
@@ -809,7 +815,7 @@ function renderLibrary() {
   el.innerHTML = docs.map(d => {
     const active = d.id === activeDocId;
     const date = new Date(d.updated).toLocaleDateString();
-    return '<div class="lib-item' + (active ? ' active' : '') + '" onclick="switchDoc(\'' + d.id + '\')">' +
+    return '<div class="lib-item' + (active ? ' active' : '') + '" onclick="switchDoc(\'' + d.id + '\')" draggable="true" data-docid="' + d.id + '">' +
       '<div class="li-title">' + esc(d.title) + '</div>' +
       '<div class="li-meta">' + date + (d.level ? ' / ' + d.level : '') +
       '<span style="float:right;display:flex;gap:4px">' +
@@ -817,6 +823,33 @@ function renderLibrary() {
       '<span onclick="event.stopPropagation();deleteDoc(\'' + d.id + '\')" style="cursor:pointer;color:var(--red)" title="Delete">x</span>' +
       '</span></div></div>';
   }).join('');
+  // Wire drag-to-reorder
+  el.querySelectorAll('.lib-item').forEach(item => {
+    item.addEventListener('dragstart', function(e) {
+      e.dataTransfer.setData('text/plain', this.dataset.docid);
+      this.style.opacity = '0.4';
+    });
+    item.addEventListener('dragend', function() { this.style.opacity = '1'; });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.borderTop = '2px solid var(--accent)';
+    });
+    item.addEventListener('dragleave', function() { this.style.borderTop = ''; });
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.style.borderTop = '';
+      const draggedId = e.dataTransfer.getData('text/plain');
+      const targetId = this.dataset.docid;
+      if (draggedId === targetId) return;
+      const draggedIdx = docs.findIndex(d => d.id === draggedId);
+      const targetIdx = docs.findIndex(d => d.id === targetId);
+      if (draggedIdx < 0 || targetIdx < 0) return;
+      const [moved] = docs.splice(draggedIdx, 1);
+      docs.splice(targetIdx, 0, moved);
+      saveDocs();
+      renderLibrary();
+    });
+  });
 }
 
 // ============================================================
@@ -895,6 +928,14 @@ function estPages() {
 // ============================================================
 function execCmd(cmd, val) { document.execCommand(cmd, false, val || null); }
 function execBlock(tag) { document.execCommand('formatBlock', false, '<' + tag + '>'); }
+function insertLink() {
+  const url = prompt('URL:', 'https://');
+  if (!url) return;
+  const text = prompt('Link text:', '') || url;
+  document.execCommand('insertHTML', false, '<a href="' + url.replace(/"/g, '&quot;') + '" style="color:#06b6d4;text-decoration:underline">' + esc(text) + '</a>');
+  scheduleSave();
+}
+
 function insertHR() {
   const sel = window.getSelection();
   if (sel.rangeCount) {
@@ -1306,9 +1347,11 @@ function updateWordCount() {
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
   const chars = text.length;
   const pages = Math.max(1, Math.ceil(canvas.scrollHeight / 1050));
+  const readTime = Math.max(1, Math.ceil(words / 200));
   document.getElementById('wc-words').textContent = words;
   document.getElementById('wc-chars').textContent = chars;
   document.getElementById('wc-pages').textContent = '~' + pages;
+  document.getElementById('wc-read').textContent = '~' + readTime + ' min';
   document.getElementById('page-est').textContent = '~ ' + pages + ' page' + (pages > 1 ? 's' : '') + ' (A4)';
 }
 
