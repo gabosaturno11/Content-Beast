@@ -668,10 +668,18 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .ctrl-body{padding:12px}
   .grid2{grid-template-columns:1fr}
   .cv-container{height:calc(100vh - 44px - 48px)}
-  .cv-toolbar{bottom:8px;padding:3px 6px}
-  .cv-toolbar button{padding:4px 6px;font-size:7px}
-  .cv-node{min-width:140px;max-width:260px;padding:10px}
+  .cv-toolbar{bottom:54px;padding:3px 6px;gap:2px}
+  .cv-toolbar button{padding:6px 8px;font-size:8px;min-height:28px;min-width:28px}
+  .cv-toolbar .cv-undo-btn{display:none}
+  .cv-toolbar .cv-sep:first-of-type{display:none}
+  .cv-node{min-width:140px;max-width:260px;padding:10px;padding-left:14px}
   .cv-node .cn-text{font-size:10px}
+  .cv-node .cn-actions{display:flex;position:static;margin-top:6px;background:transparent;border:none;box-shadow:none;padding:0;gap:4px}
+  .cv-node .cn-actions button{width:28px;height:28px;font-size:10px;background:rgba(0,0,0,0.04);border-radius:4px}
+  .cv-minimap{display:none}
+  .cv-empty{padding:0 20px}
+  .cv-empty-title{font-size:12px}
+  .cv-empty-sub{font-size:9px}
 }
 
 /* PRINT */
@@ -1026,7 +1034,8 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <div class="row">
           <label class="lbl">Actions</label>
           <div style="display:flex;gap:4px;flex-wrap:wrap">
-            <button class="btn btn-outline btn-sm" onclick="cvExportJSON()" style="flex:1;color:var(--green)">Export</button>
+            <button class="btn btn-outline btn-sm" onclick="cvExportJSON()" style="flex:1;color:var(--green)">JSON</button>
+            <button class="btn btn-outline btn-sm" onclick="cvExportPNG()" style="flex:1;color:var(--green)">PNG</button>
             <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="flex:1;color:var(--cyan)">Import</button>
             <button class="btn btn-outline btn-sm" onclick="cvClearAll()" style="flex:1;color:var(--red)">Clear</button>
           </div>
@@ -1039,8 +1048,11 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
             Pan: drag empty space / touch drag<br>
             Zoom: scroll wheel / pinch<br>
             Select: click node / Shift+click multi<br>
-            Delete: select + Del key<br>
-            Mobile: use + buttons or long-press caption
+            Lasso: Shift+drag to select area<br>
+            Edit: double-click node text<br>
+            Delete: select + Del/Backspace<br>
+            Undo: Cmd+Z / Redo: Cmd+Shift+Z<br>
+            Mobile: use + buttons or "Board" button
           </div>
           <div id="cv-stats" style="font-size:8px;color:var(--text-muted);margin-top:6px"></div>
         </div>
@@ -2768,7 +2780,10 @@ const CMD_ACTIONS = [
   { icon: 'CV', text: 'Open Canvas', desc: 'Whiteboard workspace', fn: () => setMode('canvas') },
   { icon: 'CV', text: 'Canvas: Add Text Node', desc: 'Add text to canvas', fn: () => { setMode('canvas'); cvAddTextNode(); } },
   { icon: 'CV', text: 'Canvas: Add Image', desc: 'Upload image to canvas', fn: () => { setMode('canvas'); document.getElementById('cv-img-input').click(); } },
-  { icon: 'CV', text: 'Canvas: Export JSON', desc: 'Export canvas graph', fn: () => cvExportJSON() },
+  { icon: 'CV', text: 'Canvas: Export JSON', desc: 'Export canvas graph as JSON', fn: () => cvExportJSON() },
+  { icon: 'CV', text: 'Canvas: Export PNG', desc: 'Export canvas as PNG image', fn: () => cvExportPNG() },
+  { icon: 'CV', text: 'Canvas: Undo', desc: 'Undo last canvas action', fn: () => cvUndo() },
+  { icon: 'CV', text: 'Canvas: Redo', desc: 'Redo last undone action', fn: () => cvRedo() },
   { icon: 'CV', text: 'Canvas: Import JSON', desc: 'Load canvas from file', fn: () => { setMode('canvas'); cvImportJSON(); } },
   { icon: 'CV', text: 'Canvas: Fit View', desc: 'Zoom to fit all nodes', fn: () => { setMode('canvas'); cvFitView(); } },
   { icon: 'CV', text: 'Canvas: Social Calendar', desc: 'Load social media calendar template', fn: () => { setMode('canvas'); cvLoadTemplate('social-calendar'); } },
@@ -4157,6 +4172,84 @@ function cvExportJSON() {
   a.click();
   URL.revokeObjectURL(a.href);
   toast('Canvas exported as JSON');
+}
+
+function cvExportPNG() {
+  if (!cvNodes.length) { toast('Canvas is empty'); return; }
+  toast('Generating PNG...');
+  // Calculate bounds
+  var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  cvNodes.forEach(function(n) {
+    if (n.x < minX) minX = n.x;
+    if (n.y < minY) minY = n.y;
+    if (n.x + 280 > maxX) maxX = n.x + 280;
+    if (n.y + 120 > maxY) maxY = n.y + 120;
+  });
+  var pad = 40;
+  var cw = maxX - minX + pad * 2;
+  var ch = maxY - minY + pad * 2;
+  var canvas = document.createElement('canvas');
+  var dpr = 2; // retina
+  canvas.width = cw * dpr;
+  canvas.height = ch * dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  // Background
+  ctx.fillStyle = '#f8f7f4';
+  ctx.fillRect(0, 0, cw, ch);
+  // Grid dots
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  for (var gx = 0; gx < cw; gx += 24) {
+    for (var gy = 0; gy < ch; gy += 24) {
+      ctx.beginPath();
+      ctx.arc(gx, gy, 0.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // Nodes
+  var borderColors = { caption: '#8B5CF6', text: '#4F7CFF', image: '#4ade80' };
+  cvNodes.forEach(function(n) {
+    var nx = n.x - minX + pad;
+    var ny = n.y - minY + pad;
+    var nw = 240, nh = 80;
+    // Card background
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(nx, ny, nw, nh, 8);
+    ctx.fill();
+    ctx.stroke();
+    // Left border
+    ctx.fillStyle = borderColors[n.type] || '#ddd';
+    ctx.fillRect(nx, ny + 4, 3, nh - 8);
+    // Text
+    if (n.type === 'image') {
+      ctx.fillStyle = '#999';
+      ctx.font = '10px sans-serif';
+      ctx.fillText('[Image]', nx + 14, ny + 24);
+    } else {
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = '10px sans-serif';
+      var lines = (n.text || '').split('\n');
+      lines.forEach(function(line, li) {
+        if (li < 5) ctx.fillText(line.substring(0, 40), nx + 14, ny + 18 + li * 13);
+      });
+      if (n.theme) {
+        ctx.fillStyle = '#8b5cf6';
+        ctx.font = '7px sans-serif';
+        ctx.fillText(n.theme.toUpperCase(), nx + 14, ny + nh - 8);
+      }
+    }
+  });
+  canvas.toBlob(function(blob) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'canvas-' + new Date().toISOString().slice(0, 10) + '.png';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('PNG exported');
+  });
 }
 
 function cvImportJSON() {
