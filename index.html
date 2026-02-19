@@ -305,6 +305,12 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
 .color-dot:hover{transform:scale(1.2)}
 .color-dot.active{border-color:var(--text-primary)}
 
+/* SEED LIBRARY */
+.seed-item{padding:6px 8px;font-size:9px;color:var(--text-secondary);cursor:pointer;border-bottom:1px solid var(--border);transition:all 0.1s;line-height:1.5}
+.seed-item:hover{background:rgba(168,85,247,0.06);color:var(--text-primary)}
+.seed-item:last-child{border-bottom:none}
+.seed-tag{display:inline-block;font-size:7px;padding:1px 4px;border-radius:2px;background:var(--bg-base);color:var(--text-muted);margin-right:4px;border:1px solid var(--border)}
+
 /* SPLIT VIEW */
 .workspace.split-view{grid-template-columns:0 1fr 1fr}
 .workspace.split-view .lib{display:none}
@@ -492,18 +498,50 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--accent)}
       <div id="cap-ctrl" style="display:none">
         <div class="row">
           <label class="lbl">Seed Phrase</label>
-          <textarea id="seed-input" style="height:120px" placeholder="Enter your core idea...&#10;&#10;Example: 'Mastery is not about perfection. It is about showing up before you are ready.'"></textarea>
+          <textarea id="seed-input" style="height:100px" placeholder="Enter your core idea or pick from the Seed Library below..."></textarea>
         </div>
+
         <div class="row">
-          <label class="lbl">Voice</label>
+          <label class="lbl">Seed Library</label>
+          <select id="seed-cat" onchange="renderSeedLibrary()" style="margin-bottom:4px">
+            <option value="all">All Themes</option>
+            <option value="mindset">Mindset / Will</option>
+            <option value="truth">Truth / Clarity</option>
+            <option value="courage">Courage / Trust</option>
+            <option value="discipline">Discipline / Focus</option>
+            <option value="manifesto">Manifesto Lines</option>
+            <option value="training">Training / Movement</option>
+            <option value="vulnerability">Vulnerability / Growth</option>
+          </select>
+          <div id="seed-lib" style="max-height:140px;overflow-y:auto;border:1px solid var(--border);border-radius:3px;padding:2px"></div>
+        </div>
+
+        <div class="row">
+          <label class="lbl">Voice Mode (V2)</label>
           <div style="display:flex;gap:3px;flex-wrap:wrap">
             <button class="mode-btn active" data-v="teacher" onclick="setVoice(this)">Teacher</button>
             <button class="mode-btn" data-v="raw" onclick="setVoice(this)">Raw</button>
             <button class="mode-btn" data-v="prophet" onclick="setVoice(this)">Prophet</button>
             <button class="mode-btn" data-v="rebel" onclick="setVoice(this)">Rebel</button>
             <button class="mode-btn" data-v="mystic" onclick="setVoice(this)">Mystic</button>
+            <button class="mode-btn" data-v="philosopher" onclick="setVoice(this)">Philosopher</button>
+            <button class="mode-btn" data-v="companion" onclick="setVoice(this)">Companion</button>
+            <button class="mode-btn" data-v="confessor" onclick="setVoice(this)">Confessor</button>
           </div>
         </div>
+
+        <div class="row">
+          <label class="lbl">Framework Module</label>
+          <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <button class="mode-btn active" data-fw="none" onclick="setFramework(this)">None</button>
+            <button class="mode-btn" data-fw="fusion" onclick="setFramework(this)">Fusion</button>
+            <button class="mode-btn" data-fw="expansion" onclick="setFramework(this)">Expansion</button>
+            <button class="mode-btn" data-fw="contraction" onclick="setFramework(this)">Contraction</button>
+            <button class="mode-btn" data-fw="recursive" onclick="setFramework(this)">Recursive</button>
+          </div>
+          <div id="fw-desc" style="font-size:8px;color:var(--text-muted);margin-top:4px;line-height:1.5;display:none"></div>
+        </div>
+
         <div class="row">
           <label class="lbl">Platforms</label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
@@ -1146,20 +1184,167 @@ document.querySelectorAll('.chk').forEach(label => {
   });
 });
 
+// ============================================================
+// SEED LIBRARY (from Gabo's Writing OS - 16 PDFs)
+// ============================================================
+const SEED_LIBRARY = [
+  // MINDSET / WILL
+  {t:'mindset',q:'Every choice costs something. Choosing nothing costs everything.'},
+  {t:'mindset',q:'Comfortable is the most expensive choice you can make -- it costs you every version of yourself you will never meet.'},
+  {t:'mindset',q:'Will is not a muscle -- it is a structure.'},
+  {t:'mindset',q:'Purpose generates clarity. Clarity enables elimination. Elimination reveals will. Will becomes identity.'},
+  {t:'mindset',q:'The fundamental error: believing we must become what we already are.'},
+  {t:'mindset',q:'Perfectionism is not protection. It is procrastination with a better outfit.'},
+  {t:'mindset',q:'The only map you need is the one you draw while walking.'},
+  // TRUTH / CLARITY
+  {t:'truth',q:'The truth is the only foundation that does not crack under pressure.'},
+  {t:'truth',q:'The collapse IS the comeback. The moment you stop pretending is the moment you start building something real.'},
+  {t:'truth',q:'Solitude sharpens you.'},
+  {t:'truth',q:'The same consciousness that built the cage cannot unlock it.'},
+  {t:'truth',q:'Distance is not separation. It is the perspective needed to see what was never solid to begin with.'},
+  {t:'truth',q:'The goal is not perfection. The goal is consciousness. Knowing why you write how you write.'},
+  // COURAGE / TRUST
+  {t:'courage',q:'Logic builds cages. Trust builds wings.'},
+  {t:'courage',q:'The jump is the proof, not the landing.'},
+  {t:'courage',q:'Courage says I can handle this. Faith says I do not know if I can, but I am walking anyway. One is admirable. The other is transformational.'},
+  {t:'courage',q:'Trust the backward motion. Bring a compass. The gate is waiting.'},
+  {t:'courage',q:'Surrender is not passivity -- it is the most active form of trust.'},
+  // DISCIPLINE / FOCUS
+  {t:'discipline',q:'Discipline is just self-trust in action.'},
+  {t:'discipline',q:'The body never lies. It keeps the score.'},
+  {t:'discipline',q:'Discipline is remembering, not forcing.'},
+  {t:'discipline',q:'Michelangelo did not add David to marble. He eliminated everything that was not David.'},
+  {t:'discipline',q:'Discipline is just the art of becoming that person obsessively.'},
+  // MANIFESTO LINES
+  {t:'manifesto',q:'We rise not by getting strong but by remembering we were never broken.'},
+  {t:'manifesto',q:'We become not by adding layers but by revealing who was always there.'},
+  {t:'manifesto',q:'Stop trying to become who you already are.'},
+  {t:'manifesto',q:'The revolution is not becoming someone new. It is remembering who you have always been.'},
+  {t:'manifesto',q:'We heal not by fixing what is broken but by becoming whole enough that the broken pieces find their place.'},
+  {t:'manifesto',q:'We teach not by knowing more but by remembering less -- by unlearning the noise that made us forget the signal.'},
+  // TRAINING / MOVEMENT
+  {t:'training',q:'Movement is not exercise. It is the physical expression of how you think.'},
+  {t:'training',q:'You are not weak. You are untrained.'},
+  {t:'training',q:'You can fake confidence. You can not fake a handstand.'},
+  {t:'training',q:'One perfect rep is worth more than ten sloppy ones.'},
+  {t:'training',q:'The body is the last honest mirror.'},
+  // VULNERABILITY / GROWTH
+  {t:'vulnerability',q:'The warrior is not someone who never falls -- it is someone who maintains love for themselves while falling.'},
+  {t:'vulnerability',q:'If you can not handle your own worst, you do not deserve your own best.'},
+  {t:'vulnerability',q:'The pendulum swings. Always. The darker it gets, the brighter it is about to become. But only if you stay with yourself through the fall.'},
+  {t:'vulnerability',q:'These past few months were not a break. They were a total collapse and breakdown. But they were also a rebuild.'},
+  {t:'vulnerability',q:'The mess IS the masterpiece.'},
+  {t:'vulnerability',q:'You ARE the territory.'},
+  {t:'vulnerability',q:'Obligation is fear dressed in productivity. Guidance is peace dressed in movement.'}
+];
+
+let currentFramework = 'none';
+
+function renderSeedLibrary() {
+  const cat = document.getElementById('seed-cat').value;
+  const el = document.getElementById('seed-lib');
+  const seeds = cat === 'all' ? SEED_LIBRARY : SEED_LIBRARY.filter(s => s.t === cat);
+  el.innerHTML = seeds.map(s =>
+    '<div class="seed-item" onclick="loadSeed(this)" data-seed="' + s.q.replace(/"/g, '&quot;') + '">' +
+    '<span class="seed-tag">' + s.t + '</span>' + esc(s.q.length > 80 ? s.q.substring(0,80) + '...' : s.q) + '</div>'
+  ).join('');
+}
+
+function loadSeed(el) {
+  document.getElementById('seed-input').value = el.dataset.seed;
+  toast('Seed loaded');
+}
+
+// ============================================================
+// FRAMEWORK MODULES
+// ============================================================
+const FRAMEWORKS = {
+  none: { desc: '' },
+  fusion: {
+    desc: 'FUSION PROTOCOL: Merge 2 ideas into 1 unified piece. Phase 1: Core Extraction / Phase 2: Harmonic Analysis / Phase 3: Architectural Fusion / Phase 4: Integration Refinement. Techniques: Conceptual Braiding, Paradox Stacking, Causal Chaining, Voice Mode Orchestration, Metaphor Hybridization.',
+    transform: (s) => {
+      const mid = Math.floor(s.length / 2);
+      const seedA = s.substring(0, mid).trim();
+      const seedB = s.substring(mid).trim();
+      return 'FUSION: ' + seedA + ' + ' + seedB + '\n\nWhen these two truths collide, what emerges is greater than either:\n\n' + s + '\n\nThe architecture of this idea demands both halves -- without one, the other collapses into cliche.';
+    }
+  },
+  expansion: {
+    desc: 'CONTENT EXPANSION ENGINE V3: Take a seed and expand 4x. Techniques: Conceptual Unpacking (explain the WHY), Mirror Deepening (5 angles), Paradox Isolation (find contradictions), Concept Transplanting (apply to new domains).',
+    transform: (s) => {
+      return 'EXPANSION: Unpacking the core\n\n' + s + '\n\n[MIRROR 1 - Training]\n' + s.replace(/\./g, ' -- translated through the body.') +
+        '\n\n[MIRROR 2 - Relationships]\n' + s.replace(/\./g, ' -- the same pattern lives in how we love.') +
+        '\n\n[MIRROR 3 - Business]\n' + s.replace(/\./g, ' -- this is the principle behind every real venture.') +
+        '\n\n[PARADOX]\nThe opposite is also true. And the tension between both IS the lesson.';
+    }
+  },
+  contraction: {
+    desc: 'CONTRACTION SYNTHESIS: Take a long piece and compress to its essence. Extract the 10-act story arc, contract into 3 voice variations (Raw, Philosopher, Prophet), produce a 47-word synthesis seed, 5 poems, 20 quotes.',
+    transform: (s) => {
+      const words = s.split(/\s+/);
+      const core = words.slice(0, Math.min(47, words.length)).join(' ');
+      return 'CONTRACTION SEED (47 words or less):\n' + core + '\n\n[RAW VERSION]\n' + core.replace(/[.!?]/g, '. Period.') +
+        '\n\n[PHILOSOPHER VERSION]\nTo understand this fully: ' + core +
+        '\n\n[PROPHET VERSION]\nListen. ' + core + ' And this changes everything.';
+    }
+  },
+  recursive: {
+    desc: 'RECURSIVE EXPANSION: Multi-stage multiplication. Stage 1: Fuse 2 seeds. Stage 2: Expand the fusion. Stage 3: Extract 60 quotes (20 raw + 20 philosophical + 20 deployment-ready). Stage 4: Map to 8 platforms.',
+    transform: (s) => {
+      return 'RECURSIVE STAGE 1 - Seed:\n' + s +
+        '\n\nSTAGE 2 - Expansion:\nThe depth here is not in the words. It is in the architecture. ' + s + ' When you break this down to its molecular level, every syllable carries weight.' +
+        '\n\nSTAGE 3 - Extracted Quotes:\n1. "' + s.split('.')[0].trim() + '."\n2. "The architecture of this truth is unshakeable."\n3. "When you see it, you can not unsee it."' +
+        '\n\nSTAGE 4 - Deployment:\nIG: Hook with line 1 / Email: Full expansion / YT: 3-act structure / Twitter: Quote #1';
+    }
+  }
+};
+
+function setFramework(btn) {
+  currentFramework = btn.dataset.fw;
+  document.querySelectorAll('[data-fw]').forEach(b => b.classList.toggle('active', b === btn));
+  const desc = document.getElementById('fw-desc');
+  if (currentFramework !== 'none' && FRAMEWORKS[currentFramework]) {
+    desc.textContent = FRAMEWORKS[currentFramework].desc;
+    desc.style.display = '';
+  } else {
+    desc.style.display = 'none';
+  }
+}
+
+// ============================================================
+// CAPTION MULTIPLIER (V2 - 8 Voice Modes + Frameworks)
+// ============================================================
 function multiply() {
-  const seed = document.getElementById('seed-input').value.trim();
-  if (!seed) { toast('Enter a seed phrase'); return; }
+  let seed = document.getElementById('seed-input').value.trim();
+  if (!seed) { toast('Enter a seed phrase or pick from library'); return; }
   const pls = []; document.querySelectorAll('[data-pl]:checked').forEach(cb => pls.push(cb.dataset.pl));
   if (!pls.length) { toast('Select a platform'); return; }
 
-  const S = {raw:{p:'',s:''},teacher:{p:'',s:'\n\nSave this for later.'},prophet:{p:'The truth is this:\n\n',s:'\n\nThis changes everything.'},rebel:{p:'Most people get this wrong.\n\n',s:'\n\nThink different.'},mystic:{p:'In the silence between reps...\n\n',s:''}};
+  // Apply framework transformation if selected
+  if (currentFramework !== 'none' && FRAMEWORKS[currentFramework] && FRAMEWORKS[currentFramework].transform) {
+    seed = FRAMEWORKS[currentFramework].transform(seed);
+  }
+
+  const S = {
+    raw:{p:'',s:''},
+    teacher:{p:'',s:'\n\nSave this for later.'},
+    prophet:{p:'The truth is this:\n\n',s:'\n\nThis changes everything.'},
+    rebel:{p:'Most people get this wrong.\n\n',s:'\n\nThink different.'},
+    mystic:{p:'In the silence between reps...\n\n',s:''},
+    philosopher:{p:'Consider this:\n\n',s:'\n\nSit with that.'},
+    companion:{p:'I need you to hear this.\n\n',s:'\n\nYou are not alone in this.'},
+    confessor:{p:'I will be honest with you.\n\n',s:'\n\nThat is the truth. Take it or leave it.'}
+  };
   const F = {
     ig:{n:'Instagram',f:(s,t)=>t.p+s+t.s+'\n\n#Calisthenics #Movement #Mastery #SaturnoMovement'},
-    email:{n:'Email',f:(s,t)=>'Subject: This changed my perspective\n\n'+t.p+s+t.s+'\n\nReply and tell me what you think.\n\n-- Gabo'},
-    yt:{n:'YouTube',f:(s,t)=>'[HOOK - 0:00]\n'+s.substring(0,200)+'\n\n[EXPAND - 0:15]\n'+t.p+s+t.s+'\n\n[CTA - End]\nSubscribe for more movement wisdom.'},
+    email:{n:'Email',f:(s,t)=>{
+      const subj = s.split('.')[0].trim().substring(0,60);
+      return 'Subject: ' + subj + '\n\n'+t.p+s+t.s+'\n\nYour inbox is sacred, and I respect that deeply.\n\nReply and tell me what you think.\n\n-- Gabo\nSaturno Movement';
+    }},
+    yt:{n:'YouTube',f:(s,t)=>'[HOOK - 0:00]\n'+s.substring(0,200)+'\n\n[EXPAND - 0:15]\n'+t.p+s+t.s+'\n\n[CTA - End]\nIf this resonated, subscribe. We go deeper every week.'},
     twitter:{n:'Twitter/X',f:(s,t)=>t.p+(s.length>240?s.substring(0,240)+'...':s)+t.s},
     linkedin:{n:'LinkedIn',f:(s,t)=>t.p+s+t.s+'\n\n---\n\nWhat is your experience with this? Share below.'},
-    tiktok:{n:'TikTok',f:(s,t)=>'[TEXT ON SCREEN]\n"'+s.substring(0,100)+'..."\n\n[VOICEOVER]\n'+t.p+s+t.s}
+    tiktok:{n:'TikTok',f:(s,t)=>'[TEXT ON SCREEN]\n"'+s.substring(0,100)+'..."\n\n[VOICEOVER]\n'+t.p+s+t.s+'\n\n[CAPTION]\n'+s.substring(0,150)}
   };
 
   const style = S[currentVoice] || S.teacher;
@@ -1168,7 +1353,7 @@ function multiply() {
     const c = f.f(seed, style);
     return '<div class="variant-card '+p+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:8px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">'+f.n+'</span><button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText);toast(\'Copied\')" class="btn btn-outline btn-sm">Copy</button></div><pre style="font-size:10px;color:var(--text-secondary);white-space:pre-wrap;line-height:1.6;font-family:var(--mono)">'+esc(c)+'</pre></div>';
   }).join('');
-  toast(pls.length + ' variants generated');
+  toast(pls.length + ' variants generated' + (currentFramework !== 'none' ? ' (' + currentFramework + ' applied)' : ''));
 }
 
 // ============================================================
@@ -2010,6 +2195,7 @@ document.addEventListener('keydown', e => {
 // ============================================================
 loadDocs();
 updateWordCount();
+renderSeedLibrary();
 </script>
 </body>
 </html>
