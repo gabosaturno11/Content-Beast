@@ -644,7 +644,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   </button>
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v6.4</span>
+    <span class="ver">v6.5</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -782,6 +782,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           <div class="cl-search">
             <input type="text" id="cl-search" placeholder="Search captions..." style="padding:5px 8px;font-size:9px" oninput="searchCaptions()">
             <button class="btn btn-outline btn-sm" onclick="document.getElementById('cl-file').click()" title="Import captions">Import</button>
+            <button class="btn btn-outline btn-sm" onclick="seedGaboCaptions()" title="Load Gabo's full content library" style="color:var(--accent)">Seed</button>
             <button class="btn btn-outline btn-sm" onclick="addCaptionManual()" title="Add new caption">+</button>
           </div>
           <input type="file" id="cl-file" accept=".json,.md,.txt,.csv" style="display:none" multiple onchange="importCaptions(this.files)">
@@ -1087,7 +1088,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v6.4 — by Saturno Movement</span>
+  <span>CONTENT BEAST v6.5 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -1715,6 +1716,125 @@ const SEED_LIBRARY = [
   {t:'courage',q:'You will not find yourself by arriving somewhere safe. You will find yourself by being willing to get lost.'},
   {t:'manifesto',q:'Every choice costs something. Choosing nothing costs everything.'},
   {t:'manifesto',q:'The only map you need is the one you draw while walking.'}
+];
+
+// ============================================================
+// GABO CONTENT LIBRARY — Full caption bank for auto-seeding
+// Source files: We Rise Not By, Trust Before Proof, Rhyming Synthesis
+// ============================================================
+const GABO_CAPTIONS = [
+  // === WE RISE NOT BY — MANIFESTO COUPLETS (V3: The Perfect Mix) ===
+  {t:'manifesto',q:'We rise not by getting strong but by remembering we were never broken.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We heal not by trying to but by acting as we already did.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We love not by earning it but by remembering we always deserved it.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We find fulfillment not by chasing more but by recognizing what already fills us.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We grow not by doing more but by forgetting that which was never ours.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We feel gratitude not by counting blessings but by dropping the story that we lack.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We find peace not by searching for it but by allowing it to be seen.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We become not by adding layers but by revealing who was always there.',s:'we-rise-not-by'},
+  // V1/V2 unique couplets
+  {t:'manifesto',q:'We teach not by showing the path but by leading every step of it.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We discover purpose not by seeking meaning but by trusting what moves through us.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We create connection not by performing worthiness but by allowing ourselves to be seen.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We become not by transforming into someone else but by forgetting who we pretended to be.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We rise not by building strength but by remembering we were never broken.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We heal not by fixing wounds but by acting from wholeness.',s:'we-rise-not-by'},
+  {t:'manifesto',q:'We find fulfillment not by chasing more but by recognizing what already fills us.',s:'we-rise-not-by'},
+  // === RAW TRUTH ===
+  {t:'truth',q:'Stop trying to become who you already are.',s:'we-rise-not-by'},
+  {t:'truth',q:'You\'re carrying weapons against enemies that don\'t exist. Building strength for battles that ended years ago. Searching for peace that\'s been here the whole time, underneath the noise.',s:'we-rise-not-by'},
+  {t:'truth',q:'We rise not by getting stronger. We rise by remembering we were never weak.',s:'we-rise-not-by'},
+  {t:'truth',q:'Drop the weight. Trust the being. Stop defending against a war that exists only in your head.',s:'we-rise-not-by'},
+  {t:'truth',q:'The bomb you\'ve been carrying? Made of stories that were never yours.',s:'we-rise-not-by'},
+  {t:'truth',q:'The strength you\'ve been building? For battles that ended before you were born.',s:'we-rise-not-by'},
+  {t:'truth',q:'The peace you\'ve been seeking? Been here the entire time.',s:'we-rise-not-by'},
+  {t:'truth',q:'Everything else is just remembering.',s:'we-rise-not-by'},
+  // === TRUST BEFORE PROOF — CORE PASSAGES ===
+  {t:'courage',q:'Base your direction not in your current capacity to tolerate the load associated with the road ahead. Anchor yourself in a deep knowing that you will figure it out along the way.',s:'trust-before-proof'},
+  {t:'courage',q:'Collect data as experience usually wins over imagination\u2014yet, do not wait for competence to build confidence. If that was the case, nothing great would\'ve ever been achieved.',s:'trust-before-proof'},
+  {t:'courage',q:'Trust when you haven\'t even proven it to yourself. Trust when you have an absurd amount of proof. Trust when you see your mind not trusting.',s:'trust-before-proof'},
+  {t:'courage',q:'Because trust doesn\'t come from logic. It comes\u2014it grows\u2014every time you jump even when, and especially when, it doesn\'t make fucking sense.',s:'trust-before-proof'},
+  {t:'courage',q:'Courage is walking on solid floor. Faith is walking in turbulent water. Not because you can, but because you know how not to drown even in impossible situations.',s:'trust-before-proof'},
+  // Expanded additions
+  {t:'courage',q:'The weight you can carry today is not the weight you\'ll carry tomorrow.',s:'trust-before-proof'},
+  {t:'courage',q:'Confidence isn\'t earned through mastery. It\'s built through the audacity to begin before you\'re ready.',s:'trust-before-proof'},
+  {t:'courage',q:'If competence had to come first, nothing great would\'ve ever been achieved. Every master was once a disaster who refused to wait for permission.',s:'trust-before-proof'},
+  {t:'courage',q:'The jump is the proof. Not the landing.',s:'trust-before-proof'},
+  {t:'courage',q:'Courage says: \'I can handle this.\' Faith says: \'I don\'t know if I can, but I\'m walking anyway.\' One is admirable. The other is transformational.',s:'trust-before-proof'},
+  {t:'courage',q:'You don\'t need to see the whole staircase. You need to trust that your foot knows how to find the next step\u2014even in the dark. Especially in the dark.',s:'trust-before-proof'},
+  // === TRUST BEFORE PROOF — ONE-LINERS (20) ===
+  {t:'courage',q:'Your current capacity is not your permanent ceiling.',s:'trust-quotes'},
+  {t:'courage',q:'The load grows lighter when you stop measuring it.',s:'trust-quotes'},
+  {t:'courage',q:'Direction requires conviction, not calculation.',s:'trust-quotes'},
+  {t:'courage',q:'You will figure it out\u2014you always have.',s:'trust-quotes'},
+  {t:'discipline',q:'Confidence isn\'t earned through mastery\u2014it\'s built through beginning.',s:'trust-quotes'},
+  {t:'discipline',q:'Do not wait for competence to build confidence.',s:'trust-quotes'},
+  {t:'discipline',q:'Every master was once a disaster who refused to wait.',s:'trust-quotes'},
+  {t:'discipline',q:'Experience wins over imagination\u2014but imagination starts the race.',s:'trust-quotes'},
+  {t:'courage',q:'Trust when your mind refuses to.',s:'trust-quotes'},
+  {t:'courage',q:'The jump is the proof, not the landing.',s:'trust-quotes'},
+  {t:'courage',q:'Trust doesn\'t come from logic\u2014it grows from leaps.',s:'trust-quotes'},
+  {t:'courage',q:'Trust especially when it doesn\'t make fucking sense.',s:'trust-quotes'},
+  {t:'courage',q:'Courage walks on solid ground; faith walks on water.',s:'trust-quotes'},
+  {t:'courage',q:'Courage says \'I can.\' Faith says \'I will anyway.\'',s:'trust-quotes'},
+  {t:'courage',q:'Faith is the audacity to move without certainty.',s:'trust-quotes'},
+  {t:'courage',q:'You don\'t need to see the staircase\u2014just the next step.',s:'trust-quotes'},
+  {t:'courage',q:'The weight shifts when you stop calculating if you can carry it.',s:'trust-quotes'},
+  {t:'courage',q:'Begin before you\'re ready\u2014readiness is a lie.',s:'trust-quotes'},
+  {t:'courage',q:'Movement is the only proof that matters.',s:'trust-quotes'},
+  {t:'courage',q:'Walk anyway. That\'s the whole teaching.',s:'trust-quotes'},
+  // === TRUST BEFORE PROOF — TWO-LINERS (20) ===
+  {t:'courage',q:'Your capacity today is not your capacity tomorrow. Stop measuring weight you haven\'t lifted yet.',s:'trust-quotes'},
+  {t:'courage',q:'Don\'t base your direction on what you can tolerate now. Base it on who you\'re becoming.',s:'trust-quotes'},
+  {t:'courage',q:'The road ahead looks impossible from here. But \'here\' isn\'t where you\'ll walk it from.',s:'trust-quotes'},
+  {t:'courage',q:'Anchor yourself in knowing, not hoping. Knowing survives what hope cannot.',s:'trust-quotes'},
+  {t:'discipline',q:'Competence comes from doing. Confidence comes from starting. Start first. The rest follows.',s:'trust-quotes'},
+  {t:'discipline',q:'If competence had to come first, nothing great would exist. The greatest things were built by beginners.',s:'trust-quotes'},
+  {t:'discipline',q:'Experience usually wins over imagination. But imagination is what gets you to experience.',s:'trust-quotes'},
+  {t:'discipline',q:'Don\'t wait for permission from your own mastery. Mastery is built by the unpermissioned.',s:'trust-quotes'},
+  {t:'courage',q:'Trust when you haven\'t proven it to yourself. Especially then.',s:'trust-quotes'},
+  {t:'courage',q:'Trust doesn\'t come from evidence. It comes from jumping before you have any.',s:'trust-quotes'},
+  {t:'courage',q:'Trust when it makes no logical sense. Logic builds cages. Trust builds wings.',s:'trust-quotes'},
+  {t:'courage',q:'Your mind will not trust. Trust anyway\u2014that\'s not your mind\'s job.',s:'trust-quotes'},
+  {t:'courage',q:'The proof you\'re looking for is on the other side of the jump. Stop waiting for it on this side.',s:'trust-quotes'},
+  {t:'courage',q:'Courage handles what it can see. Faith handles what it can\'t.',s:'trust-quotes'},
+  {t:'courage',q:'Courage is walking on solid floor. Faith is walking on turbulent water.',s:'trust-quotes'},
+  {t:'courage',q:'One is admirable. The other is transformational. Choose transformation.',s:'trust-quotes'},
+  {t:'courage',q:'Courage says: \'I can handle this.\' Faith says: \'I don\'t know, but I\'m walking anyway.\'',s:'trust-quotes'},
+  {t:'courage',q:'You don\'t need to see the whole staircase. Your foot knows how to find the next step.',s:'trust-quotes'},
+  {t:'courage',q:'The dark doesn\'t stop the climb. It just changes what you use to navigate.',s:'trust-quotes'},
+  {t:'vulnerability',q:'Walking in the dark isn\'t about sight. It\'s about trust in your own feet.',s:'trust-quotes'},
+  // === TRUST BEFORE PROOF — THREE-LINERS (20) ===
+  {t:'courage',q:'The load associated with the road ahead looks unbearable. But you\'re not measuring with the strength you\'ll have when you get there. That version of you is waiting to be built by the walk itself.',s:'trust-quotes'},
+  {t:'courage',q:'Anchor yourself in deep knowing. Not the knowing that comes from evidence. The knowing that comes from having survived everything so far.',s:'trust-quotes'},
+  {t:'courage',q:'Your current capacity is a snapshot, not a verdict. The you who will walk that road doesn\'t exist yet. And won\'t\u2014until you start walking.',s:'trust-quotes'},
+  {t:'courage',q:'Direction isn\'t about tolerating what\'s ahead. It\'s about trusting what\'s inside. That\'s never been measured accurately by fear.',s:'trust-quotes'},
+  {t:'discipline',q:'Collect data. Experience wins over imagination. But don\'t wait for competence to build confidence. Confidence is the precondition, not the reward.',s:'trust-quotes'},
+  {t:'discipline',q:'If waiting for readiness was required, nothing great would\'ve ever been achieved. Every cathedral was started by someone who couldn\'t see the ceiling.',s:'trust-quotes'},
+  {t:'discipline',q:'Mastery comes from accumulation. Confidence comes from audacity. One follows competence. The other creates it.',s:'trust-quotes'},
+  {t:'discipline',q:'The greatest achievements weren\'t built by the ready. They were built by the willing. Willingness is the only prerequisite.',s:'trust-quotes'},
+  {t:'courage',q:'Trust when you haven\'t proven it to yourself. Trust when you have absurd amounts of proof. Trust when you see your mind not trusting.',s:'trust-quotes'},
+  {t:'courage',q:'Trust doesn\'t come from logic. It comes\u2014it grows\u2014every time you jump. Even when, especially when, it doesn\'t make fucking sense.',s:'trust-quotes'},
+  {t:'courage',q:'Your mind will present evidence against the leap. It\'s doing its job. Your job is to jump anyway.',s:'trust-quotes'},
+  {t:'courage',q:'The proof isn\'t found before the jump. The proof IS the jump. Everything after is just confirmation.',s:'trust-quotes'},
+  {t:'courage',q:'Logic demands certainty before movement. Trust demands movement before certainty. One keeps you safe. The other keeps you alive.',s:'trust-quotes'},
+  {t:'courage',q:'Courage is walking on solid floor. Faith is walking in turbulent water. Not because you can, but because you know how not to drown.',s:'trust-quotes'},
+  {t:'courage',q:'Courage operates in the known. Faith operates in the unknown. Transformation only lives in one of those territories.',s:'trust-quotes'},
+  {t:'courage',q:'Courage says: \'I\'ve done this before.\' Faith says: \'I haven\'t, but I trust myself to figure it out.\' The second voice is the one that builds new worlds.',s:'trust-quotes'},
+  {t:'courage',q:'Courage is admirable. Faith is transformational. One handles challenges. The other creates possibilities. Stop admiring. Start transforming.',s:'trust-quotes'},
+  {t:'courage',q:'You don\'t need to see the whole staircase. You need to trust your foot knows the next step. Even in the dark. Especially in the dark.',s:'trust-quotes'},
+  {t:'vulnerability',q:'Walking in impossible situations isn\'t about ability. It\'s about the accumulated proof that you\'ve survived every impossible so far. That\'s not confidence. That\'s data.',s:'trust-quotes'},
+  {t:'courage',q:'The jump is never logical. The landing is never guaranteed. But the growth is always certain.',s:'trust-quotes'},
+  // === RHYMING SYNTHESIS — POEMS ===
+  {t:'poetry',q:'When purpose finds its way to you,\nClarity follows, clear and true.\nWhat doesn\'t serve begins to fade,\nRoom for will is gently made.\nYour will becomes who you will be,\nIdentity flows naturally.\nAnd momentum starts to grow,\nLike rivers that have learned to flow.\nNo force required, no strain,\nJust gentle, steady, healing rain.\nThe architecture builds with care,\nFoundation solid, everywhere.\nWhat storms may come, what winds may blow,\nThe structure holds, the roots below\nRemember who you chose to be,\nUnbreakable, eternally.',s:'rhyming-synthesis',v:'soft'},
+  {t:'poetry',q:'Purpose cuts through every lie\nElimination starts today\nWill emerges, standing high\nIdentity shows you the way\nClarity slices through the noise\nMomentum builds with every choice\nArchitecture doesn\'t bend\nUnbreakable until the end\nStop waiting for permission\nStart your systematic mission\nCut away what doesn\'t serve\nBuild the will that won\'t observe\nThe storm\u2014it only tests what\'s real\nFoundation that was built with steel\nPurpose, clarity, and will\nUnbreakable, unmoving still',s:'rhyming-synthesis',v:'sharp'},
+  {t:'poetry',q:'You spiral back to purpose true\nRound and round the pattern goes\nEach time clarity breaks through\nThe architecture simply grows\nEliminate what held you down\nThe spiral deepens every turn\nWill rises up from common ground\nIdentity is what you learn\nAnd when you think you\'ve lost your way\nThe spiral brings you back again\nMomentum building day by day\nUnbreakable through joy and pain\nReturn, return, but not the same\nEach spiral carries deeper truth\nThe architecture stays the game\nBut you emerge with clearer proof\nThat will was always who you are\nIdentity your truest name\nBuilt to last through near and far\nUnbreakable\u2014that\'s why you came',s:'rhyming-synthesis',v:'spiral'},
+  {t:'poetry',q:'Purpose real, cuts through the feel of being lost\nClarity costs, but pays back what you thought you\'d lost\nElimination, no vacation from the truth\nWill uncouth, breaks through, shows proof of deeper youth\nIdentity, the entity that can\'t be faked\nMomentum baked into the will that won\'t be slaked\nArchitecture, not just lectures about strength\nAt length, the building goes to any length\nTo hold, to mold, to be bold enough to last\nThe past can\'t blast what\'s built to hold steadfast\nUnbreakable, unshakeable, unmistakeable\nThe will you build is real, achievable, believable',s:'rhyming-synthesis',v:'raw'},
+  {t:'poetry',q:'Purpose flows like water clear\nClarity runs crystal near\nWill springs up without a fear\nAnd momentum starts to build\nIdentity takes shape and form\nArchitecture rides the storm\nNothing here can bring you harm\nWhen momentum starts to build\nElimination like the tide\nWashes what you cannot hide\nStrength emerging from inside\nAs momentum starts to build\nWill becomes the solid ground\nPurpose makes the truest sound\nClarity is what you\'ve found\nWhen momentum starts to build',s:'rhyming-synthesis',v:'lyrical'},
+  {t:'poetry',q:'Let me teach you how will\'s made\nPurpose first must find its place\nClarity cuts through the shade\nGives elimination space\nWhat doesn\'t serve must go away\nWill emerges from what\'s left\nIdentity shows you the way\nOf power that can\'t be theft\nMomentum builds on solid ground\nArchitecture holds the line\nUnbreakable will is found\nWhen purpose and clarity align\nThis isn\'t theory, this is fact\nThis isn\'t hope, this is the way\nBuild your will through conscious act\nUnbreakable every day',s:'rhyming-synthesis',v:'teacher'},
+  {t:'poetry',q:'You will find your purpose true\nClarity will cut right through\nElimination comes for you\nThis is what your will will do\nYou will see identity\nBorn from who you choose to be\nMomentum flows like destiny\nThis is what your will will do\nYou will build what can\'t be shaken\nArchitecture never broken\nWords I speak are never spoken\nThis is what your will will do\nUnbreakable was always planned\nWritten in your heart and hand\nNow you finally understand\nThis is what your will will do',s:'rhyming-synthesis',v:'prophet'},
+  {t:'poetry',q:'Fuck their rules about how will should feel\nMine builds different, mine builds real\nPurpose that they can\'t control\nClarity that saves my soul\nEliminate their expectations\nBuild my own damn foundations\nWill that doesn\'t need permission\nIdentity through self-admission\nMomentum they can\'t understand\nArchitecture built by hand\nNot their plans, not their design\nUnbreakable by my design\nLet them wonder how I built\nWhat they couldn\'t\u2014zero guilt\nPurpose, clarity, and will\nUnbreakable, I\'m building still',s:'rhyming-synthesis',v:'rebel'},
+  {t:'poetry',q:'Purpose flows through time and space\nClarity beyond the mind\nWill transcends the human race\nIdentity finds its true place\nWhile souls and stars become aligned\nMomentum of celestial kind\nArchitecture of the soul\nSpans dimensions, spans all time\nWill eternal, spirit whole\nPlaying out its destined role\nIn rhythm and eternal rhyme\nUnbreakable by design sublime\nConsciousness builds what flesh cannot\nFoundation deeper than the earth\nPurpose is what time forgot\nIdentity that can\'t be caught\nMomentum from spiritual birth\nUnbreakable of infinite worth',s:'rhyming-synthesis',v:'mystic'}
 ];
 
 let currentFramework = 'none';
@@ -2494,6 +2614,7 @@ const CMD_ACTIONS = [
   { icon: 'CL', text: 'Export All Captions (JSON)', desc: 'Full library backup', fn: () => clExportAll('json') },
   { icon: 'CL', text: 'Export All Captions (Markdown)', desc: 'Library as MD', fn: () => clExportAll('md') },
   { icon: 'CL', text: 'Import Seeds to Library', desc: 'Add built-in quotes to library', fn: () => importSeedsToLibrary() },
+  { icon: 'CL', text: 'Seed Full Content Library', desc: 'Load all manifesto, quotes, and poems', fn: () => { setMode('caption'); setCapSub('library'); seedGaboCaptions(); } },
   { icon: 'CL', text: 'Add Caption', desc: 'Add manually', fn: () => { setMode('caption'); setCapSub('library'); addCaptionManual(); } },
   { icon: 'T', text: 'Toggle Library Panel', desc: 'Show/hide sidebar', fn: () => togglePanel('lib') },
   { icon: 'T', text: 'Toggle Toolbar', desc: 'Show/hide formatting bar', fn: () => togglePanel('toolbar') }
@@ -3649,6 +3770,38 @@ async function importSeedsToLibrary() {
   toast('Imported ' + imported + ' seeds to library');
 }
 
+// GABO CONTENT → CAPTION LIBRARY (full content bank)
+async function seedGaboCaptions() {
+  let imported = 0;
+  for (const g of GABO_CAPTIONS) {
+    const exists = clCaptions.some(c => c.text === g.q);
+    if (!exists) {
+      const c = makeCaption(g.q, {
+        theme: g.t,
+        source: g.s || 'gabo-content',
+        voice: g.v || ''
+      });
+      await clPut(c);
+      clCaptions.push(c);
+      imported++;
+    }
+  }
+  // Also import seed library entries
+  for (const s of SEED_LIBRARY) {
+    const exists = clCaptions.some(c => c.text === s.q);
+    if (!exists) {
+      const c = makeCaption(s.q, { theme: s.t, source: 'seed-library' });
+      await clPut(c);
+      clCaptions.push(c);
+      imported++;
+    }
+  }
+  if (imported > 0) {
+    renderCaptionLibrary();
+    toast('Loaded ' + imported + ' captions from content library');
+  }
+}
+
 // ============================================================
 // DRAGGABLE PANEL RESIZE
 // ============================================================
@@ -3985,7 +4138,7 @@ updateWordCount();
 renderSeedLibrary();
 initPanelResize();
 initUniversalDragDrop();
-openCaptionDB().then(() => clLoadAll()).catch(e => console.warn('IndexedDB:', e));
+openCaptionDB().then(() => clLoadAll()).then(() => { if (clCaptions.length === 0) seedGaboCaptions(); }).catch(e => console.warn('IndexedDB:', e));
 // Restore sidebar state from localStorage
 if(localStorage.getItem('cb-sidebar')==='0'){document.getElementById('workspace').classList.add('two-col');var sb=document.getElementById('sidebar-btn');if(sb)sb.classList.remove('active');}
 </script>
