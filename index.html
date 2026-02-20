@@ -616,6 +616,15 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 /* Node header type label */
 .cv-node .cn-type-label{display:inline-block;font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;opacity:0.5}
 .cv-node.cn-caption .cn-type-label{color:#8B5CF6}.cv-node.cn-text-node .cn-type-label{color:#4F7CFF}.cv-node.cn-image .cn-type-label{color:#4ade80}
+/* Connection lines */
+.cv-connections{position:absolute;top:0;left:0;pointer-events:none;z-index:0}
+.cv-connections line{stroke:rgba(139,92,246,0.25);stroke-width:1.5;stroke-dasharray:4,3}
+/* Node color indicator dot */
+.cv-node .cn-color-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+/* Snap guides */
+.cv-snap-line{position:absolute;pointer-events:none;z-index:50}
+.cv-snap-line.snap-h{height:1px;left:0;right:0;background:rgba(79,124,255,0.3)}
+.cv-snap-line.snap-v{width:1px;top:0;bottom:0;background:rgba(79,124,255,0.3)}
 
 /* === SIDEBAR TOGGLE BUTTON (Astra-style) === */
 .sidebar-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);flex-shrink:0;padding:0}
@@ -1012,6 +1021,16 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
             <button class="btn btn-outline btn-sm" onclick="document.getElementById('cv-img-input').click()" style="flex:1">+ Image</button>
           </div>
           <input type="file" id="cv-img-input" accept="image/*" style="display:none" multiple onchange="cvHandleImages(this.files)">
+        </div>
+
+        <div class="row">
+          <label class="lbl">Selection Actions</label>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="cvConnectSelected()" style="flex:1;color:var(--accent)">Connect</button>
+            <button class="btn btn-outline btn-sm" onclick="cvDisconnectSelected()" style="flex:1">Disconnect</button>
+            <button class="btn btn-outline btn-sm" onclick="cvCopySelected()" style="flex:1">Copy</button>
+            <button class="btn btn-outline btn-sm" onclick="cvPasteFromClipboard()" style="flex:1">Paste</button>
+          </div>
         </div>
 
         <div class="section-toggle" onclick="toggleSection(this)">
@@ -2784,6 +2803,10 @@ const CMD_ACTIONS = [
   { icon: 'CV', text: 'Canvas: Export PNG', desc: 'Export canvas as PNG image', fn: () => cvExportPNG() },
   { icon: 'CV', text: 'Canvas: Undo', desc: 'Undo last canvas action', fn: () => cvUndo() },
   { icon: 'CV', text: 'Canvas: Redo', desc: 'Redo last undone action', fn: () => cvRedo() },
+  { icon: 'CV', text: 'Canvas: Connect Selected', desc: 'Draw lines between selected nodes (Cmd+L)', fn: () => cvConnectSelected() },
+  { icon: 'CV', text: 'Canvas: Disconnect Selected', desc: 'Remove lines between selected nodes', fn: () => cvDisconnectSelected() },
+  { icon: 'CV', text: 'Canvas: Copy Nodes', desc: 'Copy selected nodes (Cmd+C)', fn: () => cvCopySelected() },
+  { icon: 'CV', text: 'Canvas: Paste Nodes', desc: 'Paste copied nodes (Cmd+V)', fn: () => cvPasteFromClipboard() },
   { icon: 'CV', text: 'Canvas: Import JSON', desc: 'Load canvas from file', fn: () => { setMode('canvas'); cvImportJSON(); } },
   { icon: 'CV', text: 'Canvas: Fit View', desc: 'Zoom to fit all nodes', fn: () => { setMode('canvas'); cvFitView(); } },
   { icon: 'CV', text: 'Canvas: Social Calendar', desc: 'Load social media calendar template', fn: () => { setMode('canvas'); cvLoadTemplate('social-calendar'); } },
@@ -4002,6 +4025,12 @@ const CV_MAX_UNDO = 40;
 let cvLassoing = false;
 let cvLassoStartX = 0, cvLassoStartY = 0;
 let cvLassoEl = null;
+// Connections
+let cvConnections = []; // [{from: nodeId, to: nodeId}]
+// Clipboard
+let cvClipboard = [];
+// Multi-drag
+let cvMultiDragOffsets = {};
 
 function cvMakeId() { return 'cn_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5); }
 
@@ -4062,6 +4091,7 @@ function cvAddNode(type, data) {
 function cvDeleteNode(id) {
   cvPushUndo();
   cvNodes = cvNodes.filter(n => n.id !== id);
+  cvConnections = cvConnections.filter(function(c) { return c.from !== id && c.to !== id; });
   cvSelectedIds.delete(id);
   cvRender();
   cvScheduleSave();
@@ -4113,6 +4143,94 @@ function cvEditNode(id) {
   });
 }
 
+// === CONNECTIONS ===
+function cvConnect(fromId, toId) {
+  if (fromId === toId) return;
+  var exists = cvConnections.some(function(c) { return (c.from === fromId && c.to === toId) || (c.from === toId && c.to === fromId); });
+  if (exists) return;
+  cvConnections.push({ from: fromId, to: toId });
+  cvRender();
+  cvScheduleSave();
+}
+
+function cvDisconnect(fromId, toId) {
+  cvConnections = cvConnections.filter(function(c) {
+    return !((c.from === fromId && c.to === toId) || (c.from === toId && c.to === fromId));
+  });
+  cvRender();
+  cvScheduleSave();
+}
+
+function cvConnectSelected() {
+  var ids = Array.from(cvSelectedIds);
+  if (ids.length < 2) { toast('Select 2+ nodes to connect'); return; }
+  for (var i = 0; i < ids.length - 1; i++) {
+    cvConnect(ids[i], ids[i + 1]);
+  }
+  toast('Connected ' + ids.length + ' nodes');
+}
+
+function cvDisconnectSelected() {
+  var ids = Array.from(cvSelectedIds);
+  if (ids.length < 2) return;
+  for (var i = 0; i < ids.length; i++) {
+    for (var j = i + 1; j < ids.length; j++) {
+      cvDisconnect(ids[i], ids[j]);
+    }
+  }
+  toast('Disconnected');
+}
+
+function cvRenderConnections() {
+  var surface = document.getElementById('cv-surface');
+  if (!surface) return;
+  var old = surface.querySelector('.cv-connections');
+  if (old) old.remove();
+  if (!cvConnections.length) return;
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'cv-connections');
+  svg.style.width = '100000px';
+  svg.style.height = '100000px';
+  cvConnections.forEach(function(conn) {
+    var fromNode = cvNodes.find(function(n) { return n.id === conn.from; });
+    var toNode = cvNodes.find(function(n) { return n.id === conn.to; });
+    if (!fromNode || !toNode) return;
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', fromNode.x + 100);
+    line.setAttribute('y1', fromNode.y + 40);
+    line.setAttribute('x2', toNode.x + 100);
+    line.setAttribute('y2', toNode.y + 40);
+    svg.appendChild(line);
+  });
+  surface.insertBefore(svg, surface.firstChild.nextSibling);
+}
+
+// === CLIPBOARD ===
+function cvCopySelected() {
+  if (!cvSelectedIds.size) return;
+  cvClipboard = cvNodes.filter(function(n) { return cvSelectedIds.has(n.id); }).map(function(n) { return JSON.parse(JSON.stringify(n)); });
+  toast('Copied ' + cvClipboard.length + ' node(s)');
+}
+
+function cvPasteFromClipboard() {
+  if (!cvClipboard.length) return;
+  cvPushUndo();
+  var offset = 30;
+  cvSelectedIds.clear();
+  cvClipboard.forEach(function(n) {
+    var newNode = JSON.parse(JSON.stringify(n));
+    newNode.id = cvMakeId();
+    newNode.x += offset;
+    newNode.y += offset;
+    newNode.created = new Date().toISOString();
+    cvNodes.push(newNode);
+    cvSelectedIds.add(newNode.id);
+  });
+  cvRender();
+  cvScheduleSave();
+  toast('Pasted ' + cvClipboard.length + ' node(s)');
+}
+
 function cvAddTextNode() {
   const text = prompt('Enter text for new node:', '');
   if (!text || !text.trim()) return;
@@ -4155,7 +4273,9 @@ function cvAddCaptionToCanvas(id) {
 
 function cvClearAll() {
   if (!confirm('Clear all canvas nodes?')) return;
+  cvPushUndo();
   cvNodes = [];
+  cvConnections = [];
   cvSelectedIds.clear();
   cvRender();
   cvScheduleSave();
@@ -4164,7 +4284,7 @@ function cvClearAll() {
 
 function cvExportJSON() {
   if (!cvNodes.length) { toast('Canvas is empty'); return; }
-  const data = JSON.stringify({ nodes: cvNodes, viewport: cvViewport, exported: new Date().toISOString() }, null, 2);
+  const data = JSON.stringify({ nodes: cvNodes, connections: cvConnections, viewport: cvViewport, exported: new Date().toISOString() }, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -4206,6 +4326,20 @@ function cvExportPNG() {
       ctx.fill();
     }
   }
+  // Connection lines
+  ctx.strokeStyle = 'rgba(139,92,246,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  cvConnections.forEach(function(conn) {
+    var fromNode = cvNodes.find(function(x) { return x.id === conn.from; });
+    var toNode = cvNodes.find(function(x) { return x.id === conn.to; });
+    if (!fromNode || !toNode) return;
+    ctx.beginPath();
+    ctx.moveTo(fromNode.x - minX + pad + 100, fromNode.y - minY + pad + 40);
+    ctx.lineTo(toNode.x - minX + pad + 100, toNode.y - minY + pad + 40);
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
   // Nodes
   var borderColors = { caption: '#8B5CF6', text: '#4F7CFF', image: '#4ade80' };
   cvNodes.forEach(function(n) {
@@ -4265,6 +4399,7 @@ function cvImportJSON() {
         if (data.nodes && Array.isArray(data.nodes)) {
           if (cvNodes.length > 0 && !confirm('Replace current canvas with imported data?')) return;
           cvNodes = data.nodes;
+          cvConnections = data.connections || [];
           if (data.viewport) {
             cvViewport.x = data.viewport.x || 0;
             cvViewport.y = data.viewport.y || 0;
@@ -4356,7 +4491,7 @@ function cvRender() {
       e.stopPropagation();
       cvEditNode(n.id);
     });
-    // Node mouse drag
+    // Node mouse drag (supports multi-select drag)
     el.addEventListener('mousedown', function(e) {
       if (e.target.closest('.cn-actions') || e.target.closest('[contenteditable="true"]')) return;
       e.stopPropagation();
@@ -4371,6 +4506,14 @@ function cvRender() {
         cvSelectedIds.clear();
       }
       cvSelectedIds.add(n.id);
+      // Store offsets for multi-drag
+      cvMultiDragOffsets = {};
+      if (cvSelectedIds.size > 1) {
+        cvSelectedIds.forEach(function(sid) {
+          var sn = cvNodes.find(function(x) { return x.id === sid; });
+          if (sn) cvMultiDragOffsets[sid] = { sx: sn.x, sy: sn.y };
+        });
+      }
       cvRender();
     });
     // Node touch drag
@@ -4395,6 +4538,8 @@ function cvRender() {
   if (countEl) countEl.textContent = cvNodes.length + ' node' + (cvNodes.length !== 1 ? 's' : '');
   var statsEl = document.getElementById('cv-stats');
   if (statsEl) statsEl.textContent = cvNodes.length + ' nodes' + (cvSelectedIds.size > 0 ? ' / ' + cvSelectedIds.size + ' selected' : '');
+  // Render connections
+  cvRenderConnections();
   // Update minimap
   cvUpdateMinimap();
 }
@@ -4445,6 +4590,7 @@ function cvSave() {
     var state = {
       id: 'main',
       nodes: cvNodes,
+      connections: cvConnections,
       vx: cvViewport.x,
       vy: cvViewport.y,
       vz: cvViewport.zoom,
@@ -4464,6 +4610,7 @@ function cvLoad() {
       req.onsuccess = function() {
         if (req.result) {
           cvNodes = req.result.nodes || [];
+          cvConnections = req.result.connections || [];
           cvViewport.x = req.result.vx || 0;
           cvViewport.y = req.result.vy || 0;
           cvViewport.zoom = req.result.vz || 1;
@@ -4522,12 +4669,26 @@ function cvInitEvents() {
     if (cvDragNodeId) {
       var dx = (e.clientX - cvStartX) / cvViewport.zoom;
       var dy = (e.clientY - cvStartY) / cvViewport.zoom;
-      var node = cvNodes.find(function(n) { return n.id === cvDragNodeId; });
-      if (node) {
-        node.x = cvDragStartNodeX + dx;
-        node.y = cvDragStartNodeY + dy;
-        var el = document.querySelector('.cv-node[data-id="' + cvDragNodeId + '"]');
-        if (el) { el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; }
+      // Multi-drag: move all selected nodes
+      if (cvSelectedIds.size > 1 && Object.keys(cvMultiDragOffsets).length > 0) {
+        cvSelectedIds.forEach(function(sid) {
+          var sn = cvNodes.find(function(x) { return x.id === sid; });
+          var so = cvMultiDragOffsets[sid];
+          if (sn && so) {
+            sn.x = so.sx + dx;
+            sn.y = so.sy + dy;
+            var sel = document.querySelector('.cv-node[data-id="' + sid + '"]');
+            if (sel) { sel.style.left = sn.x + 'px'; sel.style.top = sn.y + 'px'; }
+          }
+        });
+      } else {
+        var node = cvNodes.find(function(n) { return n.id === cvDragNodeId; });
+        if (node) {
+          node.x = cvDragStartNodeX + dx;
+          node.y = cvDragStartNodeY + dy;
+          var el = document.querySelector('.cv-node[data-id="' + cvDragNodeId + '"]');
+          if (el) { el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; }
+        }
       }
     }
   });
@@ -4648,6 +4809,18 @@ function cvInitEvents() {
     if (e.key === 'z' && (e.metaKey || e.ctrlKey) && e.shiftKey) {
       e.preventDefault();
       cvRedo();
+    }
+    if (e.key === 'c' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      cvCopySelected();
+    }
+    if (e.key === 'v' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      cvPasteFromClipboard();
+    }
+    if (e.key === 'l' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      cvConnectSelected();
     }
   });
   // HTML5 drop from caption library
