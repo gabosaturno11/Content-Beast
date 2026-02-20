@@ -572,7 +572,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .cv-container{display:none;flex:1;position:relative;overflow:hidden;background:#f8f7f4;cursor:grab}
 .cv-container:active{cursor:grabbing}
 .cv-surface{position:absolute;top:0;left:0;transform-origin:0 0}
-.cv-grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(0,0,0,0.05) 1px,transparent 1px);background-size:24px 24px;pointer-events:none;z-index:0}
+.cv-grid{position:absolute;top:-50000px;left:-50000px;width:100000px;height:100000px;background-image:radial-gradient(circle,rgba(0,0,0,0.05) 1px,transparent 1px);background-size:24px 24px;pointer-events:none;z-index:0}
 .cv-node{position:absolute;min-width:160px;max-width:300px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;padding:14px;padding-left:18px;cursor:move;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:box-shadow 0.2s,border-color 0.2s;z-index:1;font-family:var(--sans);border-left:4px solid #ddd}
 .cv-node.cn-caption{border-left-color:#8B5CF6}
 .cv-node.cn-text-node{border-left-color:#4F7CFF}
@@ -4844,6 +4844,51 @@ function cvInitEvents() {
     if (e.key === 'l' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       cvConnectSelected();
+    }
+    // Escape to deselect
+    if (e.key === 'Escape') {
+      cvSelectedIds.clear();
+      cvRender();
+    }
+    // Arrow keys to nudge selected nodes
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].indexOf(e.key) !== -1 && cvSelectedIds.size > 0) {
+      e.preventDefault();
+      var step = e.shiftKey ? 24 : 4;
+      cvPushUndo();
+      cvSelectedIds.forEach(function(id) {
+        var n = cvNodes.find(function(x) { return x.id === id; });
+        if (!n) return;
+        if (e.key === 'ArrowUp') n.y -= step;
+        if (e.key === 'ArrowDown') n.y += step;
+        if (e.key === 'ArrowLeft') n.x -= step;
+        if (e.key === 'ArrowRight') n.x += step;
+      });
+      cvRender();
+      cvScheduleSave();
+    }
+    // Tab to cycle through nodes
+    if (e.key === 'Tab' && cvNodes.length > 0) {
+      e.preventDefault();
+      var curIds = Array.from(cvSelectedIds);
+      var allIds = cvNodes.map(function(n) { return n.id; });
+      var nextIdx = 0;
+      if (curIds.length === 1) {
+        var curIdx = allIds.indexOf(curIds[0]);
+        nextIdx = e.shiftKey ? (curIdx - 1 + allIds.length) % allIds.length : (curIdx + 1) % allIds.length;
+      }
+      cvSelectedIds.clear();
+      cvSelectedIds.add(allIds[nextIdx]);
+      // Pan to focused node
+      var focusNode = cvNodes[nextIdx];
+      if (focusNode) {
+        var cr = container.getBoundingClientRect();
+        cvViewport.x = cr.width / 2 - focusNode.x * cvViewport.zoom;
+        cvViewport.y = cr.height / 2 - focusNode.y * cvViewport.zoom;
+      }
+      cvRender();
+      // Focus the DOM element
+      var focusEl = document.querySelector('.cv-node[data-id="' + allIds[nextIdx] + '"]');
+      if (focusEl) focusEl.focus();
     }
   });
   // HTML5 drop from caption library

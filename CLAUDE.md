@@ -1,11 +1,11 @@
 # CONTENT BEAST — Build Specs
 
 ## Current State
-- **Version:** v7.0 (single-file HTML app, `index.html`, ~4775 lines)
+- **Version:** v7.4 (single-file HTML app, `index.html`, ~5530 lines)
 - **Repo:** gabosaturno11/Content-Beast
-- **Deploy:** Vercel auto-deploy from main → content-beast-five.vercel.app
+- **Deploy:** Vercel auto-deploy from main -> content-beast-five.vercel.app
 - **Architecture:** Single HTML file with inline CSS + JS
-- **Storage:** IndexedDB (`ContentBeastCaptions` DB) for caption library + canvas state
+- **Storage:** IndexedDB (`ContentBeastCaptions` DB, schema v2) for caption library + canvas state
 - **Caption Library:** 103 Gabo content captions + 80 seed library entries, auto-seeded on first load
 
 ## Hard Rules
@@ -19,90 +19,91 @@
 
 ---
 
-## UX/Canvas Spec (v7.0 Target)
+## Canvas Feature Set (v7.2-7.4)
 
-### Block 1 — Role
-Senior staff/principal engineer + UX systems architect. Ship production-grade UX improvements: accessible, mobile-first, performance-safe, maintainable.
+### Core
+- White canvas surface (#f8f7f4) with infinite dot grid
+- Node types: caption (purple), text (blue), image (green)
+- Type labels on each node
+- Pan + zoom (mouse wheel, touch pinch)
+- Touch: 1-finger pan, 2-finger pinch zoom, node touch drag
 
-### Block 2 — Mission
-Deliver requested UX/navigation improvements end-to-end. Do not stop at planning or partial progress. If blocked by unknowns, proceed with best-practice defaults, document assumptions, and keep going.
+### Node Operations
+- Add text, image, caption nodes
+- Delete, duplicate, edit (in-place double-click contenteditable)
+- Copy/paste nodes (Cmd+C / Cmd+V)
+- Arrow key nudge (4px, Shift=24px)
+- Tab/Shift+Tab to cycle through nodes
 
-### Block 3 — Primary Success Criteria (Definition of Done)
-You are "done" only when:
-- The requested UX features exist and work on **desktop + mobile**
-- A11y basics are met (keyboard/focus/semantics; touch alternatives on mobile)
-- No major regressions to existing Caption Library seeding / IndexedDB persistence
+### Selection
+- Click to select, Shift+click for multi
+- Lasso selection (Shift+drag)
+- Cmd+A to select all
+- Escape to deselect
+- Multi-node drag (all selected move together)
 
-### Block 4 — Execution Policy (Anti-stall)
-- Choose a default, implement it, and log it under "Assumptions Made."
-- Never end with "here's what I would do." Always implement.
+### Connection Lines
+- SVG dashed lines between connected nodes
+- Cmd+L to connect selected
+- Connect/Disconnect buttons
+- Persisted in IndexedDB + JSON export
+- Auto-cleanup on node delete
 
-### Block 5 — Iteration Loop (Do not break until done)
-Repeat:
-1. Implement the next smallest coherent slice
-2. Fix failures immediately
-3. Verify acceptance criteria
-4. Move to next slice
+### Alignment & Layout
+- Snap to grid (24px)
+- Align: left/right/top/bottom/center-h/center-v
+- Distribute: horizontal/vertical spacing
+- Alignment buttons in controls panel
 
-### Block 6 — Mobile-Always Requirements (Non-negotiable)
-Every UX change must include mobile behavior:
-- Responsive layout (breakpoints + fluid sizing)
-- Touch support for interactions (drag, drop, scroll, long-press alternatives)
-- Panels must be usable on small screens (collapse to drawers/sheets)
-- Minimum tap target sizes; avoid hover-only affordances
-- Performance safe on mobile (avoid heavy reflow; avoid jank during drag)
+### Templates (6)
+- Social Calendar: 7-day x 4-week grid with platform-specific content slots
+- Carousel: 10-slide structure (Hook > Problem > Agitate > Reframe > Points > CTA)
+- Mood Board: 8 brand-building categories
+- Infographic: 10-section vertical flow (Title > Problem > Solution > Steps > CTA)
+- Quote Grid: 3x3, auto-populates from caption library
+- Content Plan: 5-column Kanban (Ideas > Drafting > Review > Scheduled > Published)
 
-### Block 7 — Information Architecture + Navigation
-- Keep navigation predictable and resilient (no dead ends)
-- "Where am I / what can I do next" must be visible
-- Add breadcrumbs/headers only if they reduce confusion
+### Persistence & Export
+- IndexedDB auto-save (400ms debounce)
+- JSON export/import (nodes + connections + viewport)
+- PNG export (2x retina, includes grid, connection lines, styled nodes)
+- Canvas state restored on reload
 
-### Block 8 — Visual System Spec (Endel-inspired)
-- Base background: near-black (#0B0B10 or similar)
-- Text: --text: rgba(255,255,255,0.92); --muted: rgba(255,255,255,0.68)
-- Accent hues: blue (#4F7CFF) + purple (#8B5CF6) with subtle gradients
-- Endel-like gradients: low-opacity radial gradients, barely perceptible
-- Higher elevation modules:
-  - `--surface: rgba(255,255,255,0.04)`
-  - `--surface-2: rgba(255,255,255,0.06)`
-  - `--border: rgba(255,255,255,0.08)`
-  - `--shadow-1: 0 8px 24px rgba(0,0,0,0.35)`
-  - `--shadow-2: 0 16px 48px rgba(0,0,0,0.45)`
-- Motion: 150-320ms, ease curves, respect prefers-reduced-motion
+### Undo/Redo
+- 40-level undo stack
+- Cmd+Z / Cmd+Shift+Z
+- Toolbar buttons with state indicators
 
-### Block 9 — Canvas Requirement (Non-negotiable feature scope)
-Implement a **white canvas** where users can:
-- Drag caption blocks (and/or text modules) onto the canvas to create "nodes"
-- Reposition nodes freely
-- Add images to the canvas (upload/paste/drag-in)
-- Save/restore canvas state (IndexedDB persistence)
-- Canvas must work on desktop + mobile (touch drag/pan/zoom)
+### Minimap
+- Live overview in bottom-right corner
+- Color-coded dots by node type
+- Viewport rectangle indicator
+- Hidden on mobile
 
-### Block 10 — Canvas UX Behaviors
+### Canvas Search
+- Search input in controls panel
+- Find nodes by text or theme
+- Auto-pan to first match
+- Highlights all matches as selected
 
-**A) Caption Library Integration:**
-- Caption blocks are draggable
-- Dragging provides a clear preview/ghost
-- Drop targets are obvious (Canvas drop zone)
-- "Add to Canvas" button for mobile-friendly fallback
+### Mobile
+- Toolbar above bottom nav (54px bottom)
+- Larger touch targets (28px min)
+- Node actions always visible (not hover-dependent)
+- Minimap hidden
+- "Board" button on caption items as drag alternative
 
-**B) Canvas Features:**
-- Pan + zoom (mouse wheel/trackpad; touch pinch on mobile)
-- Drag nodes to reposition
-- Multi-node selection (desktop; mobile simplified)
-- Delete node, duplicate node, edit node text
-- Add images: upload file picker, drag image file onto canvas (desktop), paste image
-- Persistence: save canvas graph (nodes, positions, content refs) into IndexedDB, restore on reload
-- Export: JSON of canvas graph (MVP), PNG snapshot (optional)
-
-### Block 11 — Acceptance Criteria
-- Desktop: drag a caption block -> drop on canvas -> node appears at drop position
-- Mobile: user can add a caption to canvas without requiring drag (button or long-press)
-- Canvas state persists after refresh
-- Images can be added (at least via upload)
-- No regressions: Caption seeding/dedup still works; app loads without errors
-- `prefers-reduced-motion` respected for major transitions
-- Keyboard: focus visible; basic navigation works; delete node via keyboard (desktop)
+### Keyboard Shortcuts (Canvas)
+- Delete/Backspace: delete selected
+- Cmd+A: select all
+- Cmd+Z: undo
+- Cmd+Shift+Z: redo
+- Cmd+C: copy selected
+- Cmd+V: paste
+- Cmd+L: connect selected
+- Arrow keys: nudge (4px, Shift=24px)
+- Tab/Shift+Tab: cycle nodes
+- Escape: deselect all
 
 ---
 
@@ -121,14 +122,32 @@ Implement a **white canvas** where users can:
 - `mobileTab(tab, btn)` — mobile bottom nav
 - `seedGaboCaptions()` — loads 103+ content captions into IndexedDB
 - `importSeedsToLibrary()` — loads seed library into IndexedDB
+- `cvAddNode(type, data)` — add node to canvas
+- `cvRender()` — re-render all canvas nodes
+- `cvConnect(fromId, toId)` — create connection line
+- `cvAlign(dir)` — align selected nodes
+- `cvExportPNG()` — export canvas as PNG
+- `cvSearchNodes(query)` — search and select matching nodes
 
-### IndexedDB Schema
+### IndexedDB Schema (v2)
 - **DB:** ContentBeastCaptions
 - **Store:** captions (keyPath: id, indexes: theme, voice, platform, created)
-- **Store:** canvasState (keyPath: id) — for canvas persistence
+- **Store:** canvasState (keyPath: id) — nodes, connections, viewport
+
+### Canvas Node Data Model
+```javascript
+{ id, type: 'caption'|'text'|'image', x, y, text, theme, captionId, imgSrc, created }
+```
+
+### Canvas State Model
+```javascript
+{ id: 'main', nodes: [...], connections: [{from, to}], vx, vy, vz, updated }
+```
 
 ### CSS Token System
-- `--bg-void` / `--bg-base` / `--bg-elevated` / `--bg-surface` — depth layers
-- `--accent` (#a855f7) / `--cyan` (#818cf8) — primary colors
-- `--shadow-sm/md/lg/xl` — elevation system
+- `--bg-void` (#0B0B10) / `--bg-base` / `--bg-elevated` / `--bg-surface` — depth layers
+- `--accent` (#8B5CF6) / `--cyan` (#4F7CFF) — primary colors
+- `--surface` / `--surface-2` — translucent elevated surfaces
+- `--shadow-1` / `--shadow-2` — Endel-style depth shadows
+- `--glow-accent` / `--glow-cyan` — subtle glow effects
 - `--mono` / `--sans` — typography
