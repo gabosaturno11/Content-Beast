@@ -1031,6 +1031,24 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
             <button class="btn btn-outline btn-sm" onclick="cvCopySelected()" style="flex:1">Copy</button>
             <button class="btn btn-outline btn-sm" onclick="cvPasteFromClipboard()" style="flex:1">Paste</button>
           </div>
+          <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:6px">
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('left')" style="flex:1;font-size:7px" title="Align left">L</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('center-h')" style="flex:1;font-size:7px" title="Center horizontally">CH</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('right')" style="flex:1;font-size:7px" title="Align right">R</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('top')" style="flex:1;font-size:7px" title="Align top">T</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('center-v')" style="flex:1;font-size:7px" title="Center vertically">CV</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('bottom')" style="flex:1;font-size:7px" title="Align bottom">B</button>
+          </div>
+          <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('distribute-h')" style="flex:1;font-size:7px" title="Distribute horizontally">DH</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('distribute-v')" style="flex:1;font-size:7px" title="Distribute vertically">DV</button>
+            <button class="btn btn-outline btn-sm" onclick="cvSnapToGrid()" style="flex:1;font-size:7px" title="Snap to grid">Snap</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label class="lbl">Search Nodes</label>
+          <input type="text" placeholder="Find by text or theme..." style="width:100%;padding:6px 8px;font-size:9px;font-family:var(--mono);background:var(--bg-base);border:1px solid var(--border);border-radius:4px;color:var(--text-primary)" onkeyup="if(event.key==='Enter')cvSearchNodes(this.value)" id="cv-search-input">
         </div>
 
         <div class="section-toggle" onclick="toggleSection(this)">
@@ -2807,6 +2825,11 @@ const CMD_ACTIONS = [
   { icon: 'CV', text: 'Canvas: Disconnect Selected', desc: 'Remove lines between selected nodes', fn: () => cvDisconnectSelected() },
   { icon: 'CV', text: 'Canvas: Copy Nodes', desc: 'Copy selected nodes (Cmd+C)', fn: () => cvCopySelected() },
   { icon: 'CV', text: 'Canvas: Paste Nodes', desc: 'Paste copied nodes (Cmd+V)', fn: () => cvPasteFromClipboard() },
+  { icon: 'CV', text: 'Canvas: Snap to Grid', desc: 'Align nodes to 24px grid', fn: () => cvSnapToGrid() },
+  { icon: 'CV', text: 'Canvas: Align Left', desc: 'Align selected nodes to left', fn: () => cvAlign('left') },
+  { icon: 'CV', text: 'Canvas: Align Top', desc: 'Align selected nodes to top', fn: () => cvAlign('top') },
+  { icon: 'CV', text: 'Canvas: Distribute H', desc: 'Distribute selected nodes horizontally', fn: () => cvAlign('distribute-h') },
+  { icon: 'CV', text: 'Canvas: Distribute V', desc: 'Distribute selected nodes vertically', fn: () => cvAlign('distribute-v') },
   { icon: 'CV', text: 'Canvas: Import JSON', desc: 'Load canvas from file', fn: () => { setMode('canvas'); cvImportJSON(); } },
   { icon: 'CV', text: 'Canvas: Fit View', desc: 'Zoom to fit all nodes', fn: () => { setMode('canvas'); cvFitView(); } },
   { icon: 'CV', text: 'Canvas: Social Calendar', desc: 'Load social media calendar template', fn: () => { setMode('canvas'); cvLoadTemplate('social-calendar'); } },
@@ -4879,6 +4902,98 @@ function cvInitEvents() {
       }
     }
   });
+}
+
+// === SNAP TO GRID ===
+var CV_SNAP_SIZE = 24;
+function cvSnapToGrid() {
+  if (!cvSelectedIds.size) {
+    cvNodes.forEach(function(n) {
+      n.x = Math.round(n.x / CV_SNAP_SIZE) * CV_SNAP_SIZE;
+      n.y = Math.round(n.y / CV_SNAP_SIZE) * CV_SNAP_SIZE;
+    });
+  } else {
+    cvSelectedIds.forEach(function(id) {
+      var n = cvNodes.find(function(x) { return x.id === id; });
+      if (n) {
+        n.x = Math.round(n.x / CV_SNAP_SIZE) * CV_SNAP_SIZE;
+        n.y = Math.round(n.y / CV_SNAP_SIZE) * CV_SNAP_SIZE;
+      }
+    });
+  }
+  cvRender();
+  cvScheduleSave();
+  toast('Snapped to grid');
+}
+
+// === ALIGNMENT ===
+function cvAlign(dir) {
+  var ids = Array.from(cvSelectedIds);
+  if (ids.length < 2) { toast('Select 2+ nodes to align'); return; }
+  cvPushUndo();
+  var selected = cvNodes.filter(function(n) { return cvSelectedIds.has(n.id); });
+  if (dir === 'left') {
+    var minX = Math.min.apply(null, selected.map(function(n) { return n.x; }));
+    selected.forEach(function(n) { n.x = minX; });
+  } else if (dir === 'right') {
+    var maxX = Math.max.apply(null, selected.map(function(n) { return n.x; }));
+    selected.forEach(function(n) { n.x = maxX; });
+  } else if (dir === 'top') {
+    var minY = Math.min.apply(null, selected.map(function(n) { return n.y; }));
+    selected.forEach(function(n) { n.y = minY; });
+  } else if (dir === 'bottom') {
+    var maxY = Math.max.apply(null, selected.map(function(n) { return n.y; }));
+    selected.forEach(function(n) { n.y = maxY; });
+  } else if (dir === 'center-h') {
+    var avgX = selected.reduce(function(sum, n) { return sum + n.x; }, 0) / selected.length;
+    selected.forEach(function(n) { n.x = avgX; });
+  } else if (dir === 'center-v') {
+    var avgY = selected.reduce(function(sum, n) { return sum + n.y; }, 0) / selected.length;
+    selected.forEach(function(n) { n.y = avgY; });
+  } else if (dir === 'distribute-h') {
+    selected.sort(function(a, b) { return a.x - b.x; });
+    var startX = selected[0].x;
+    var endX = selected[selected.length - 1].x;
+    var step = (endX - startX) / (selected.length - 1);
+    selected.forEach(function(n, i) { n.x = startX + i * step; });
+  } else if (dir === 'distribute-v') {
+    selected.sort(function(a, b) { return a.y - b.y; });
+    var startY = selected[0].y;
+    var endY = selected[selected.length - 1].y;
+    var stepY = (endY - startY) / (selected.length - 1);
+    selected.forEach(function(n, i) { n.y = startY + i * stepY; });
+  }
+  cvRender();
+  cvScheduleSave();
+  toast('Aligned: ' + dir);
+}
+
+// === CANVAS SEARCH ===
+function cvSearchNodes(query) {
+  if (!query || !query.trim()) { cvSelectedIds.clear(); cvRender(); return; }
+  var q = query.toLowerCase().trim();
+  cvSelectedIds.clear();
+  cvNodes.forEach(function(n) {
+    if ((n.text && n.text.toLowerCase().indexOf(q) !== -1) ||
+        (n.theme && n.theme.toLowerCase().indexOf(q) !== -1)) {
+      cvSelectedIds.add(n.id);
+    }
+  });
+  if (cvSelectedIds.size > 0) {
+    // Pan to first match
+    var firstId = Array.from(cvSelectedIds)[0];
+    var firstNode = cvNodes.find(function(n) { return n.id === firstId; });
+    if (firstNode) {
+      var container = document.getElementById('cv-container');
+      var rect = container.getBoundingClientRect();
+      cvViewport.x = rect.width / 2 - firstNode.x * cvViewport.zoom;
+      cvViewport.y = rect.height / 2 - firstNode.y * cvViewport.zoom;
+    }
+    toast(cvSelectedIds.size + ' match' + (cvSelectedIds.size > 1 ? 'es' : ''));
+  } else {
+    toast('No matches');
+  }
+  cvRender();
 }
 
 // === MINIMAP ===
