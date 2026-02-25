@@ -5,7 +5,7 @@
 - **Visibility:** **Public right now** (`private: false` from GitHub metadata)
 - **Architecture:** Single-file app (`/home/runner/work/Content-Beast/Content-Beast/index.html`)
 - **Current size:** ~5776 lines, 202 `function` declarations
-- **Deploy target in code/docs:** `content-beast-five.vercel.app` (runtime health could not be verified from this sandbox due DNS/network restrictions)
+- **Deploy target in code/docs:** `content-beast-five.vercel.app` (runtime health could not be verified from this sandbox due to DNS/network restrictions)
 
 ## Full Functional Audit
 
@@ -36,7 +36,7 @@
 - **No explicit privacy controls** in-app for local content encryption/backups.
 
 ### Breaks / Known Functional Gaps
-- **Canvas undo/redo does not track connections**, only node arrays (`cvPushUndo`, `cvUndo`, `cvRedo` serialize `cvNodes` but not `cvConnections`).  
+- **Critical: Canvas undo/redo does not track connections**—only node arrays are serialized by `cvPushUndo`, `cvUndo`, and `cvRedo` (`cvNodes` but not `cvConnections`).  
   Result: after connect/disconnect operations, undo/redo can restore node positions/content without restoring matching edge state.
 
 ## API Health Check
@@ -58,7 +58,7 @@ This file now reflects the **actual observed state** of the checked-in codebase 
 
 ## Suggested Follow-Up Steps *(to be approved by Gabo)*
 - [ ] Make repository private if intended (`Settings -> General -> Danger Zone -> Change visibility`).
-- [ ] Fix canvas undo/redo to include both `cvNodes` and `cvConnections`.
+- [ ] Fix canvas undo/redo to include both `cvNodes` and `cvConnections` (see Breaks / Known Functional Gaps).
 - [ ] Add CSP and SRI for third-party scripts.
 - [ ] Audit all `innerHTML` writes and enforce sanitization policy consistently.
 - [ ] Decide whether to keep CDN dependencies or self-host critical assets.
