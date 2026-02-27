@@ -225,14 +225,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--border-a
 .fullscreen-mode .preview-body{padding:32px 10%}
 
 /* FOCUS VIEW — immersive writing */
-.workspace.focus-mode .lib{width:0;overflow:hidden;border:none;padding:0}
-.workspace.focus-mode .ctrl{border-right-color:var(--border)}
-.workspace.focus-mode .preview-body{padding:40px 12%;background:var(--bg-void)}
-.workspace.focus-mode .pdf-canvas{box-shadow:0 8px 48px rgba(0,0,0,0.6),0 0 80px rgba(45,212,191,0.04);max-width:780px;margin:0 auto}
-.workspace.focus-mode .preview-hdr{background:var(--bg-void);border-bottom-color:transparent}
-.workspace.focus-mode .preview-toolbar{opacity:0.2;transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1)}
-.workspace.focus-mode .preview-toolbar:hover{opacity:1}
-.workspace.focus-mode .wc-bar{background:var(--bg-void)}
+/* focus-mode removed — was non-functional with contenteditable */
 
 /* COVER PAGE */
 .cover-page{text-align:center;padding:80px 60px;min-height:500px;display:flex;flex-direction:column;justify-content:center;align-items:center}
@@ -430,24 +423,10 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--border-a
 .cl-import-zone:hover,.cl-import-zone.over{border-color:var(--accent);background:rgba(45,212,191,0.04)}
 
 /* SPLIT VIEW */
-.workspace.split-view{grid-template-columns:0 1fr 1fr}
-.workspace.split-view .lib{display:none}
-.workspace.split-view .ctrl{overflow-y:auto}
-.workspace.split-view .ctrl .ctrl-body{padding:0}
-.workspace.split-view .ctrl #f-content{height:100% !important;min-height:calc(100vh - 120px);border:none;border-radius:0;font-size:12px;line-height:1.7;resize:none}
-.workspace.split-view .ctrl .ctrl-hdr{display:flex}
-.workspace.split-view .ctrl #pdf-ctrl .row:not(:last-child){display:none}
-.workspace.split-view .ctrl #pdf-ctrl .grid2{display:none}
-.workspace.split-view .ctrl #pdf-ctrl [class*="preset"]{display:none}
-.workspace.split-view .ctrl #pdf-ctrl [data-tpl]{display:none}
-.workspace.split-view .ctrl #pdf-ctrl [data-lv]{display:none}
-.workspace.split-view .ctrl #pdf-ctrl .drop-zone{display:none}
-.workspace.split-view .ctrl #pdf-ctrl .md-cheat{display:none}
-.workspace.split-view .ctrl #pdf-ctrl > div:last-child{display:none}
+/* split-view removed — was non-functional with contenteditable */
 
 /* FOCUS MODE (hides library) */
-.workspace.focus-mode{grid-template-columns:0 1fr 1fr}
-.workspace.focus-mode .lib{display:none}
+/* focus-mode grid removed */
 
 /* COMMAND PALETTE */
 .cmd-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:1100;display:none;padding-top:20vh;justify-content:center}
@@ -729,11 +708,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
     <button class="tab-btn" onclick="setMode('canvas')">Canvas</button>
   </div>
   <div class="hdr-right">
-    <div class="tab-bar" style="margin-right:4px">
-      <button class="tab-btn active" id="view-default" onclick="setView('default')" title="3-panel">Full</button>
-      <button class="tab-btn" id="view-split" onclick="setView('split')" title="Markdown + Preview">Split</button>
-      <button class="tab-btn" id="view-focus" onclick="setView('focus')" title="Controls + Preview">Focus</button>
-    </div>
+    <!-- View switcher removed: split/focus were non-functional with contenteditable -->
     <span id="save-ind" style="font-size:8px;color:var(--text-muted);opacity:0;transition:opacity 0.3s">Saved</span>
     <span id="status" class="status status-ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
   </div>
@@ -2822,9 +2797,7 @@ const CMD_ACTIONS = [
   { icon: 'TP', text: 'Template: Visual Map', desc: 'Map photo/diagram needs', fn: () => applyTranscriptTemplate('visual-map') },
   { icon: 'TP', text: 'Template: Platform Deploy', desc: 'Map to IG/YT/Email/Book', fn: () => applyTranscriptTemplate('platform-deploy') },
   { icon: 'D', text: 'Document Stats', desc: 'Show reading time + stats', fn: () => showDocStats() },
-  { icon: 'V', text: 'View: Full', desc: '3-panel layout', fn: () => setView('default') },
-  { icon: 'V', text: 'View: Split', desc: 'Markdown + Preview', fn: () => setView('split') },
-  { icon: 'V', text: 'View: Focus', desc: 'Controls + Preview', fn: () => setView('focus') },
+  { icon: 'V', text: 'Toggle Sidebar', desc: 'Show/hide library panel', fn: () => toggleSidebar() },
   { icon: 'CL', text: 'Caption Library', desc: 'Browse saved captions', fn: () => { setMode('caption'); setCapSub('library'); } },
   { icon: 'CL', text: 'Import Captions', desc: 'Import JSON/MD/TXT/CSV', fn: () => { setMode('caption'); setCapSub('library'); document.getElementById('cl-file').click(); } },
   { icon: 'CL', text: 'Export All Captions (JSON)', desc: 'Full library backup', fn: () => clExportAll('json') },
@@ -3002,22 +2975,7 @@ function showDocStats() {
 // ============================================================
 // VIEW MODES (Full / Split / Focus)
 // ============================================================
-function setView(mode) {
-  const ws = document.getElementById('workspace');
-  ws.classList.remove('split-view', 'focus-mode');
-  document.querySelectorAll('[id^="view-"]').forEach(b => b.classList.remove('active'));
-  if (mode === 'split') {
-    ws.classList.add('split-view');
-    document.getElementById('view-split').classList.add('active');
-    // In split view, auto-render on content change
-    document.getElementById('f-content').oninput = function() { onFieldChange(); };
-  } else if (mode === 'focus') {
-    ws.classList.add('focus-mode');
-    document.getElementById('view-focus').classList.add('active');
-  } else {
-    document.getElementById('view-default').classList.add('active');
-  }
-}
+// setView removed — split/focus views were non-functional
 
 // ============================================================
 // SORT DOCUMENTS
@@ -5738,7 +5696,8 @@ initUniversalDragDrop();
 openCaptionDB().then(() => Promise.all([clLoadAll(), cvLoad()])).then(() => { if (clCaptions.length === 0) seedGaboCaptions(); cvRender(); }).catch(e => console.warn('IndexedDB:', e));
 cvInitEvents();
 // Restore sidebar state from localStorage
-if(localStorage.getItem('cb-sidebar')==='0'){document.getElementById('workspace').classList.add('two-col');var sb=document.getElementById('sidebar-btn');if(sb)sb.classList.remove('active');}
+// Default to 2-panel (sidebar hidden) unless user explicitly opened it
+if(localStorage.getItem('cb-sidebar')!=='1'){document.getElementById('workspace').classList.add('two-col');var sb=document.getElementById('sidebar-btn');if(sb)sb.classList.remove('active');}
 </script>
 </body>
 </html>
