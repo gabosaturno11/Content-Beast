@@ -147,7 +147,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--border-a
 .pdf-canvas strong{font-weight:700;color:#111}
 .pdf-canvas em{font-style:italic}
 .pdf-canvas hr{border:none;border-top:1px solid #ddd;margin:20px 0}
-.pdf-canvas blockquote{border-left:3px solid #2dd4bf;padding:8px 16px;margin:12px 0;background:#faf5ff;font-style:italic;color:#555}
+.pdf-canvas blockquote{border-left:3px solid #2dd4bf;padding:8px 16px;margin:12px 0;background:#f0fdfa;font-style:italic;color:#555}
 .pdf-canvas code{background:#f4f4f5;padding:1px 4px;border-radius:2px;font-family:var(--mono);font-size:11px}
 .pdf-canvas .pdf-footer{font-size:9px;color:#aaa;margin-top:40px;padding-top:12px;border-top:1px solid #eee;font-family:var(--mono);letter-spacing:0.04em}
 .pdf-canvas table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
@@ -233,10 +233,6 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--border-a
 .workspace.focus-mode .preview-toolbar{opacity:0.2;transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1)}
 .workspace.focus-mode .preview-toolbar:hover{opacity:1}
 .workspace.focus-mode .wc-bar{background:var(--bg-void)}
-
-/* SPLIT VIEW */
-.workspace.split-view .lib{width:0;overflow:hidden;border:none;padding:0}
-.workspace.split-view{grid-template-columns:0 1fr 1fr}
 
 /* COVER PAGE */
 .cover-page{text-align:center;padding:80px 60px;min-height:500px;display:flex;flex-direction:column;justify-content:center;align-items:center}
@@ -1357,12 +1353,23 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   <div class="sc-row"><span class="sc-desc">Show this help</span><span class="sc-key">Cmd+/</span></div>
   <div class="sc-row"><span class="sc-desc">Close modal / Exit fullscreen</span><span class="sc-key">Esc</span></div>
   <div style="margin-top:16px">
-    <h3 style="margin-bottom:8px">Canvas Editing</h3>
+    <h3 style="margin-bottom:8px">Text Formatting</h3>
     <div class="sc-row"><span class="sc-desc">Bold</span><span class="sc-key">Cmd+B</span></div>
     <div class="sc-row"><span class="sc-desc">Italic</span><span class="sc-key">Cmd+I</span></div>
     <div class="sc-row"><span class="sc-desc">Underline</span><span class="sc-key">Cmd+U</span></div>
+  </div>
+  <div style="margin-top:16px">
+    <h3 style="margin-bottom:8px">Canvas Whiteboard</h3>
     <div class="sc-row"><span class="sc-desc">Undo</span><span class="sc-key">Cmd+Z</span></div>
     <div class="sc-row"><span class="sc-desc">Redo</span><span class="sc-key">Cmd+Shift+Z</span></div>
+    <div class="sc-row"><span class="sc-desc">Select All</span><span class="sc-key">Cmd+A</span></div>
+    <div class="sc-row"><span class="sc-desc">Copy Nodes</span><span class="sc-key">Cmd+C</span></div>
+    <div class="sc-row"><span class="sc-desc">Paste Nodes</span><span class="sc-key">Cmd+V</span></div>
+    <div class="sc-row"><span class="sc-desc">Connect Nodes</span><span class="sc-key">Cmd+L</span></div>
+    <div class="sc-row"><span class="sc-desc">Delete Selected</span><span class="sc-key">Del</span></div>
+    <div class="sc-row"><span class="sc-desc">Nudge</span><span class="sc-key">Arrow Keys</span></div>
+    <div class="sc-row"><span class="sc-desc">Nudge (fast)</span><span class="sc-key">Shift+Arrow</span></div>
+    <div class="sc-row"><span class="sc-desc">Cycle Nodes</span><span class="sc-key">Tab</span></div>
   </div>
   <div style="text-align:center;margin-top:16px">
     <button class="btn btn-outline btn-sm" onclick="closeShortcuts()">Close</button>
@@ -2952,7 +2959,7 @@ function runCmd(idx) {
 function backupData() {
   snapshotActive();
   const backup = {
-    version: '6.4',
+    version: '8.0',
     exported: new Date().toISOString(),
     docs: docs,
     versions: getVersions()
