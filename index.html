@@ -161,7 +161,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--border-a
 .pdf-canvas.tpl-dark h3{color:#22d3ee}
 .pdf-canvas.tpl-dark h4{color:#94a3b8}
 .pdf-canvas.tpl-dark p,.pdf-canvas.tpl-dark li{color:#cbd5e1}
-.pdf-canvas.tpl-dark blockquote{background:rgba(45,212,191,0.05);border-left-color:#2dd4bf;color:#a78bfa}
+.pdf-canvas.tpl-dark blockquote{background:rgba(45,212,191,0.05);border-left-color:#2dd4bf;color:#5eead4}
 .pdf-canvas.tpl-dark th{background:#111;border-color:#222;color:#94a3b8}
 .pdf-canvas.tpl-dark td{border-color:#1a1a1a;color:#94a3b8}
 .pdf-canvas.tpl-dark hr{border-top-color:#222}
@@ -176,7 +176,7 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--border-a
 .pdf-canvas.tpl-saturno p,.pdf-canvas.tpl-saturno li{color:#94a3b8}
 .pdf-canvas.tpl-saturno strong{color:#e2e8f0}
 .pdf-canvas.tpl-saturno blockquote{background:rgba(6,182,212,0.05);border-left-color:#06b6d4;color:#67e8f9}
-.pdf-canvas.tpl-saturno th{background:rgba(45,212,191,0.08);border-color:#1e293b;color:#a78bfa}
+.pdf-canvas.tpl-saturno th{background:rgba(45,212,191,0.08);border-color:#1e293b;color:#5eead4}
 .pdf-canvas.tpl-saturno td{border-color:#1e293b;color:#94a3b8}
 .pdf-canvas.tpl-saturno hr{border-top-color:#1e293b}
 .pdf-canvas.tpl-saturno .pdf-footer{color:#334155;border-top-color:#1e293b}
@@ -1186,9 +1186,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <button class="btn-icon" onclick="insertEditorImage()" title="Insert image">IMG</button>
         <input type="file" id="editor-img-file" accept="image/*" style="display:none" onchange="handleEditorImage(this.files[0])">
         <span class="tb-sep"></span>
-        <button class="btn-icon" onclick="insertImage()" title="Insert image">Img</button>
         <button class="btn-icon" onclick="openTblModal()" title="Insert table">Tbl</button>
-        <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(this.files[0])">
         <input type="color" id="color-input" style="display:none" onchange="execCmd('foreColor',this.value)">
         <button class="btn-icon" onclick="document.getElementById('color-input').click()" title="Text color" style="position:relative">A<span style="position:absolute;bottom:2px;left:4px;right:4px;height:2px;background:var(--accent);border-radius:1px"></span></button>
         <div style="position:relative;display:inline-block">
@@ -1835,11 +1833,6 @@ function downloadHTML() {
 // ============================================================
 // CAPTION MULTIPLIER
 // ============================================================
-function setVoice(btn) {
-  currentVoice = btn.dataset.v;
-  document.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('active', b === btn));
-}
-
 document.querySelectorAll('.chk').forEach(label => {
   label.addEventListener('click', function(e) {
     if (e.target.tagName !== 'INPUT') { const cb = this.querySelector('input'); cb.checked = !cb.checked; }
@@ -2280,39 +2273,7 @@ function insertPageBreak() {
 // ============================================================
 // IMAGE INSERT
 // ============================================================
-function insertImage() {
-  document.getElementById('img-input').click();
-}
-
-function handleImage(file) {
-  if (!file || !file.type.startsWith('image/')) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const canvas = document.getElementById('canvas');
-    const img = document.createElement('img');
-    img.src = e.target.result;
-    img.style.maxWidth = '100%';
-    img.alt = file.name;
-    const sel = window.getSelection();
-    if (sel.rangeCount && canvas.contains(sel.anchorNode)) {
-      const range = sel.getRangeAt(0);
-      range.insertNode(img);
-      range.setStartAfter(img);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    } else {
-      const footer = canvas.querySelector('.pdf-footer');
-      if (footer) { canvas.insertBefore(img, footer); }
-      else { canvas.appendChild(img); }
-    }
-    scheduleSave();
-    toast('Image inserted');
-  };
-  reader.readAsDataURL(file);
-  document.getElementById('img-input').value = '';
-}
-
-// Editor image insert (with styled container)
+// Editor image insert (with styled figure + figcaption)
 function insertEditorImage() { document.getElementById('editor-img-file').click(); }
 function handleEditorImage(file) {
   if (!file || !file.type.startsWith('image/')) return;
