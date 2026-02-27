@@ -2146,8 +2146,219 @@ function setFramework(btn) {
 }
 
 // ============================================================
-// CAPTION MULTIPLIER (V2 - 8 Voice Modes + Frameworks)
+// CAPTION MULTIPLIER V3 — Collision Matrix Pipeline
+// Dials ACTUALLY transform. Platforms have REAL structures.
 // ============================================================
+
+// Voice architecture: each voice defines structural DNA, not just prefix/suffix
+const VOICE_DNA = {
+  raw:       { pronoun:'you', open:'hook', close:'rebel', sentLen:'short', energy:'explosive', hedging:false, profanity:true, direct:true, questions:false },
+  teacher:   { pronoun:'you', open:'statement', close:'soft', sentLen:'mixed', energy:'steady', hedging:false, profanity:false, direct:true, questions:true },
+  prophet:   { pronoun:'we', open:'hook', close:'prophetic', sentLen:'short', energy:'accelerating', hedging:false, profanity:false, direct:true, questions:false },
+  rebel:     { pronoun:'you', open:'question', close:'rebel', sentLen:'short', energy:'explosive', hedging:false, profanity:true, direct:true, questions:true },
+  mystic:    { pronoun:'souls', open:'story', close:'soft', sentLen:'long', energy:'gradual', hedging:true, profanity:false, direct:false, questions:false },
+  philosopher:{ pronoun:'we', open:'statement', close:'soft', sentLen:'long', energy:'steady', hedging:true, profanity:false, direct:false, questions:true },
+  companion: { pronoun:'we', open:'story', close:'soft', sentLen:'mixed', energy:'gradual', hedging:true, profanity:false, direct:true, questions:false },
+  confessor: { pronoun:'I', open:'hook', close:'rebel', sentLen:'mixed', energy:'accelerating', hedging:false, profanity:true, direct:true, questions:false }
+};
+
+// Dial-driven text transformations — these MODIFY the actual output
+function applyDialTransforms(text, voice) {
+  const iLvl = voiceDials.intensity || 5;
+  const vLvl = voiceDials.vuln || 4;
+  const aLvl = voiceDials.abstract || 4;
+  const dna = VOICE_DNA[voice] || VOICE_DNA.teacher;
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  let result = [];
+
+  sentences.forEach((s, i) => {
+    s = s.trim();
+    if (!s) return;
+
+    // INTENSITY (1-10): Affects sentence endings, emphasis, urgency
+    if (iLvl >= 8) {
+      s = s.replace(/\.$/, '.');
+      if (i === 0 || i === sentences.length - 1) s = s.toUpperCase().replace(/\.$/, '.');
+    } else if (iLvl >= 6) {
+      if (i === sentences.length - 1) s = s.replace(/\.$/, '. Period.');
+    } else if (iLvl <= 2) {
+      s = s.toLowerCase().replace(/^./, c => c.toUpperCase());
+    }
+
+    // VULNERABILITY (1-10): Affects pronoun choice and confession depth
+    if (vLvl >= 7) {
+      if (i === 0) s = 'I need to say this. ' + s;
+    } else if (vLvl >= 5 && i === 0 && dna.pronoun === 'I') {
+      s = 'Honestly? ' + s;
+    }
+
+    // ABSTRACTION (1-10): Concrete vs cosmic framing
+    if (aLvl >= 8 && i === sentences.length - 1) {
+      s += ' And beyond that -- into something language cannot hold.';
+    } else if (aLvl >= 6 && i === sentences.length - 1) {
+      s += ' The pattern is universal.';
+    } else if (aLvl <= 3 && i === 0) {
+      s = 'Here is the practical truth. ' + s;
+    }
+
+    result.push(s);
+  });
+
+  // Opening transforms based on voice DNA
+  if (dna.open === 'hook' && iLvl >= 5) {
+    result.unshift(result.shift().replace(/^/, ''));
+  } else if (dna.open === 'question' && result.length) {
+    const first = result[0];
+    result[0] = 'What if ' + first.charAt(0).toLowerCase() + first.slice(1).replace(/\.$/, '?');
+  }
+
+  // Closing transforms
+  if (dna.close === 'rebel' && iLvl >= 6) {
+    result.push('Now act on it.');
+  } else if (dna.close === 'prophetic') {
+    result.push('This changes everything.');
+  } else if (dna.close === 'soft' && vLvl >= 5) {
+    result.push('Sit with that.');
+  }
+
+  return result.join(' ');
+}
+
+// Platform formatters — REAL structural frameworks, not prefix/suffix
+const PLATFORM_ENGINES = {
+  ig: {
+    name: 'Instagram',
+    format: function(seed, voice, dials) {
+      const lines = seed.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+      const hook = lines[0] || seed.substring(0, 80);
+      const body = lines.slice(1, -1).join('.\n') || seed;
+      const closer = lines[lines.length - 1] || '';
+      let out = hook + '.\n\n';
+      // IG structure: Hook line → white space → body with line breaks → CTA → tags
+      if (lines.length >= 3) {
+        out += body + '.\n\n';
+        out += closer + '.';
+      } else {
+        out += seed;
+      }
+      out += '\n\n.\n.\n.\n';
+      out += '#Calisthenics #Movement #BodyWeight #SaturnoMovement #Discipline';
+      if (dials.intensity >= 7) out += ' #NoExcuses #Truth';
+      if (dials.abstract >= 7) out += ' #Mindset #Philosophy';
+      return out;
+    }
+  },
+  email: {
+    name: 'Email',
+    format: function(seed, voice, dials) {
+      const lines = seed.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+      const subject = (lines[0] || seed.substring(0, 50)).replace(/^(the |a |an )/i, '');
+      const preview = lines[1] ? lines[1].substring(0, 90) : '';
+      let out = 'SUBJECT: ' + subject + '\n';
+      out += 'PREVIEW: ' + preview + '\n\n';
+      out += '---\n\n';
+      // Email body: personal, one idea per paragraph
+      lines.forEach((line, i) => {
+        out += line + '.\n\n';
+      });
+      // Tone-specific close
+      if (voice === 'confessor' || voice === 'raw') {
+        out += 'That is what I had to say.\n\nReply if this hit.\n\n';
+      } else if (voice === 'companion') {
+        out += 'I wanted to share this with you personally.\n\nHit reply -- I read every one.\n\n';
+      } else if (voice === 'teacher') {
+        out += 'Try this today. Then reply and tell me what shifted.\n\n';
+      } else {
+        out += 'Reply and tell me what you think.\n\n';
+      }
+      out += 'With love,\nGabo\nSaturno Movement';
+      return out;
+    }
+  },
+  yt: {
+    name: 'YouTube',
+    format: function(seed, voice, dials) {
+      const lines = seed.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+      // Dan Koe structure: Hook → Context → Breakdown → Reframe → CTA
+      let out = '--- YOUTUBE SCRIPT ---\n\n';
+      out += '[HOOK — 0:00]\n';
+      out += (lines[0] || seed.substring(0, 120)) + '.\n';
+      if (dials.intensity >= 7) out += 'And no one is talking about this.\n';
+      out += '\n[CONTEXT — 0:15]\n';
+      out += 'Here is what most people miss.\n';
+      if (lines.length >= 3) {
+        out += lines.slice(1, Math.ceil(lines.length / 2)).join('. ') + '.\n';
+      }
+      out += '\n[BREAKDOWN — 1:00]\n';
+      if (lines.length >= 4) {
+        const mid = Math.ceil(lines.length / 2);
+        lines.slice(mid, -1).forEach((l, i) => {
+          out += (i + 1) + '. ' + l + '.\n';
+        });
+      } else {
+        out += seed + '\n';
+      }
+      out += '\n[REFRAME — End-30s]\n';
+      out += (lines[lines.length - 1] || 'This is what changes everything') + '.\n';
+      out += '\n[CTA — End]\n';
+      out += 'If this made you think differently, subscribe.\n';
+      out += 'New deep dives every week.';
+      return out;
+    }
+  },
+  twitter: {
+    name: 'Twitter/X',
+    format: function(seed, voice, dials) {
+      const lines = seed.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+      // Twitter: Thread structure if long, single if short
+      if (seed.length <= 280) {
+        return seed;
+      }
+      let out = '1/ ' + (lines[0] || seed.substring(0, 240)) + '.\n\n';
+      lines.slice(1).forEach((l, i) => {
+        out += (i + 2) + '/ ' + l + '.\n\n';
+      });
+      out += (lines.length + 1) + '/ Follow @GaboSaturno for more like this.';
+      return out;
+    }
+  },
+  linkedin: {
+    name: 'LinkedIn',
+    format: function(seed, voice, dials) {
+      const lines = seed.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+      let out = (lines[0] || seed.substring(0, 100)) + '.\n\n';
+      out += '(And it is not what you think.)\n\n';
+      lines.slice(1).forEach(l => {
+        out += l + '.\n\n';
+      });
+      if (voice === 'teacher') out += 'What framework have you found that works? Share below.\n\n';
+      else if (voice === 'rebel') out += 'Agree or disagree?\n\n';
+      else out += 'What is your experience with this?\n\n';
+      out += '---\n';
+      out += 'Follow for more on movement, discipline, and the art of the body.\n';
+      out += '#Calisthenics #Movement #Discipline #PersonalDevelopment';
+      return out;
+    }
+  },
+  tiktok: {
+    name: 'TikTok',
+    format: function(seed, voice, dials) {
+      const lines = seed.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+      let out = '--- TIKTOK SCRIPT ---\n\n';
+      out += '[TEXT ON SCREEN]\n';
+      out += '"' + (lines[0] || seed.substring(0, 80)) + '"\n\n';
+      out += '[VOICEOVER]\n';
+      if (dials.intensity >= 7) out += 'Listen.\n';
+      lines.forEach(l => { out += l + '.\n'; });
+      out += '\n[CAPTION]\n';
+      out += (lines[0] || seed.substring(0, 100)) + ' ';
+      out += '#bodyweight #calisthenics #movement';
+      if (dials.intensity >= 6) out += ' #truth #discipline';
+      return out;
+    }
+  }
+};
+
 function multiply() {
   let seed = document.getElementById('seed-input').value.trim();
   if (!seed) { toast('Enter a seed phrase or pick from library'); return; }
@@ -2159,41 +2370,33 @@ function multiply() {
     seed = FRAMEWORKS[currentFramework].transform(seed);
   }
 
-  const S = {
-    raw:{p:'',s:''},
-    teacher:{p:'',s:'\n\nSave this for later.'},
-    prophet:{p:'The truth is this:\n\n',s:'\n\nThis changes everything.'},
-    rebel:{p:'Most people get this wrong.\n\n',s:'\n\nThink different.'},
-    mystic:{p:'In the silence between reps...\n\n',s:''},
-    philosopher:{p:'Consider this:\n\n',s:'\n\nSit with that.'},
-    companion:{p:'I need you to hear this.\n\n',s:'\n\nYou are not alone in this.'},
-    confessor:{p:'I will be honest with you.\n\n',s:'\n\nThat is the truth. Take it or leave it.'}
-  };
-  const F = {
-    ig:{n:'Instagram',f:(s,t)=>t.p+s+t.s+'\n\n#Calisthenics #Movement #Mastery #SaturnoMovement'},
-    email:{n:'Email',f:(s,t)=>{
-      const subj = s.split('.')[0].trim().substring(0,60);
-      return 'Subject: ' + subj + '\n\n'+t.p+s+t.s+'\n\nYour inbox is sacred, and I respect that deeply.\n\nReply and tell me what you think.\n\n-- Gabo\nSaturno Movement';
-    }},
-    yt:{n:'YouTube',f:(s,t)=>'[HOOK - 0:00]\n'+s.substring(0,200)+'\n\n[EXPAND - 0:15]\n'+t.p+s+t.s+'\n\n[CTA - End]\nIf this resonated, subscribe. We go deeper every week.'},
-    twitter:{n:'Twitter/X',f:(s,t)=>t.p+(s.length>240?s.substring(0,240)+'...':s)+t.s},
-    linkedin:{n:'LinkedIn',f:(s,t)=>t.p+s+t.s+'\n\n---\n\nWhat is your experience with this? Share below.'},
-    tiktok:{n:'TikTok',f:(s,t)=>'[TEXT ON SCREEN]\n"'+s.substring(0,100)+'..."\n\n[VOICEOVER]\n'+t.p+s+t.s+'\n\n[CAPTION]\n'+s.substring(0,150)}
-  };
+  // Apply voice + dial transforms to the seed (dials ACTUALLY modify text now)
+  const transformed = applyDialTransforms(seed, currentVoice);
 
-  const style = S[currentVoice] || S.teacher;
-  // Apply voice dials modifiers
   const iLvl = voiceDials.intensity || 5;
   const vLvl = voiceDials.vuln || 4;
   const aLvl = voiceDials.abstract || 4;
-  // Dial context badge
-  const dialBadge = '[' + SLIDER_LEVELS.intensity[iLvl-1] + ' / ' + SLIDER_LEVELS.vuln[vLvl-1] + ' / ' + SLIDER_LEVELS.abstract[aLvl-1] + ']';
-  document.getElementById('cap-output').innerHTML = '<div style="padding:8px 0;margin-bottom:8px;font-size:8px;color:var(--text-muted);border-bottom:1px solid var(--border)"><b style="color:var(--accent)">' + currentVoice.toUpperCase() + '</b> ' + dialBadge + '</div>' + pls.map(p => {
-    const f = F[p]; if (!f) return '';
-    const c = f.f(seed, style);
-    return '<div class="variant-card '+p+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:8px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">'+f.n+'</span><button onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText);toast(\'Copied\')" class="btn btn-outline btn-sm">Copy</button></div><pre style="font-size:10px;color:var(--text-secondary);white-space:pre-wrap;line-height:1.6;font-family:var(--mono)">'+esc(c)+'</pre></div>';
-  }).join('');
-  toast(pls.length + ' variants generated' + (currentFramework !== 'none' ? ' (' + currentFramework + ' applied)' : ''));
+  const dials = { intensity: iLvl, vuln: vLvl, abstract: aLvl };
+  const dialBadge = SLIDER_LEVELS.intensity[iLvl-1] + ' / ' + SLIDER_LEVELS.vuln[vLvl-1] + ' / ' + SLIDER_LEVELS.abstract[aLvl-1];
+
+  document.getElementById('cap-output').innerHTML =
+    '<div style="padding:8px 0;margin-bottom:8px;font-size:8px;color:var(--text-muted);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">' +
+    '<span><b style="color:var(--accent)">' + currentVoice.toUpperCase() + '</b> <span style="opacity:0.6">' + dialBadge + '</span>' +
+    (currentFramework !== 'none' ? ' <span style="color:var(--cyan);margin-left:6px">' + currentFramework.toUpperCase() + '</span>' : '') + '</span>' +
+    '<span style="color:var(--text-muted)">' + pls.length + ' variant' + (pls.length > 1 ? 's' : '') + '</span></div>' +
+    pls.map(p => {
+      const engine = PLATFORM_ENGINES[p]; if (!engine) return '';
+      const c = engine.format(transformed, currentVoice, dials);
+      return '<div class="variant-card ' + p + '" style="margin-bottom:10px;padding:12px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);border-left:3px solid var(--accent)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+        '<span style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted)">' + engine.name + '</span>' +
+        '<div style="display:flex;gap:3px">' +
+        '<button onclick="navigator.clipboard.writeText(this.closest(\'.variant-card\').querySelector(\'pre\').innerText);toast(\'Copied ' + engine.name + '\')" class="cl-act" title="Copy"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>' +
+        '<button onclick="var t=this.closest(\'.variant-card\').querySelector(\'pre\').innerText;document.getElementById(\'seed-input\').value=t;toast(\'Loaded as seed\')" class="cl-act" title="Re-seed" style="color:var(--amber)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V8"/><path d="M5 12l7-7 7 7"/></svg></button>' +
+        '</div></div>' +
+        '<pre style="font-size:10px;color:var(--text-primary);white-space:pre-wrap;line-height:1.7;font-family:var(--sans)">' + esc(c) + '</pre></div>';
+    }).join('');
+  toast(pls.length + ' variants generated — ' + currentVoice + ' voice, dials applied');
 }
 
 // ============================================================
