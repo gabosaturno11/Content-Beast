@@ -584,13 +584,30 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 /* In-place editing */
 .cv-node .cn-text[contenteditable="true"]{outline:none;background:rgba(45,212,191,0.04);border-radius:4px;padding:4px;margin:-4px;min-height:20px;cursor:text}
 .cv-node .cn-text[contenteditable="true"]:focus{background:rgba(45,212,191,0.08);box-shadow:0 0 0 1px rgba(45,212,191,0.2)}
+/* Node color system */
+.cv-node.cn-color-yellow{background:#fefce8;border-left-color:#eab308}.cv-node.cn-color-yellow .cn-type-label{color:#a16207}
+.cv-node.cn-color-pink{background:#fdf2f8;border-left-color:#ec4899}.cv-node.cn-color-pink .cn-type-label{color:#be185d}
+.cv-node.cn-color-blue{background:#eff6ff;border-left-color:#3b82f6}.cv-node.cn-color-blue .cn-type-label{color:#1d4ed8}
+.cv-node.cn-color-green{background:#f0fdf4;border-left-color:#22c55e}.cv-node.cn-color-green .cn-type-label{color:#15803d}
+.cv-node.cn-color-orange{background:#fff7ed;border-left-color:#f97316}.cv-node.cn-color-orange .cn-type-label{color:#c2410c}
+.cv-node.cn-color-purple{background:#faf5ff;border-left-color:#a855f7}.cv-node.cn-color-purple .cn-type-label{color:#7e22ce}
+.cv-node.cn-color-red{background:#fef2f2;border-left-color:#ef4444}.cv-node.cn-color-red .cn-type-label{color:#b91c1c}
+.cv-node.cn-color-dark{background:#1a1a2e;border-left-color:#2dd4bf;color:#e2e8f0}.cv-node.cn-color-dark .cn-type-label{color:#2dd4bf}.cv-node.cn-color-dark .cn-text{color:#e2e8f0}.cv-node.cn-color-dark .cn-meta{color:#94a3b8}.cv-node.cn-color-dark .cn-actions{background:#1a1a2e;border-color:rgba(255,255,255,0.1)}.cv-node.cn-color-dark .cn-actions button{color:#94a3b8}.cv-node.cn-color-dark .cn-actions button:hover{background:rgba(255,255,255,0.08);color:#e2e8f0}
+/* Color picker strip */
+.cn-colors{display:none;position:absolute;top:-30px;left:0;gap:2px;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:6px;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.cn-colors.open{display:flex}
+.cn-colors button{width:14px;height:14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:50%;cursor:pointer;padding:0;transition:transform 0.1s}
+.cn-colors button:hover{transform:scale(1.3)}
+/* Note type (sticky) */
+.cv-node.cn-note{border-radius:2px;box-shadow:2px 3px 8px rgba(0,0,0,0.1);border-left:none;min-width:140px;max-width:220px;font-size:12px}
+.cv-node.cn-note .cn-text{font-family:var(--sans);font-size:12px;line-height:1.5}
 /* Selection lasso */
 .cv-lasso{position:absolute;border:1.5px dashed rgba(45,212,191,0.6);background:rgba(45,212,191,0.06);pointer-events:none;z-index:50;border-radius:2px}
 /* Minimap */
 .cv-minimap{position:absolute;bottom:52px;right:10px;width:140px;height:100px;background:rgba(255,255,255,0.96);border:1px solid rgba(0,0,0,0.08);border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.08);z-index:10;overflow:hidden;cursor:pointer}
 .cv-minimap-viewport{position:absolute;border:1.5px solid rgba(45,212,191,0.5);background:rgba(45,212,191,0.06);border-radius:1px;pointer-events:none}
 .cv-minimap-dot{position:absolute;width:4px;height:4px;border-radius:50%;pointer-events:none}
-.cv-minimap-dot.mm-caption{background:#2dd4bf}.cv-minimap-dot.mm-text{background:#38bdf8}.cv-minimap-dot.mm-image{background:#4ade80}
+.cv-minimap-dot.mm-caption{background:#2dd4bf}.cv-minimap-dot.mm-text{background:#38bdf8}.cv-minimap-dot.mm-image{background:#4ade80}.cv-minimap-dot.mm-note{background:#eab308}
 /* Undo indicator */
 .cv-toolbar .cv-undo-btn{opacity:0.4;pointer-events:none}.cv-toolbar .cv-undo-btn.has-history{opacity:1;pointer-events:auto}
 /* Node header type label */
@@ -993,8 +1010,16 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <div class="row">
           <label class="lbl">Add to Canvas</label>
           <div style="display:flex;gap:4px;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('yellow')" style="flex:1;color:#eab308;border-color:rgba(234,179,8,0.2)">+ Note</button>
             <button class="btn btn-outline btn-sm" onclick="cvAddTextNode()" style="flex:1">+ Text</button>
             <button class="btn btn-outline btn-sm" onclick="document.getElementById('cv-img-input').click()" style="flex:1">+ Image</button>
+          </div>
+          <div style="display:flex;gap:3px;margin-top:4px">
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('pink')" style="flex:1;font-size:7px;color:#ec4899;border-color:rgba(236,72,153,0.15)">Pink</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('blue')" style="flex:1;font-size:7px;color:#3b82f6;border-color:rgba(59,130,246,0.15)">Blue</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('green')" style="flex:1;font-size:7px;color:#22c55e;border-color:rgba(34,197,94,0.15)">Green</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('orange')" style="flex:1;font-size:7px;color:#f97316;border-color:rgba(249,115,22,0.15)">Orange</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('dark')" style="flex:1;font-size:7px;color:#2dd4bf;border-color:rgba(45,212,191,0.15)">Dark</button>
           </div>
           <input type="file" id="cv-img-input" accept="image/*" style="display:none" multiple onchange="cvHandleImages(this.files)">
         </div>
@@ -1244,13 +1269,14 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       </div>
       <div id="cv-empty" class="cv-empty">
         <div class="cv-empty-title">Canvas</div>
-        <div class="cv-empty-sub">Drag captions from the library, or start with a template</div>
+        <div class="cv-empty-sub">Your workspace. Add blocks, notes, and connections.</div>
         <div style="display:flex;gap:6px;margin-top:12px;pointer-events:auto;flex-wrap:wrap;justify-content:center">
+          <button class="btn btn-outline btn-sm" onclick="cvAddNote('yellow')" style="font-size:8px;color:#eab308;border-color:rgba(234,179,8,0.25)">+ Note</button>
           <button class="btn btn-outline btn-sm" onclick="cvAddTextNode()" style="font-size:8px;color:#38bdf8;border-color:rgba(56,189,248,0.2)">+ Text</button>
           <button class="btn btn-outline btn-sm" onclick="document.getElementById('cv-img-input').click()" style="font-size:8px;color:#4ade80;border-color:rgba(74,222,128,0.2)">+ Image</button>
           <button class="btn btn-outline btn-sm" onclick="cvLoadTemplate('social-calendar')" style="font-size:8px;color:#2dd4bf;border-color:rgba(45,212,191,0.2)">Social Calendar</button>
           <button class="btn btn-outline btn-sm" onclick="cvLoadTemplate('carousel')" style="font-size:8px;color:#2dd4bf;border-color:rgba(45,212,191,0.2)">Carousel</button>
-          <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="font-size:8px;color:var(--text-muted)">Import JSON</button>
+          <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="font-size:8px;color:var(--text-muted)">Import</button>
         </div>
       </div>
       <div id="cv-minimap" class="cv-minimap"></div>
@@ -1263,8 +1289,12 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <button onclick="cvZoomBy(0.1)" title="Zoom in">+</button>
         <button onclick="cvFitView()" title="Fit view">Fit</button>
         <span class="cv-sep"></span>
+        <button onclick="cvAddNote('yellow')" title="Add sticky note" style="color:#eab308">+Note</button>
         <button onclick="cvAddTextNode()" title="Add text node">+Text</button>
         <button onclick="document.getElementById('cv-img-input').click()" title="Add image">+Img</button>
+        <span class="cv-sep"></span>
+        <button onclick="cvConnectSelected()" title="Connect selected (Cmd+L)">Link</button>
+        <button onclick="cvDisconnectSelected()" title="Disconnect selected">Unlink</button>
         <span class="cv-sep"></span>
         <span class="cv-zoom-val" id="cv-node-count">0 nodes</span>
       </div>
@@ -2822,6 +2852,7 @@ const CMD_ACTIONS = [
   { icon: 'CL', text: 'Import Seeds to Library', desc: 'Add built-in quotes to library', fn: () => importSeedsToLibrary() },
   { icon: 'CL', text: 'Seed Full Content Library', desc: 'Load all manifesto, quotes, and poems', fn: () => { setMode('caption'); setCapSub('library'); seedGaboCaptions(); } },
   { icon: 'CV', text: 'Open Canvas', desc: 'Whiteboard workspace', fn: () => setMode('canvas') },
+  { icon: 'CV', text: 'Canvas: Add Note', desc: 'Add sticky note to canvas', fn: () => { setMode('canvas'); cvAddNote('yellow'); } },
   { icon: 'CV', text: 'Canvas: Add Text Node', desc: 'Add text to canvas', fn: () => { setMode('canvas'); cvAddTextNode(); } },
   { icon: 'CV', text: 'Canvas: Add Image', desc: 'Upload image to canvas', fn: () => { setMode('canvas'); document.getElementById('cv-img-input').click(); } },
   { icon: 'CV', text: 'Canvas: Export JSON', desc: 'Export canvas graph as JSON', fn: () => cvExportJSON() },
@@ -4330,6 +4361,7 @@ function cvAddNode(type, data) {
     theme: data.theme || '',
     captionId: data.captionId || null,
     imgSrc: data.imgSrc || null,
+    color: data.color || '',
     created: new Date().toISOString()
   };
   cvNodes.push(node);
@@ -4357,7 +4389,8 @@ function cvDuplicateNode(id) {
     text: src.text,
     theme: src.theme,
     captionId: src.captionId,
-    imgSrc: src.imgSrc
+    imgSrc: src.imgSrc,
+    color: src.color
   });
 }
 
@@ -4492,6 +4525,29 @@ function cvAddTextNode() {
   cvAddNode('text', { text: text.trim(), x: cx - 80, y: cy - 30 });
 }
 
+function cvAddNote(color) {
+  const container = document.getElementById('cv-container');
+  const rect = container.getBoundingClientRect();
+  const cx = (rect.width / 2 - cvViewport.x) / cvViewport.zoom;
+  const cy = (rect.height / 2 - cvViewport.y) / cvViewport.zoom;
+  const node = cvAddNode('note', { text: '', color: color || 'yellow', x: cx - 70 + Math.random() * 40, y: cy - 50 + Math.random() * 40 });
+  setTimeout(function() { cvEditNode(node.id); }, 100);
+}
+
+function cvToggleColorPicker(id) {
+  var el = document.getElementById('cn-colors-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function cvSetColor(id, color) {
+  var n = cvNodes.find(function(x) { return x.id === id; });
+  if (!n) return;
+  cvPushUndo();
+  n.color = color;
+  cvRender();
+  cvScheduleSave();
+}
+
 function cvHandleImages(files) {
   if (!files || !files.length) return;
   const container = document.getElementById('cv-container');
@@ -4592,22 +4648,24 @@ function cvExportPNG() {
   });
   ctx.setLineDash([]);
   // Nodes
-  var borderColors = { caption: '#2dd4bf', text: '#38bdf8', image: '#4ade80' };
+  var borderColors = { caption: '#2dd4bf', text: '#38bdf8', image: '#4ade80', note: '#eab308' };
+  var colorBgs = {yellow:'#fefce8',pink:'#fdf2f8',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',red:'#fef2f2',dark:'#1a1a2e'};
+  var colorBorders = {yellow:'#eab308',pink:'#ec4899',blue:'#3b82f6',green:'#22c55e',orange:'#f97316',purple:'#a855f7',red:'#ef4444',dark:'#2dd4bf'};
   cvNodes.forEach(function(n) {
     var nx = n.x - minX + pad;
     var ny = n.y - minY + pad;
     var nw = 240, nh = 80;
-    // Card background
-    ctx.fillStyle = '#fff';
+    // Card background (with color support)
+    ctx.fillStyle = n.color ? (colorBgs[n.color] || '#fff') : '#fff';
     ctx.strokeStyle = 'rgba(0,0,0,0.08)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.roundRect(nx, ny, nw, nh, 8);
+    ctx.roundRect(nx, ny, nw, nh, n.type === 'note' ? 2 : 8);
     ctx.fill();
     ctx.stroke();
     // Left border
-    ctx.fillStyle = borderColors[n.type] || '#ddd';
-    ctx.fillRect(nx, ny + 4, 3, nh - 8);
+    ctx.fillStyle = n.color ? (colorBorders[n.color] || borderColors[n.type] || '#ddd') : (borderColors[n.type] || '#ddd');
+    if (n.type !== 'note') ctx.fillRect(nx, ny + 4, 3, nh - 8);
     // Text
     if (n.type === 'image') {
       ctx.fillStyle = '#999';
@@ -4708,30 +4766,38 @@ function cvRender() {
   // Empty state
   var emptyEl = document.getElementById('cv-empty');
   if (emptyEl) emptyEl.style.display = cvNodes.length === 0 ? '' : 'none';
-  var typeLabels = { caption: 'CAPTION', text: 'TEXT', image: 'IMAGE' };
+  var typeLabels = { caption: 'CAPTION', text: 'TEXT', image: 'IMAGE', note: 'NOTE' };
+  var nodeColors = ['yellow','pink','blue','green','orange','purple','red','dark'];
+  var nodeColorHex = {yellow:'#eab308',pink:'#ec4899',blue:'#3b82f6',green:'#22c55e',orange:'#f97316',purple:'#a855f7',red:'#ef4444',dark:'#2dd4bf','':'#ddd'};
   // Render each node
   cvNodes.forEach(function(n) {
     var el = document.createElement('div');
-    var typeClass = n.type === 'image' ? ' cn-image' : n.type === 'caption' ? ' cn-caption' : ' cn-text-node';
-    el.className = 'cv-node' + typeClass + (cvSelectedIds.has(n.id) ? ' selected' : '');
+    var typeClass = n.type === 'image' ? ' cn-image' : n.type === 'caption' ? ' cn-caption' : n.type === 'note' ? ' cn-note' : ' cn-text-node';
+    var colorClass = n.color ? ' cn-color-' + n.color : '';
+    el.className = 'cv-node' + typeClass + colorClass + (cvSelectedIds.has(n.id) ? ' selected' : '');
     el.setAttribute('tabindex', '0');
     el.dataset.id = n.id;
     el.style.left = n.x + 'px';
     el.style.top = n.y + 'px';
     var html = '<div class="cn-actions">';
+    html += '<button onclick="event.stopPropagation();cvToggleColorPicker(\'' + n.id + '\')" title="Color">C</button>';
     html += '<button onclick="event.stopPropagation();cvDuplicateNode(\'' + n.id + '\')" title="Duplicate">D</button>';
     html += '<button onclick="event.stopPropagation();cvEditNode(\'' + n.id + '\')" title="Edit (or double-click)">E</button>';
     html += '<button class="cn-del" onclick="event.stopPropagation();cvDeleteNode(\'' + n.id + '\')" title="Delete">x</button>';
+    html += '</div>';
+    html += '<div class="cn-colors" id="cn-colors-' + n.id + '">';
+    html += '<button onclick="event.stopPropagation();cvSetColor(\'' + n.id + '\',\'\')" style="background:#fff" title="Default"></button>';
+    nodeColors.forEach(function(c) { html += '<button onclick="event.stopPropagation();cvSetColor(\'' + n.id + '\',\'' + c + '\')" style="background:' + nodeColorHex[c] + '" title="' + c + '"></button>'; });
     html += '</div>';
     if (n.type === 'image' && n.imgSrc) {
       html += '<span class="cn-type-label">' + typeLabels[n.type] + '</span>';
       html += '<img src="' + n.imgSrc + '" alt="" draggable="false">';
     } else {
-      html += '<span class="cn-type-label">' + typeLabels[n.type] + '</span>';
+      html += '<span class="cn-type-label">' + (typeLabels[n.type] || 'TEXT') + '</span>';
       html += '<div class="cn-text">' + esc(n.text) + '</div>';
       html += '<div class="cn-meta">';
       if (n.theme) html += '<span class="cn-theme">' + esc(n.theme) + '</span>';
-      html += '<span>' + (n.text ? n.text.split(/\s+/).length : 0) + 'w</span>';
+      html += '<span>' + (n.text ? n.text.split(/\s+/).filter(Boolean).length : 0) + 'w</span>';
       if (n.type === 'caption') html += '<span>caption</span>';
       html += '</div>';
     }
