@@ -1211,12 +1211,29 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       </div>
       <div id="cap-output" style="display:none"></div>
       <div id="cl-preview" style="display:none;padding:16px">
-        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px">Caption Preview</div>
-        <div id="cl-preview-content" style="font-size:13px;color:var(--text-primary);line-height:1.8;font-family:var(--sans);white-space:pre-wrap"></div>
-        <div id="cl-preview-meta" style="font-size:8px;color:var(--text-muted);margin-top:16px;padding-top:8px;border-top:1px solid var(--border)"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">Caption Preview</div>
+          <div style="display:flex;gap:3px">
+            <button class="btn btn-outline btn-sm" onclick="clPreviewCopy()" style="font-size:7px">Copy</button>
+            <button class="btn btn-outline btn-sm" onclick="clPreviewToSeed()" style="font-size:7px;color:var(--amber)">Seed</button>
+            <button class="btn btn-outline btn-sm" onclick="clPreviewToPDF()" style="font-size:7px;color:var(--cyan)">PDF</button>
+            <button class="btn btn-outline btn-sm" onclick="clPreviewToBoard()" style="font-size:7px;color:var(--accent)">Board</button>
+          </div>
+        </div>
+        <div id="cl-preview-content" contenteditable="true" style="font-size:13px;color:var(--text-primary);line-height:1.8;font-family:var(--sans);white-space:pre-wrap;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;min-height:120px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='rgba(45,212,191,0.35)'" onblur="this.style.borderColor='rgba(255,255,255,0.04)';clPreviewSave()"></div>
+        <div id="cl-preview-meta" style="font-size:8px;color:var(--text-muted);margin-top:10px;padding-top:8px;border-top:1px solid var(--border)"></div>
+        <div id="cl-preview-wc" style="font-size:8px;color:var(--text-muted);margin-top:4px;font-family:var(--mono)"></div>
       </div>
-      <div id="atom-preview" style="display:none;padding:8px">
-        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Atom Preview</div>
+      <div id="atom-preview" style="display:none;padding:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">Atom Preview</div>
+          <div style="display:flex;gap:3px" id="atom-preview-actions">
+            <button class="btn btn-outline btn-sm" onclick="atomPreviewCopy()" style="font-size:7px">Copy</button>
+            <button class="btn btn-outline btn-sm" onclick="atomPreviewToPDF()" style="font-size:7px;color:var(--cyan)">PDF</button>
+            <button class="btn btn-outline btn-sm" onclick="atomPreviewToBoard()" style="font-size:7px;color:var(--accent)">Board</button>
+            <button class="btn btn-outline btn-sm" onclick="atomPreviewNewDoc()" style="font-size:7px;color:var(--green)">New Doc</button>
+          </div>
+        </div>
         <div id="atom-preview-content" style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--sans)"></div>
       </div>
     </div>
@@ -3600,18 +3617,32 @@ function atomNewDoc(id) {
   toast('New doc from atom #' + id);
 }
 
+let atomPreviewId = null;
 function previewAtom(id) {
   const a = atoms.find(x => x.id === id);
   if (!a) return;
+  atomPreviewId = id;
   const el = document.getElementById('atom-preview-content');
-  let html = '<div style="margin-bottom:8px"><span class="ac-type t-' + a.type + '">' + a.type + '</span></div>';
+  const wc = a.text.split(/\s+/).filter(Boolean).length;
+  let html = '<div style="margin-bottom:8px;display:flex;align-items:center;gap:6px"><span class="ac-type t-' + a.type + '">' + a.type + '</span><span style="font-size:8px;color:var(--text-muted)">' + wc + ' words</span></div>';
   if (a.type === 'heading') html += '<h2 style="color:var(--text-primary);font-size:18px;font-family:var(--sans)">' + esc(a.text) + '</h2>';
   else if (a.type === 'quote') html += '<blockquote style="border-left:3px solid var(--accent);padding:12px 16px;font-style:italic;color:var(--text-primary);font-size:13px;font-family:var(--sans);line-height:1.8">' + esc(a.text) + '</blockquote>';
   else if (a.type === 'code') html += '<pre style="background:var(--bg-base);padding:12px;border-radius:4px;font-family:var(--mono);font-size:11px;color:var(--text-secondary);overflow-x:auto">' + esc(a.text) + '</pre>';
   else html += '<p style="color:var(--text-primary);font-size:12px;font-family:var(--sans);line-height:1.8">' + esc(a.text) + '</p>';
-  html += '<div style="margin-top:12px;font-size:8px;color:var(--text-muted)">Source: ' + esc(a.source) + ' / #' + a.id + ' / ' + a.text.split(/\s+/).length + ' words</div>';
+  html += '<div style="margin-top:12px;font-size:8px;color:var(--text-muted)">Source: ' + esc(a.source) + ' / #' + a.id + '</div>';
   el.innerHTML = html;
 }
+function atomPreviewCopy() { if (atomPreviewId !== null) atomCopy(atomPreviewId); }
+function atomPreviewToPDF() { if (atomPreviewId !== null) { atomToCanvas(atomPreviewId); setMode('pdf'); } }
+function atomPreviewToBoard() {
+  if (atomPreviewId === null) return;
+  const a = atoms.find(x => x.id === atomPreviewId);
+  if (!a) return;
+  cvAddNode('text', { text: a.text });
+  setMode('canvas');
+  toast('Atom added to canvas board');
+}
+function atomPreviewNewDoc() { if (atomPreviewId !== null) atomNewDoc(atomPreviewId); }
 
 // BULK ACTIONS
 function bulkToCanvas() {
@@ -3897,18 +3928,44 @@ function clDeselectAll() {
 }
 
 // SINGLE ACTIONS
+let clPreviewId = null;
 function clPreview(id) {
   const c = clCaptions.find(x => x.id === id);
   if (!c) return;
+  clPreviewId = id;
   document.getElementById('cl-preview-content').textContent = c.text;
   document.getElementById('cl-preview-meta').innerHTML =
-    '<span>Theme: <b>' + esc(c.theme) + '</b></span>' +
-    (c.voice ? ' / Voice: <b>' + esc(c.voice) + '</b>' : '') +
-    (c.platform && c.platform.length ? ' / Platform: <b>' + c.platform.join(', ') + '</b>' : '') +
-    ' / Words: <b>' + c.words + '</b>' +
-    ' / Source: <b>' + esc(c.source || 'manual') + '</b>' +
-    ' / Created: <b>' + new Date(c.created).toLocaleDateString() + '</b>';
+    '<span style="display:inline-block;padding:2px 6px;border-radius:3px;background:rgba(45,212,191,0.08);color:var(--accent);margin-right:6px">' + esc(c.theme) + '</span>' +
+    (c.voice ? '<span style="display:inline-block;padding:2px 6px;border-radius:3px;background:rgba(56,189,248,0.08);color:var(--cyan);margin-right:6px">' + esc(c.voice) + '</span>' : '') +
+    (c.platform && c.platform.length ? '<span style="margin-right:6px">' + c.platform.join(', ') + '</span>' : '') +
+    '<span style="margin-right:6px">' + esc(c.source || 'manual') + '</span>' +
+    '<span>' + new Date(c.created).toLocaleDateString() + '</span>';
+  const wc = (c.text || '').split(/\s+/).filter(Boolean).length;
+  const chars = (c.text || '').length;
+  document.getElementById('cl-preview-wc').textContent = wc + ' words / ' + chars + ' chars / ~' + Math.ceil(wc / 200) + ' min read';
 }
+function clPreviewSave() {
+  if (!clPreviewId) return;
+  const c = clCaptions.find(x => x.id === clPreviewId);
+  if (!c) return;
+  const newText = document.getElementById('cl-preview-content').textContent.trim();
+  if (newText === c.text) return;
+  c.text = newText;
+  c.words = newText.split(/\s+/).filter(Boolean).length;
+  clPut(c).then(() => { renderCaptionLibrary(); toast('Caption updated'); });
+}
+function clPreviewCopy() {
+  const text = document.getElementById('cl-preview-content').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard'));
+}
+function clPreviewToSeed() {
+  const text = document.getElementById('cl-preview-content').textContent;
+  document.getElementById('seed-input').value = text;
+  setCapSub('multiplier');
+  toast('Loaded as seed');
+}
+function clPreviewToPDF() { if (clPreviewId) clToCanvas(clPreviewId); }
+function clPreviewToBoard() { if (clPreviewId) cvAddCaptionToCanvas(clPreviewId); }
 
 function clToCanvas(id) {
   const c = clCaptions.find(x => x.id === id);
