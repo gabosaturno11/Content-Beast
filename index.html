@@ -674,6 +674,46 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .cv-dropzone.drag-hover .cvdz-icon{color:var(--accent);opacity:1}
 .cvdz-icon{color:var(--text-muted);opacity:0.5;transition:all 0.2s}
 .cvdz-text{font-size:8px;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em}
+
+/* ═══════════════════════════════════════════════
+   BRAIN DRAWER v9.0
+═══════════════════════════════════════════════ */
+.brain-panel{position:fixed;top:0;right:-380px;width:380px;max-width:92vw;height:100vh;background:var(--bg-base);border-left:var(--border-w) solid var(--border);box-shadow:-16px 0 48px rgba(0,0,0,0.65);z-index:1200;display:flex;flex-direction:column;transition:right 0.28s var(--ease);font-family:var(--mono)}
+.brain-panel.open{right:0}
+.brain-hdr{padding:var(--sp-3) var(--sp-4);border-bottom:var(--border-w) solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.brain-title{font-size:var(--text-sm);font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-primary);font-family:var(--mono)}
+.brain-orbit-badge{font-size:var(--text-xs);padding:2px var(--sp-2);border-radius:var(--radius-full);background:var(--accent-glow);color:var(--accent);border:var(--border-w) solid rgba(45,212,191,0.2);letter-spacing:0.08em}
+.brain-body{padding:var(--sp-3) var(--sp-4) var(--sp-4);flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:var(--sp-2)}
+.brain-dials{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-2);margin-top:var(--sp-1)}
+.brain-dial-wrap{display:flex;flex-direction:column;gap:var(--sp-1)}
+.brain-dial-wrap label{font-size:var(--text-xs);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em}
+.brain-dial-wrap input[type=range]{width:100%;height:3px;accent-color:var(--accent);cursor:pointer}
+.brain-dial-val{font-size:var(--text-xs);color:var(--accent);font-family:var(--mono);text-align:center}
+.brain-log{font-size:var(--text-sm);color:var(--text-muted);font-family:var(--mono);max-height:220px;overflow-y:auto;border-radius:var(--radius);border:var(--border-w) solid var(--border);padding:var(--sp-2);background:var(--bg-surface);line-height:var(--leading-relaxed)}
+.brain-log-entry{padding:var(--sp-1) 0;border-bottom:1px dashed var(--border);cursor:pointer;transition:color 0.1s}
+.brain-log-entry:hover{color:var(--text-primary)}
+.brain-log-entry:last-child{border-bottom:none}
+.brain-log-tag{display:inline-block;padding:1px var(--sp-2);border-radius:var(--radius-full);background:var(--accent-glow);color:var(--accent);font-size:var(--text-xs);margin-right:var(--sp-1);border:var(--border-w) solid rgba(45,212,191,0.15)}
+.brain-next-q{font-size:var(--text-xs);color:var(--text-secondary);margin-top:var(--sp-1);font-style:italic;padding-left:var(--sp-1);border-left:2px solid var(--border-active)}
+.brain-collision-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:var(--sp-1)}
+.brain-chip{font-size:var(--text-xs);padding:2px 7px;border-radius:var(--radius-full);border:var(--border-w) solid var(--border);color:var(--text-muted);background:var(--bg-surface);cursor:pointer;transition:var(--transition-fast);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.06em}
+.brain-chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+/* Epistemic atom badges */
+.atom-ep-badge{display:inline-block;padding:1px var(--sp-2);border-radius:var(--radius);font-size:var(--text-xs);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;border:var(--border-w) solid var(--border);background:rgba(148,163,184,0.04);color:var(--text-muted)}
+.atom-ep-badge[data-ep="claim"]{border-color:#2dd4bf;color:#2dd4bf}
+.atom-ep-badge[data-ep="story"]{border-color:#a78bfa;color:#a78bfa}
+.atom-ep-badge[data-ep="protocol"]{border-color:#4ade80;color:#4ade80}
+.atom-ep-badge[data-ep="pattern"]{border-color:#38bdf8;color:#38bdf8}
+.atom-ep-badge[data-ep="belief"]{border-color:#fb923c;color:#fb923c}
+.atom-ep-badge[data-ep="question"]{border-color:#facc15;color:#facc15}
+.atom-ep-badge[data-ep="feeling"]{border-color:#f472b6;color:#f472b6}
+.atom-ep-badge[data-ep="command"]{border-color:#f87171;color:#f87171}
+/* Epistemic filter row */
+.ep-filter-bar{display:flex;flex-wrap:wrap;gap:3px;padding:var(--sp-1) 0}
+.ep-filter-btn{font-size:var(--text-xs);padding:2px 7px;border-radius:var(--radius-full);cursor:pointer;border:var(--border-w) solid var(--border);background:transparent;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.07em;transition:var(--transition-fast)}
+.ep-filter-btn:hover{border-color:var(--border-hover);color:var(--text-secondary)}
+.ep-filter-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+
 /* === SIDEBAR TOGGLE BUTTON (Astra-style) === */
 .sidebar-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);flex-shrink:0;padding:0}
 .sidebar-btn:hover{border-color:var(--border-hover);color:var(--text-primary);background:rgba(255,255,255,0.04)}
@@ -773,7 +813,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   </button>
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v8.0</span>
+    <span class="ver">v9.0</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -1377,7 +1417,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v8.0 — by Saturno Movement</span>
+  <span>CONTENT BEAST v9.0 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -1392,6 +1432,76 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 
 <div class="toast" id="toast"></div>
 <input type="file" id="file-input" accept=".md,.txt,.markdown,.text" style="display:none" onchange="handleFile(this.files[0])">
+
+<!-- ═══ AI BRAIN DRAWER v9.0 ═══ -->
+<div id="brain-panel" class="brain-panel">
+  <div class="brain-hdr">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="brain-title">AI Brain</span>
+      <span class="brain-orbit-badge" id="brain-orbit-count">0 orbits</span>
+    </div>
+    <button class="btn-icon" onclick="toggleBrain()" style="font-size:10px;">x</button>
+  </div>
+  <div class="brain-body">
+    <div>
+      <label class="lbl">Seed — Voice dump, idea, atom selection</label>
+      <textarea id="brain-input" rows="4" placeholder="What do I need to say right now that, once said, tells me what to say next, where to say it, and makes everything I've already said more true?" style="width:100%;resize:vertical;min-height:80px;"></textarea>
+    </div>
+    <div class="grid2" style="gap:6px;">
+      <div>
+        <label class="lbl">Channel</label>
+        <select id="brain-target" onchange="onChannelChange()">
+          <option value="email">Email</option>
+          <option value="blog">Blog</option>
+          <option value="tech">Technical Article</option>
+          <option value="speech">Live Speech</option>
+          <option value="webinar">Webinar</option>
+          <option value="book">Book</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Aperture</label>
+        <select id="brain-aperture">
+          <option value="atom">Atom</option>
+          <option value="section">Section</option>
+          <option value="chapter">Chapter</option>
+          <option value="os">Whole OS</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <label class="lbl">Voice Dials</label>
+      <div class="brain-dials">
+        <div class="brain-dial-wrap">
+          <label>Intensity</label>
+          <input type="range" min="1" max="10" value="7" id="dial-intensity" oninput="document.getElementById('dv-intensity').textContent=this.value">
+          <span class="brain-dial-val" id="dv-intensity">7</span>
+        </div>
+        <div class="brain-dial-wrap">
+          <label>Vulnerability</label>
+          <input type="range" min="1" max="10" value="5" id="dial-vulnerability" oninput="document.getElementById('dv-vulnerability').textContent=this.value">
+          <span class="brain-dial-val" id="dv-vulnerability">5</span>
+        </div>
+        <div class="brain-dial-wrap">
+          <label>Abstraction</label>
+          <input type="range" min="1" max="10" value="5" id="dial-abstraction" oninput="document.getElementById('dv-abstraction').textContent=this.value">
+          <span class="brain-dial-val" id="dv-abstraction">5</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <label class="lbl">Collision Pack <span style="color:var(--text-muted);font-weight:400;">(auto from channel, toggle to edit)</span></label>
+      <div id="brain-collision-chips" class="brain-collision-chips"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;font-size:10px;letter-spacing:0.1em;" onclick="runBrain()">RUN ORBIT</button>
+    <div>
+      <label class="lbl">Orbit Log — click any to re-seed</label>
+      <div id="brain-log" class="brain-log">
+        <div style="color:var(--text-muted);font-size:8px;padding:4px 0;">No orbits yet. Seed the first one.</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- EXPORT SETTINGS MODAL -->
 <div class="export-overlay" id="export-overlay" onclick="closeExport()"></div>
@@ -6183,6 +6293,249 @@ function setupDropTarget(el, type) {
   });
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  CONTENT BEAST v9.0 — AI BRAIN / EPISTEMIC ATOMIZER-SYNTHESIZER
+//  ONE ORBIT: Seed → Atoms → Collisions → Channel → Artifact → Loop
+// ═══════════════════════════════════════════════════════════════
+
+const BRAIN_SEED_QUESTION = 'What do I need to say right now that, once said, tells me what to say next, where to say it, and makes everything I\'ve already said more true?';
+
+const EP_TYPES = ['claim','story','protocol','pattern','belief','question','feeling','command'];
+
+const COLLISION_MATRIX = [
+  {id:'C001',name:'Truth vs Politeness Split',type:'switch',collision:'raw truth \u2194 social smoothing',move:'Say the clean truth, then delete the apology.',best_for:'authority, leadership',failure_mode:'sounds cold if no empathy anchor'},
+  {id:'C002',name:'Short Sentence Cut',type:'dial',collision:'long reasoning \u2194 blunt impact',move:'Cut every sentence to 6\u201310 words.',best_for:'hooks, captions',failure_mode:'robotic if overdone'},
+  {id:'C003',name:'Opposite-Claim Mirror',type:'knob',collision:'your claim \u2194 its strongest opposite',move:'State the opposite as if you believe it. Then return.',best_for:'persuasion, integrity checks',failure_mode:'confusion without final stance'},
+  {id:'C004',name:'Precision Injection',type:'slider',collision:'vague meaning \u2194 measurable specificity',move:'Replace adjectives with numbers, timelines, thresholds.',best_for:'offers, execution plans',failure_mode:'kills poetry if everywhere'},
+  {id:'C005',name:'Metaphor Refusal',type:'switch',collision:'poetic framing \u2194 literal statement',move:'Rewrite the same line with zero metaphor.',best_for:'clarity, teaching',failure_mode:'loses charm if no rhythm'},
+  {id:'C006',name:'Metaphor Overload',type:'knob',collision:'literal explanation \u2194 symbolic compression',move:'Encode the idea into one visual object.',best_for:'branding, worldview',failure_mode:'vague if not grounded'},
+  {id:'C007',name:'Agency Forcing Function',type:'switch',collision:'passive observation \u2194 executable command',move:'Convert every paragraph into an action order.',best_for:'protocols, decisions',failure_mode:'aggressive if overused'},
+  {id:'C008',name:'No-Excuse Rewrite',type:'dial',collision:'contextualizing \u2194 accountability',move:'Remove all reasons. Keep only responsibility.',best_for:'discipline voice',failure_mode:'ignores nuance'},
+  {id:'C009',name:'Contradiction Spotlight',type:'knob',collision:'belief A \u2194 behavior B',move:'Expose mismatch in one sentence.',best_for:'self-reflection',failure_mode:'preachy if no self-inclusion'},
+  {id:'C010',name:'Permissionless Claim',type:'switch',collision:'waiting for proof \u2194 acting as proof',move:'State the claim as already true, then justify.',best_for:'confidence, leadership',failure_mode:'delusional without anchors'},
+  {id:'C011',name:'Evidence Anchor',type:'slider',collision:'emotion \u2194 proof',move:'Add 1 concrete example per paragraph.',best_for:'credibility, conversions',failure_mode:'boring if generic'},
+  {id:'C012',name:'Emotional Undercut',type:'dial',collision:'logic wall \u2194 human confession',move:'Insert one honest sentence that leaks reality.',best_for:'trust, intimacy',failure_mode:'manipulative if forced'},
+  {id:'C013',name:'Tempo Break',type:'switch',collision:'flow \u2194 abrupt stop',move:'Hard stop mid-thought. Restart sharper.',best_for:'attention resets',failure_mode:'jarring if too frequent'},
+  {id:'C014',name:'Rhetorical Interrogation',type:'slider',collision:'statement \u2194 question pressure',move:'Turn claims into questions that corner the reader.',best_for:'persuasion, engagement',failure_mode:'annoying if every line'},
+  {id:'C015',name:'Surgical Deletion',type:'dial',collision:'extra words \u2194 core signal',move:'Delete 30% of text without losing meaning.',best_for:'clean writing, clarity',failure_mode:'loses rhythm if overcut'},
+  {id:'C016',name:'Exaggerated Absolute',type:'knob',collision:'soft claim \u2194 extreme assertion',move:'Push the claim to a hard edge, then temper once.',best_for:'hooks, strong POV',failure_mode:'clickbait if not earned'},
+  {id:'C017',name:'Micro-Story Embed',type:'slider',collision:'idea \u2194 lived moment',move:'Drop a 2\u20133 line scene inside the argument.',best_for:'retention, relatability',failure_mode:'distracts if irrelevant'},
+  {id:'C018',name:'Value Ladder Smash',type:'knob',collision:'cheap option \u2194 premium standard',move:'Contrast low-commitment behavior with elite behavior.',best_for:'coaching tone',failure_mode:'elitist if contemptuous'},
+  {id:'C019',name:'Constraint Elevation',type:'switch',collision:'freedom \u2194 rules',move:'Add one strict constraint to raise quality.',best_for:'systems, writing prompts',failure_mode:'overconstrains creativity'},
+  {id:'C020',name:'Outcome First',type:'switch',collision:'setup \u2194 payoff',move:'Start with the final conclusion, then explain.',best_for:'posts, sales copy',failure_mode:'unsupported without reasoning'}
+];
+
+const CHANNEL_PRESETS = {
+  email: {
+    apertureSuggestion: 'section',
+    epBias: ['feeling','story','belief','command'],
+    collisionPack: ['C020','C017','C011','C015','C012'],
+    structureTemplate: '<h1>Subject: {SUBJECT}</h1><h2>Hook</h2><p>{HOOK}</p><h2>Story</h2><p>{STORY}</p><h2>Lesson</h2><p>{LESSON}</p><h2>Action</h2><p>{ACTION}</p>'
+  },
+  blog: {
+    apertureSuggestion: 'chapter',
+    epBias: ['claim','pattern','story','belief'],
+    collisionPack: ['C004','C017','C014','C011','C016'],
+    structureTemplate: '<h1>{TITLE}</h1><h2>Hook</h2><p>{HOOK}</p><h2>Context</h2><p>{CONTEXT}</p><h2>Core Argument</h2><p>{ARGUMENT}</p><h2>Evidence</h2><p>{EVIDENCE}</p><h2>Implication</h2><p>{IMPLICATION}</p>'
+  },
+  tech: {
+    apertureSuggestion: 'chapter',
+    epBias: ['claim','pattern','protocol','question'],
+    collisionPack: ['C004','C011','C005','C019','C007'],
+    structureTemplate: '<h1>{TITLE}</h1><h2>Problem</h2><p>{PROBLEM}</p><h2>Definitions</h2><p>{DEFINITIONS}</p><h2>Method</h2><p>{METHOD}</p><h2>Examples</h2><p>{EXAMPLES}</p><h2>Edge Cases</h2><p>{EDGE_CASES}</p>'
+  },
+  speech: {
+    apertureSuggestion: 'chapter',
+    epBias: ['feeling','story','belief','command'],
+    collisionPack: ['C012','C002','C013','C010','C017'],
+    structureTemplate: '<h1>{TITLE}</h1><h2>Cold Open</h2><p>{COLD_OPEN}</p><h2>Story</h2><p>{STORY}</p><h2>Thesis</h2><p>{THESIS}</p><h2>Pillar 1</h2><p>{P1}</p><h2>Pillar 2</h2><p>{P2}</p><h2>Pillar 3</h2><p>{P3}</p><h2>Closing Image</h2><p>{CLOSING}</p>'
+  },
+  webinar: {
+    apertureSuggestion: 'chapter',
+    epBias: ['protocol','pattern','claim','question'],
+    collisionPack: ['C014','C011','C019','C004','C007'],
+    structureTemplate: '<h1>{TITLE}</h1><h2>Agenda</h2><p>{AGENDA}</p><h2>Teaching Block 1</h2><p>{BLOCK1}</p><h2>Teaching Block 2</h2><p>{BLOCK2}</p><h2>Teaching Block 3</h2><p>{BLOCK3}</p><h2>Live Prompts</h2><p>{PROMPTS}</p><h2>Offer</h2><p>{OFFER}</p>'
+  },
+  book: {
+    apertureSuggestion: 'os',
+    epBias: ['claim','story','pattern','belief','protocol'],
+    collisionPack: ['C003','C009','C017','C011','C004','C012','C015'],
+    structureTemplate: '<h1>{BOOK_TITLE}</h1><h2>Part {PART_NUM}: {PART_TITLE}</h2><h3>Chapter {CH_NUM}: {CH_TITLE}</h3><p>{CH_INTRO}</p><h3>Core Argument</h3><p>{ARGUMENT}</p><h3>Evidence</h3><p>{EVIDENCE}</p><h3>Exercise</h3><p>{EXERCISE}</p>'
+  }
+};
+
+function classifyEpistemicType(text, atomType) {
+  if (!text) return 'unknown';
+  var t = text.trim();
+  var lower = t.toLowerCase();
+  if (/[?]\s*$/.test(t) || /^(how|why|what|when|where|who|should|can|do|does|did|is|are|am|will|would|could)\b/i.test(t)) return 'question';
+  if (/^(step\s*\d+[:.]|phase\s*\d+|do this|then,|next,|first,|second,|third,)/i.test(t) || /(reps|sets|protocol|routine|instruction)/i.test(lower)) return 'protocol';
+  if (/^(build|create|implement|write|design|ship|record|deploy|connect|make|start|stop|use)\b/i.test(t)) return 'command';
+  if (/^(i feel|i'm feeling|this hurts|this scares|i'm afraid|i'm excited|it feels like)/i.test(lower)) return 'feeling';
+  if (/^(i believe|i think|in my view|my philosophy|the truth is|the principle|values)/i.test(lower)) return 'belief';
+  if (/^(i|we)\s+(was|were|did|started|tried|failed|learned|remember)/i.test(t) && /(years? ago|yesterday|last week|back then|one time|that day)/i.test(lower)) return 'story';
+  if (/(when.*then|every time|whenever|if you.*you get|pattern|tends to|cycle|loop)/i.test(lower)) return 'pattern';
+  if (atomType === 'heading' || atomType === 'paragraph' || atomType === 'quote') return 'claim';
+  return 'unknown';
+}
+
+// Brain state
+var brainLog = JSON.parse(localStorage.getItem('brainLog') || '[]');
+var activeCollisions = new Set();
+
+function saveBrainLog() { localStorage.setItem('brainLog', JSON.stringify(brainLog.slice(0, 30))); }
+
+function toggleBrain() {
+  var panel = document.getElementById('brain-panel');
+  var isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    renderCollisionChips();
+    renderBrainLog();
+    var el = document.getElementById('brain-input');
+    if (el) setTimeout(function() { el.focus(); }, 60);
+  }
+}
+
+function onChannelChange() {
+  var target = document.getElementById('brain-target').value;
+  var preset = CHANNEL_PRESETS[target];
+  if (!preset) return;
+  document.getElementById('brain-aperture').value = preset.apertureSuggestion;
+  activeCollisions = new Set(preset.collisionPack);
+  renderCollisionChips();
+}
+
+function renderCollisionChips() {
+  var container = document.getElementById('brain-collision-chips');
+  if (!container) return;
+  container.innerHTML = COLLISION_MATRIX.map(function(c) {
+    return '<span class="brain-chip ' + (activeCollisions.has(c.id) ? 'on' : '') + '" title="' + esc(c.collision + ' | ' + c.move) + '" onclick="toggleCollision(\'' + c.id + '\', this)">' + c.id + '</span>';
+  }).join('');
+}
+
+function toggleCollision(id, el) {
+  if (activeCollisions.has(id)) { activeCollisions.delete(id); el.classList.remove('on'); }
+  else { activeCollisions.add(id); el.classList.add('on'); }
+}
+
+function buildClaudePayload(seed, target, aperture) {
+  var preset = CHANNEL_PRESETS[target] || CHANNEL_PRESETS.email;
+  var epAtoms = (window.atoms || []).filter(function(a) {
+    if (a.epType === 'unknown') return false;
+    return preset.epBias.indexOf(a.epType) !== -1;
+  }).slice(0, 40).map(function(a) { return { epType: a.epType, type: a.type, text: a.text }; });
+  var collisionsToUse = COLLISION_MATRIX.filter(function(c) { return activeCollisions.has(c.id); });
+  var voiceDials = {
+    intensity: parseInt(document.getElementById('dial-intensity')?.value || 7),
+    vulnerability: parseInt(document.getElementById('dial-vulnerability')?.value || 5),
+    abstraction: parseInt(document.getElementById('dial-abstraction')?.value || 5)
+  };
+  return { seed: seed, target: target, aperture: aperture, collisionPack: collisionsToUse, epAtoms: epAtoms, voiceDials: voiceDials, structureTemplate: preset.structureTemplate, metaQuestion: BRAIN_SEED_QUESTION };
+}
+
+async function runBrain() {
+  var inputEl = document.getElementById('brain-input');
+  var targetEl = document.getElementById('brain-target');
+  var apertureEl = document.getElementById('brain-aperture');
+  var seed = (inputEl?.value || '').trim();
+  if (!seed) { toast('Add a seed, voice dump, or question first.'); return; }
+  var target = targetEl?.value || 'email';
+  var aperture = apertureEl?.value || 'section';
+  toast('Orbit in progress...');
+  var payload = buildClaudePayload(seed, target, aperture);
+  try {
+    var result = await callClaudeBrain(payload);
+    handleBrainResult(result, { target: target, aperture: aperture, seed: seed });
+  } catch(err) {
+    console.error('[Brain]', err);
+    // Local fallback: route seed to PDF with channel template
+    var preset = CHANNEL_PRESETS[target] || CHANNEL_PRESETS.email;
+    var localContent = preset.structureTemplate.replace(/\{[A-Z_]+\}/g, function(match) {
+      return '<span style="color:var(--text-muted);font-style:italic;">[' + match + ' — fill from seed]</span>';
+    });
+    localContent = localContent.replace('{SUBJECT}', esc(seed.slice(0, 60))).replace('{TITLE}', esc(seed.slice(0, 60))).replace('{BOOK_TITLE}', esc(seed.slice(0, 60)));
+    handleBrainResult({ mode: 'pdf', content: localContent, summary: 'Local route — no backend. Template loaded for: ' + target, nextQuestion: '' }, { target: target, aperture: aperture, seed: seed });
+    toast('No backend — template loaded locally. Fill sections manually.');
+  }
+}
+
+async function callClaudeBrain(payload) {
+  var res = await fetch('/api/claude-brain', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('Brain API ' + res.status);
+  return res.json();
+}
+
+function handleBrainResult(result, ctx) {
+  var entry = {
+    id: Date.now(),
+    ts: new Date().toLocaleTimeString(),
+    target: ctx.target,
+    aperture: ctx.aperture,
+    seed: ctx.seed.slice(0, 120),
+    summary: result.summary || '\u2014',
+    nextQuestion: result.nextQuestion || ''
+  };
+  brainLog.unshift(entry);
+  if (brainLog.length > 30) brainLog.length = 30;
+  saveBrainLog();
+  renderBrainLog();
+  var orbitCount = document.getElementById('brain-orbit-count');
+  if (orbitCount) orbitCount.textContent = brainLog.length + ' orbit' + (brainLog.length !== 1 ? 's' : '');
+
+  var mode = result.mode || 'pdf';
+  if (['email','blog','tech','speech','webinar','book','pdf'].indexOf(mode) !== -1) {
+    if (typeof newDocument === 'function') newDocument('Brain: ' + ctx.seed.slice(0, 40) + '...');
+    setMode('pdf');
+    var canvasEl = document.getElementById('canvas');
+    if (canvasEl && result.content) { canvasEl.innerHTML = result.content; if (typeof updateWordCount === 'function') updateWordCount(); }
+  } else if (mode === 'caption') {
+    setMode('caption');
+    if (result.captions && Array.isArray(result.captions)) {
+      result.captions.forEach(function(c) { if (typeof saveCaptionToLibrary === 'function') saveCaptionToLibrary(c); });
+    }
+  } else if (mode === 'canvas') {
+    setMode('canvas');
+    if (result.nodes && Array.isArray(result.nodes)) {
+      result.nodes.forEach(function(n) { cvAddNode(n.type || 'text', n); });
+      cvRender();
+    }
+  }
+  toast('Orbit complete \u2192 ' + ctx.target);
+}
+
+function renderBrainLog() {
+  var logEl = document.getElementById('brain-log');
+  if (!logEl) return;
+  if (!brainLog.length) { logEl.innerHTML = '<div style="color:var(--text-muted);font-size:8px;padding:4px 0;">No orbits yet.</div>'; return; }
+  logEl.innerHTML = brainLog.map(function(e) {
+    return '<div class="brain-log-entry" onclick="reseedBrain(\'' + esc(e.seed).replace(/'/g, "\\'") + '\')">' +
+      '<div><span class="brain-log-tag">' + esc(e.target) + '/' + esc(e.aperture) + '</span><span style="color:var(--text-muted);font-size:7px;">' + esc(e.ts) + '</span></div>' +
+      '<div style="color:var(--text-secondary);margin-top:2px;font-size:8px;">' + esc(e.summary) + '</div>' +
+      (e.nextQuestion ? '<div class="brain-next-q">' + esc(e.nextQuestion) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+function reseedBrain(seed) {
+  var el = document.getElementById('brain-input');
+  if (el) { el.value = seed; el.focus(); }
+  toast('Re-seeded. Adjust dials, then Run Orbit.');
+}
+
+var currentEpFilter = 'all';
+function setEpFilter(ep) {
+  currentEpFilter = ep;
+  document.querySelectorAll('.ep-filter-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-ep') === ep);
+  });
+  if (typeof renderAtomList === 'function') renderAtomList();
+}
+
 // ============================================================
 // INIT
 // ============================================================
@@ -6231,6 +6584,21 @@ cvInitEvents();
 // Restore sidebar state from localStorage
 // Default to 2-panel (sidebar hidden) unless user explicitly opened it
 if(localStorage.getItem('cb-sidebar')!=='1'){document.getElementById('workspace').classList.add('two-col');var sb=document.getElementById('sidebar-btn');if(sb)sb.classList.remove('active');}
+// Brain button injection + init
+(function initBrain() {
+  var hdrRight = document.querySelector('.hdr-right');
+  if (!hdrRight) return;
+  var btn = document.createElement('button');
+  btn.className = 'btn btn-outline btn-sm';
+  btn.style.cssText = 'font-size:9px;text-transform:uppercase;letter-spacing:0.12em;border-color:rgba(45,212,191,0.25);color:var(--accent);';
+  btn.textContent = 'BRAIN';
+  btn.setAttribute('title', 'AI Brain \u2014 Epistemic Atomizer-Synthesizer');
+  btn.onclick = toggleBrain;
+  hdrRight.insertBefore(btn, hdrRight.firstChild);
+  activeCollisions = new Set(CHANNEL_PRESETS.email.collisionPack);
+  var orbitCount = document.getElementById('brain-orbit-count');
+  if (orbitCount && brainLog.length) orbitCount.textContent = brainLog.length + ' orbit' + (brainLog.length !== 1 ? 's' : '');
+})();
 </script>
 </body>
 </html>
