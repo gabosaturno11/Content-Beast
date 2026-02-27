@@ -84,7 +84,7 @@ body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondar
 .ctrl-body{flex:1;overflow-y:auto;padding:14px}
 
 /* RIGHT: PREVIEW */
-.preview{display:flex;flex-direction:column;overflow:hidden;background:var(--bg-void)}
+.preview{display:flex;flex-direction:column;overflow:hidden;background:var(--bg-void);position:relative}
 .preview-hdr{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .preview-hdr .title{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-family:var(--mono)}
 .preview-toolbar{display:flex;gap:3px;flex-wrap:wrap;align-items:center}
@@ -626,6 +626,14 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .cv-snap-line.snap-h{height:1px;left:0;right:0;background:rgba(56,189,248,0.3)}
 .cv-snap-line.snap-v{width:1px;top:0;bottom:0;background:rgba(56,189,248,0.3)}
 
+/* Canvas cross-mode drop zone */
+.cv-dropzone{display:none;position:absolute;bottom:0;left:0;right:0;height:64px;background:linear-gradient(180deg,transparent 0%,rgba(45,212,191,0.03) 100%);border-top:1px dashed rgba(45,212,191,0.15);align-items:center;justify-content:center;gap:8px;transition:all 0.2s;z-index:5}
+.cv-dropzone.visible{display:flex}
+.cv-dropzone.drag-hover{background:rgba(45,212,191,0.06);border-top-color:rgba(45,212,191,0.4)}
+.cv-dropzone.drag-hover .cvdz-text{color:var(--accent)}
+.cv-dropzone.drag-hover .cvdz-icon{color:var(--accent);opacity:1}
+.cvdz-icon{color:var(--text-muted);opacity:0.5;transition:all 0.2s}
+.cvdz-text{font-size:8px;color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em}
 /* === SIDEBAR TOGGLE BUTTON (Astra-style) === */
 .sidebar-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;color:var(--text-muted);cursor:pointer;transition:all 0.2s cubic-bezier(0.4,0,0.2,1);flex-shrink:0;padding:0}
 .sidebar-btn:hover{border-color:var(--border-hover);color:var(--text-primary);background:rgba(255,255,255,0.04)}
@@ -1077,6 +1085,8 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           <div style="display:flex;gap:4px;flex-wrap:wrap">
             <button class="btn btn-outline btn-sm" onclick="cvExportJSON()" style="flex:1;color:var(--green)">JSON</button>
             <button class="btn btn-outline btn-sm" onclick="cvExportPNG()" style="flex:1;color:var(--green)">PNG</button>
+            <button class="btn btn-outline btn-sm" onclick="cvExportPDF(false)" style="flex:1;color:var(--amber)" title="PDF with background">PDF</button>
+            <button class="btn btn-outline btn-sm" onclick="cvExportPDF(true)" style="flex:1;color:var(--amber)" title="PDF transparent background">PDF+T</button>
             <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="flex:1;color:var(--cyan)">Import</button>
             <button class="btn btn-outline btn-sm" onclick="cvClearAll()" style="flex:1;color:var(--red)">Clear</button>
           </div>
@@ -1267,6 +1277,11 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         </div>
         <div id="atom-preview-content" style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--sans)"></div>
       </div>
+    </div>
+    <!-- CANVAS DROP ZONE (visible when canvas is hidden) -->
+    <div id="cv-dropzone" class="cv-dropzone">
+      <div class="cvdz-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+      <div class="cvdz-text">Drop here to add to Canvas</div>
     </div>
     <!-- CANVAS WHITEBOARD -->
     <div id="cv-container" class="cv-container" tabindex="0">
@@ -2445,6 +2460,9 @@ function setMode(mode) {
   document.getElementById('ctrl-title').textContent = titles[mode] || '';
   document.getElementById('preview-title').textContent = ptitles[mode] || '';
   document.getElementById('preview-toolbar').style.display = mode === 'pdf' ? '' : 'none';
+  // Drop zone: visible in caption/atomizer so users can drag to canvas without switching
+  const dz = document.getElementById('cv-dropzone');
+  if (dz) dz.classList.toggle('visible', mode === 'caption' || mode === 'atomizer');
 }
 
 // ============================================================
@@ -3066,6 +3084,8 @@ const CMD_ACTIONS = [
   { icon: 'CV', text: 'Canvas: Add Image', desc: 'Upload image to canvas', fn: () => { setMode('canvas'); document.getElementById('cv-img-input').click(); } },
   { icon: 'CV', text: 'Canvas: Export JSON', desc: 'Export canvas graph as JSON', fn: () => cvExportJSON() },
   { icon: 'CV', text: 'Canvas: Export PNG', desc: 'Export canvas as PNG image', fn: () => cvExportPNG() },
+  { icon: 'CV', text: 'Canvas: Export PDF', desc: 'Export canvas as PDF with background', fn: () => cvExportPDF(false) },
+  { icon: 'CV', text: 'Canvas: Export PDF Transparent', desc: 'Export canvas as PDF, no background', fn: () => cvExportPDF(true) },
   { icon: 'CV', text: 'Canvas: Undo', desc: 'Undo last canvas action', fn: () => cvUndo() },
   { icon: 'CV', text: 'Canvas: Redo', desc: 'Redo last undone action', fn: () => cvRedo() },
   { icon: 'CV', text: 'Canvas: Connect Selected', desc: 'Draw lines between selected nodes (Cmd+L)', fn: () => cvConnectSelected() },
@@ -4922,6 +4942,88 @@ function cvExportPNG() {
   });
 }
 
+function cvExportPDF(transparent) {
+  if (!cvNodes.length) { toast('Canvas is empty'); return; }
+  toast('Generating PDF...');
+  // Calculate bounds
+  var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  cvNodes.forEach(function(n) {
+    if (n.x < minX) minX = n.x;
+    if (n.y < minY) minY = n.y;
+    if (n.x + 280 > maxX) maxX = n.x + 280;
+    if (n.y + 120 > maxY) maxY = n.y + 120;
+  });
+  var pad = 40;
+  var cw = maxX - minX + pad * 2;
+  var ch = maxY - minY + pad * 2;
+  // Render to canvas first (same as PNG but with optional transparent bg)
+  var c = document.createElement('canvas');
+  var dpr = 2;
+  c.width = cw * dpr;
+  c.height = ch * dpr;
+  var ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  if (!transparent) {
+    ctx.fillStyle = '#f8f7f4';
+    ctx.fillRect(0, 0, cw, ch);
+    // Grid dots
+    ctx.fillStyle = 'rgba(0,0,0,0.04)';
+    for (var gx = 0; gx < cw; gx += 24) {
+      for (var gy = 0; gy < ch; gy += 24) {
+        ctx.beginPath(); ctx.arc(gx, gy, 0.8, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+  // Connection lines
+  ctx.strokeStyle = transparent ? 'rgba(45,212,191,0.4)' : 'rgba(45,212,191,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  cvConnections.forEach(function(conn) {
+    var fromNode = cvNodes.find(function(x) { return x.id === conn.from; });
+    var toNode = cvNodes.find(function(x) { return x.id === conn.to; });
+    if (!fromNode || !toNode) return;
+    ctx.beginPath();
+    ctx.moveTo(fromNode.x - minX + pad + 100, fromNode.y - minY + pad + 40);
+    ctx.lineTo(toNode.x - minX + pad + 100, toNode.y - minY + pad + 40);
+    ctx.stroke();
+  });
+  ctx.setLineDash([]);
+  // Nodes
+  var borderColors = { caption: '#2dd4bf', text: '#38bdf8', image: '#4ade80', note: '#eab308' };
+  var colorBgs = {yellow:'#fefce8',pink:'#fdf2f8',blue:'#eff6ff',green:'#f0fdf4',orange:'#fff7ed',purple:'#faf5ff',red:'#fef2f2',dark:'#1a1a2e'};
+  var colorBorders = {yellow:'#eab308',pink:'#ec4899',blue:'#3b82f6',green:'#22c55e',orange:'#f97316',purple:'#a855f7',red:'#ef4444',dark:'#2dd4bf'};
+  cvNodes.forEach(function(n) {
+    var nx = n.x - minX + pad;
+    var ny = n.y - minY + pad;
+    var nw = 240, nh = 80;
+    if (!transparent) {
+      ctx.fillStyle = n.color ? (colorBgs[n.color] || '#fff') : '#fff';
+    } else {
+      ctx.fillStyle = n.color ? (colorBgs[n.color] || 'rgba(255,255,255,0.92)') : 'rgba(255,255,255,0.92)';
+    }
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(nx, ny, nw, nh, n.type === 'note' ? 2 : 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = n.color ? (colorBorders[n.color] || borderColors[n.type] || '#ddd') : (borderColors[n.type] || '#ddd');
+    if (n.type !== 'note') ctx.fillRect(nx, ny + 4, 3, nh - 8);
+    if (n.type === 'image') {
+      ctx.fillStyle = '#999'; ctx.font = '10px sans-serif'; ctx.fillText('[Image]', nx + 14, ny + 24);
+    } else {
+      ctx.fillStyle = '#1a1a1a'; ctx.font = '10px sans-serif';
+      var lines = (n.text || '').split('\n');
+      lines.forEach(function(line, li) { if (li < 5) ctx.fillText(line.substring(0, 40), nx + 14, ny + 18 + li * 13); });
+      if (n.theme) { ctx.fillStyle = '#2dd4bf'; ctx.font = '7px sans-serif'; ctx.fillText(n.theme.toUpperCase(), nx + 14, ny + nh - 8); }
+    }
+  });
+  // Convert to PDF using jsPDF
+  var orientation = cw > ch ? 'l' : 'p';
+  var pdf = new jspdf.jsPDF({ orientation: orientation, unit: 'px', format: [cw, ch], hotfixes: ['px_scaling'] });
+  var imgData = c.toDataURL('image/png');
+  pdf.addImage(imgData, 'PNG', 0, 0, cw, ch);
+  pdf.save('canvas-' + new Date().toISOString().slice(0, 10) + '.pdf');
+  toast('Canvas exported as PDF');
+}
+
 function cvImportJSON() {
   var input = document.createElement('input');
   input.type = 'file';
@@ -6045,6 +6147,41 @@ initPanelResize();
 initUniversalDragDrop();
 openCaptionDB().then(() => Promise.all([clLoadAll(), cvLoad()])).then(() => { if (clCaptions.length === 0) seedGaboCaptions(); cvRender(); }).catch(e => console.warn('IndexedDB:', e));
 cvInitEvents();
+// Drop zone: wire drag/drop events so captions can be dragged to canvas from other modes
+(function initDropZone() {
+  const dz = document.getElementById('cv-dropzone');
+  if (!dz) return;
+  dz.addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; dz.classList.add('drag-hover'); });
+  dz.addEventListener('dragleave', function() { dz.classList.remove('drag-hover'); });
+  dz.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dz.classList.remove('drag-hover');
+    const raw = e.dataTransfer.getData('application/x-cb-caption');
+    if (raw) {
+      try {
+        const cap = JSON.parse(raw);
+        // Add to canvas without switching mode — position in center of viewport
+        const container = document.getElementById('cv-container');
+        const rect = container.getBoundingClientRect();
+        const cx = (rect.width / 2 - cvViewport.x) / cvViewport.zoom;
+        const cy = (rect.height / 2 - cvViewport.y) / cvViewport.zoom;
+        cvAddNode('caption', { text: cap.text, theme: cap.theme || '', captionId: cap.id, x: cx - 80 + Math.random() * 60, y: cy - 30 + Math.random() * 60 });
+        toast('Caption added to Canvas');
+      } catch(err) { console.warn('Drop parse error:', err); }
+    } else {
+      // Fallback: plain text drop
+      const txt = e.dataTransfer.getData('text/plain');
+      if (txt) {
+        const container = document.getElementById('cv-container');
+        const rect = container.getBoundingClientRect();
+        const cx = (rect.width / 2 - cvViewport.x) / cvViewport.zoom;
+        const cy = (rect.height / 2 - cvViewport.y) / cvViewport.zoom;
+        cvAddNode('text', { text: txt, x: cx - 80 + Math.random() * 60, y: cy - 30 + Math.random() * 60 });
+        toast('Text added to Canvas');
+      }
+    }
+  });
+})();
 // Restore sidebar state from localStorage
 // Default to 2-panel (sidebar hidden) unless user explicitly opened it
 if(localStorage.getItem('cb-sidebar')!=='1'){document.getElementById('workspace').classList.add('two-col');var sb=document.getElementById('sidebar-btn');if(sb)sb.classList.remove('active');}
