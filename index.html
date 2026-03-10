@@ -1198,7 +1198,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
               <button class="mode-btn" data-fw="contraction" onclick="setFramework(this)">Contraction</button>
               <button class="mode-btn" data-fw="recursive" onclick="setFramework(this)">Recursive</button>
             </div>
-            <div id="fw-desc" style="font-size:8px;color:var(--text-muted);margin-top:4px;line-height:1.5;display:none"></div>
+            <div id="fw-desc" style="font-size:var(--text-xs);color:var(--text-muted);margin-top:4px;line-height:1.5;display:none"></div>
           </div>
 
           <div class="row">
@@ -1229,11 +1229,11 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
             <button class="btn btn-outline btn-sm" onclick="document.getElementById('cv-img-input').click()" style="flex:1">+ Image</button>
           </div>
           <div style="display:flex;gap:3px;margin-top:4px">
-            <button class="btn btn-outline btn-sm" onclick="cvAddNote('pink')" style="flex:1;font-size:7px;color:#ec4899;border-color:rgba(236,72,153,0.15)">Pink</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAddNote('blue')" style="flex:1;font-size:7px;color:#3b82f6;border-color:rgba(59,130,246,0.15)">Blue</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAddNote('green')" style="flex:1;font-size:7px;color:#22c55e;border-color:rgba(34,197,94,0.15)">Green</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAddNote('orange')" style="flex:1;font-size:7px;color:#f97316;border-color:rgba(249,115,22,0.15)">Orange</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAddNote('dark')" style="flex:1;font-size:7px;color:#2dd4bf;border-color:rgba(45,212,191,0.15)">Dark</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('pink')" style="flex:1;font-size:var(--text-xs);color:#ec4899;border-color:rgba(236,72,153,0.15)">Pink</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('blue')" style="flex:1;font-size:var(--text-xs);color:#3b82f6;border-color:rgba(59,130,246,0.15)">Blue</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('green')" style="flex:1;font-size:var(--text-xs);color:#22c55e;border-color:rgba(34,197,94,0.15)">Green</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('orange')" style="flex:1;font-size:var(--text-xs);color:#f97316;border-color:rgba(249,115,22,0.15)">Orange</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAddNote('dark')" style="flex:1;font-size:var(--text-xs);color:#2dd4bf;border-color:rgba(45,212,191,0.15)">Dark</button>
           </div>
           <input type="file" id="cv-img-input" accept="image/*" style="display:none" multiple onchange="cvHandleImages(this.files)">
         </div>
@@ -1247,23 +1247,23 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
             <button class="btn btn-outline btn-sm" onclick="cvPasteFromClipboard()" style="flex:1">Paste</button>
           </div>
           <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:6px">
-            <button class="btn btn-outline btn-sm" onclick="cvAlign('left')" style="flex:1;font-size:7px" title="Align left">L</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAlign('center-h')" style="flex:1;font-size:7px" title="Center horizontally">CH</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAlign('right')" style="flex:1;font-size:7px" title="Align right">R</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAlign('top')" style="flex:1;font-size:7px" title="Align top">T</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAlign('center-v')" style="flex:1;font-size:7px" title="Center vertically">CV</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAlign('bottom')" style="flex:1;font-size:7px" title="Align bottom">B</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('left')" style="flex:1;font-size:var(--text-xs)" title="Align left">L</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('center-h')" style="flex:1;font-size:var(--text-xs)" title="Center horizontally">CH</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('right')" style="flex:1;font-size:var(--text-xs)" title="Align right">R</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('top')" style="flex:1;font-size:var(--text-xs)" title="Align top">T</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('center-v')" style="flex:1;font-size:var(--text-xs)" title="Center vertically">CV</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('bottom')" style="flex:1;font-size:var(--text-xs)" title="Align bottom">B</button>
           </div>
           <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">
-            <button class="btn btn-outline btn-sm" onclick="cvAlign('distribute-h')" style="flex:1;font-size:7px" title="Distribute horizontally">DH</button>
-            <button class="btn btn-outline btn-sm" onclick="cvAlign('distribute-v')" style="flex:1;font-size:7px" title="Distribute vertically">DV</button>
-            <button class="btn btn-outline btn-sm" onclick="cvSnapToGrid()" style="flex:1;font-size:7px" title="Snap to grid">Snap</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('distribute-h')" style="flex:1;font-size:var(--text-xs)" title="Distribute horizontally">DH</button>
+            <button class="btn btn-outline btn-sm" onclick="cvAlign('distribute-v')" style="flex:1;font-size:var(--text-xs)" title="Distribute vertically">DV</button>
+            <button class="btn btn-outline btn-sm" onclick="cvSnapToGrid()" style="flex:1;font-size:var(--text-xs)" title="Snap to grid">Snap</button>
           </div>
         </div>
 
         <div class="row">
           <label class="lbl">Search Nodes</label>
-          <input type="text" placeholder="Find by text or theme..." style="width:100%;padding:6px 8px;font-size:9px;font-family:var(--mono);background:var(--bg-base);border:1px solid var(--border);border-radius:4px;color:var(--text-primary)" onkeyup="if(event.key==='Enter')cvSearchNodes(this.value)" id="cv-search-input">
+          <input type="text" placeholder="Find by text or theme..." style="width:100%;padding:6px 8px;font-size:var(--text-sm);font-family:var(--mono);background:var(--bg-base);border:1px solid var(--border);border-radius:4px;color:var(--text-primary)" onkeyup="if(event.key==='Enter')cvSearchNodes(this.value)" id="cv-search-input">
         </div>
 
         <div class="section-toggle" onclick="toggleSection(this)">
@@ -1297,7 +1297,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 
         <div class="row">
           <label class="lbl">Canvas Info</label>
-          <div id="cv-info" style="font-size:8px;color:var(--text-muted);line-height:1.6">
+          <div id="cv-info" style="font-size:var(--text-xs);color:var(--text-muted);line-height:1.6">
             Drag captions from library onto the canvas.<br>
             Pan: drag empty space / touch drag<br>
             Zoom: scroll wheel / pinch<br>
@@ -1308,7 +1308,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
             Undo: Cmd+Z / Redo: Cmd+Shift+Z<br>
             Mobile: use + buttons or "Board" button
           </div>
-          <div id="cv-stats" style="font-size:8px;color:var(--text-muted);margin-top:6px"></div>
+          <div id="cv-stats" style="font-size:var(--text-xs);color:var(--text-muted);margin-top:6px"></div>
         </div>
       </div>
 
@@ -1330,14 +1330,14 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <input type="file" id="atom-file" accept=".pdf,.md,.txt,.markdown,.text,.html,.vtt,.srt" style="display:none" onchange="atomizeFile(this.files[0])">
         <div id="atom-source-info" style="display:none;padding:8px;background:var(--bg-base);border:1px solid var(--border);border-radius:3px;margin-bottom:8px">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <span id="atom-source-name" style="font-size:9px;color:var(--text-primary);font-weight:500"></span>
+            <span id="atom-source-name" style="font-size:var(--text-sm);color:var(--text-primary);font-weight:500"></span>
             <button class="btn btn-outline btn-sm" onclick="clearAtoms()">Clear</button>
           </div>
-          <div id="atom-source-meta" style="font-size:8px;color:var(--text-muted);margin-top:3px"></div>
+          <div id="atom-source-meta" style="font-size:var(--text-xs);color:var(--text-muted);margin-top:3px"></div>
         </div>
         <div class="atom-filters" id="atom-filters"></div>
         <div class="atom-bulk" id="atom-bulk" style="display:none">
-          <span style="font-size:8px;color:var(--text-muted)"><b id="atom-sel-count">0</b> selected</span>
+          <span style="font-size:var(--text-xs);color:var(--text-muted)"><b id="atom-sel-count">0</b> selected</span>
           <button class="btn btn-primary btn-sm" onclick="bulkToCanvas()">To Canvas</button>
           <button class="btn btn-outline btn-sm" onclick="bulkToSeed()">To Seed</button>
           <button class="btn btn-outline btn-sm" onclick="bulkNewDoc()">New Doc</button>
@@ -1345,8 +1345,8 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           <button class="btn btn-outline btn-sm" onclick="deselectAll()" style="margin-left:auto">Deselect</button>
         </div>
         <div class="atom-list" id="atom-list" style="max-height:calc(100vh - 360px);overflow-y:auto">
-          <div style="padding:24px 16px;text-align:center;font-size:9px;color:var(--text-muted);line-height:2">
-            <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;font-weight:500">Ingest. Atomize. Transform.</div>
+          <div style="padding:24px 16px;text-align:center;font-size:var(--text-sm);color:var(--text-muted);line-height:2">
+            <div style="font-size:var(--text-md);color:var(--text-secondary);margin-bottom:8px;font-weight:500">Ingest. Atomize. Transform.</div>
             Drop any document above to break it<br>into reusable atomic units.<br><br>
             <span style="color:var(--accent)">Quotes</span> / <span style="color:var(--cyan)">Headings</span> / <span style="color:var(--text-secondary)">Paragraphs</span><br>
             <span style="color:var(--green)">Lists</span> / <span style="color:var(--amber)">Tables</span> / Code / Images<br><br>
@@ -1357,7 +1357,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 
         <!-- Transcript Processing Templates -->
         <div id="atom-templates" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-          <div style="font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:6px;font-family:var(--mono)">Processing Templates</div>
+          <div style="font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:6px;font-family:var(--mono)">Processing Templates</div>
           <div id="atom-tpl-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4px"></div>
         </div>
       </div>
@@ -1374,7 +1374,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <button class="btn-icon" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
         <button class="btn-icon" onclick="execCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
         <span class="tb-sep"></span>
-        <select onchange="execCmd('fontSize',this.value);this.selectedIndex=0" style="width:50px;padding:3px;font-size:8px;background:var(--bg-base);border:1px solid var(--border);color:var(--text-muted);border-radius:3px;font-family:var(--mono)" title="Font size">
+        <select onchange="execCmd('fontSize',this.value);this.selectedIndex=0" style="width:50px;padding:3px;font-size:var(--text-xs);background:var(--bg-base);border:1px solid var(--border);color:var(--text-muted);border-radius:3px;font-family:var(--mono)" title="Font size">
           <option value="">Size</option>
           <option value="1">Small</option>
           <option value="3">Normal</option>
@@ -1438,7 +1438,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       <button class="btn btn-outline btn-sm" onclick="replaceOne()">Replace</button>
       <button class="btn btn-outline btn-sm" onclick="replaceAll()">All</button>
       <span class="find-count" id="find-count"></span>
-      <button class="btn-icon" onclick="toggleFind()" style="margin-left:auto;font-size:8px">x</button>
+      <button class="btn-icon" onclick="toggleFind()" style="margin-left:auto;font-size:var(--text-xs)">x</button>
     </div>
     <div class="preview-body" id="preview-body">
       <div id="pdf-wrap" class="drop-target canvas-drop-zone" data-drop="canvas">
@@ -1453,7 +1453,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       <div id="cap-output" style="display:none"></div>
       <div id="cl-preview" style="display:none;padding:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">Writing Blocks</div>
+          <div style="font-size:var(--text-sm);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">Writing Blocks</div>
           <div style="display:flex;gap:3px">
             <button class="cl-act" onclick="clPreviewCopy()" title="Copy all"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
             <button class="cl-act" onclick="clPreviewToSeed()" title="All to Seed" style="color:var(--amber)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22V8"/><path d="M5 12l7-7 7 7"/></svg></button>
@@ -1464,18 +1464,18 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         </div>
         <div id="cl-preview-content" style="max-height:calc(100vh - 200px);overflow-y:auto"></div>
         <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-          <div id="cl-preview-meta" style="font-size:8px;color:var(--text-muted)"></div>
-          <div id="cl-preview-wc" style="font-size:8px;color:var(--text-muted);font-family:var(--mono)"></div>
+          <div id="cl-preview-meta" style="font-size:var(--text-xs);color:var(--text-muted)"></div>
+          <div id="cl-preview-wc" style="font-size:var(--text-xs);color:var(--text-muted);font-family:var(--mono)"></div>
         </div>
       </div>
       <div id="atom-preview" style="display:none;padding:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">Atom Preview</div>
+          <div style="font-size:var(--text-sm);color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">Atom Preview</div>
           <div style="display:flex;gap:3px" id="atom-preview-actions">
-            <button class="btn btn-outline btn-sm" onclick="atomPreviewCopy()" style="font-size:7px">Copy</button>
-            <button class="btn btn-outline btn-sm" onclick="atomPreviewToPDF()" style="font-size:7px;color:var(--cyan)">PDF</button>
-            <button class="btn btn-outline btn-sm" onclick="atomPreviewToBoard()" style="font-size:7px;color:var(--accent)">Board</button>
-            <button class="btn btn-outline btn-sm" onclick="atomPreviewNewDoc()" style="font-size:7px;color:var(--green)">New Doc</button>
+            <button class="btn btn-outline btn-sm" onclick="atomPreviewCopy()" style="font-size:var(--text-xs)">Copy</button>
+            <button class="btn btn-outline btn-sm" onclick="atomPreviewToPDF()" style="font-size:var(--text-xs);color:var(--cyan)">PDF</button>
+            <button class="btn btn-outline btn-sm" onclick="atomPreviewToBoard()" style="font-size:var(--text-xs);color:var(--accent)">Board</button>
+            <button class="btn btn-outline btn-sm" onclick="atomPreviewNewDoc()" style="font-size:var(--text-xs);color:var(--green)">New Doc</button>
           </div>
         </div>
         <div id="atom-preview-content" style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--sans)"></div>
@@ -1495,12 +1495,12 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <div class="cv-empty-title">Canvas</div>
         <div class="cv-empty-sub">Your workspace. Add blocks, notes, and connections.</div>
         <div style="display:flex;gap:6px;margin-top:12px;pointer-events:auto;flex-wrap:wrap;justify-content:center">
-          <button class="btn btn-outline btn-sm" onclick="cvAddNote('yellow')" style="font-size:8px;color:#eab308;border-color:rgba(234,179,8,0.25)">+ Note</button>
-          <button class="btn btn-outline btn-sm" onclick="cvAddTextNode()" style="font-size:8px;color:#38bdf8;border-color:rgba(56,189,248,0.2)">+ Text</button>
-          <button class="btn btn-outline btn-sm" onclick="document.getElementById('cv-img-input').click()" style="font-size:8px;color:#4ade80;border-color:rgba(74,222,128,0.2)">+ Image</button>
-          <button class="btn btn-outline btn-sm" onclick="cvLoadTemplate('social-calendar')" style="font-size:8px;color:#2dd4bf;border-color:rgba(45,212,191,0.2)">Social Calendar</button>
-          <button class="btn btn-outline btn-sm" onclick="cvLoadTemplate('carousel')" style="font-size:8px;color:#2dd4bf;border-color:rgba(45,212,191,0.2)">Carousel</button>
-          <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="font-size:8px;color:var(--text-muted)">Import</button>
+          <button class="btn btn-outline btn-sm" onclick="cvAddNote('yellow')" style="font-size:var(--text-xs);color:#eab308;border-color:rgba(234,179,8,0.25)">+ Note</button>
+          <button class="btn btn-outline btn-sm" onclick="cvAddTextNode()" style="font-size:var(--text-xs);color:#38bdf8;border-color:rgba(56,189,248,0.2)">+ Text</button>
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('cv-img-input').click()" style="font-size:var(--text-xs);color:#4ade80;border-color:rgba(74,222,128,0.2)">+ Image</button>
+          <button class="btn btn-outline btn-sm" onclick="cvLoadTemplate('social-calendar')" style="font-size:var(--text-xs);color:#2dd4bf;border-color:rgba(45,212,191,0.2)">Social Calendar</button>
+          <button class="btn btn-outline btn-sm" onclick="cvLoadTemplate('carousel')" style="font-size:var(--text-xs);color:#2dd4bf;border-color:rgba(45,212,191,0.2)">Carousel</button>
+          <button class="btn btn-outline btn-sm" onclick="cvImportJSON()" style="font-size:var(--text-xs);color:var(--text-muted)">Import</button>
         </div>
       </div>
       <div id="cv-minimap" class="cv-minimap"></div>
@@ -1693,8 +1693,8 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 <!-- TABLE INSERT MODAL -->
 <div class="export-overlay" id="tbl-overlay" onclick="closeTblModal()"></div>
 <div class="tbl-modal" id="tbl-modal">
-  <h3 style="font-size:10px;font-weight:600;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Insert Table</h3>
-  <div style="font-size:8px;color:var(--text-muted);margin-bottom:6px">Select size: <span id="tbl-size">0 x 0</span></div>
+  <h3 style="font-size:var(--text-base);font-weight:600;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Insert Table</h3>
+  <div style="font-size:var(--text-xs);color:var(--text-muted);margin-bottom:6px">Select size: <span id="tbl-size">0 x 0</span></div>
   <div class="tbl-grid-pick" id="tbl-grid"></div>
   <div style="display:flex;gap:6px">
     <button class="btn btn-primary btn-sm" style="flex:1" onclick="insertTable()">Insert</button>
@@ -1706,13 +1706,13 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 <div class="ver-panel" id="ver-panel">
   <div class="ver-panel-hdr">
     <h3>Version History</h3>
-    <button class="btn-icon" onclick="closeVersions()" style="font-size:8px">x</button>
+    <button class="btn-icon" onclick="closeVersions()" style="font-size:var(--text-xs)">x</button>
   </div>
   <div style="padding:8px 12px;border-bottom:1px solid var(--border)">
     <button class="btn btn-outline btn-sm btn-block" onclick="saveVersion()">Save Snapshot</button>
   </div>
   <div class="ver-list" id="ver-list">
-    <div style="padding:16px;text-align:center;font-size:9px;color:var(--text-muted)">No snapshots yet</div>
+    <div style="padding:16px;text-align:center;font-size:var(--text-sm);color:var(--text-muted)">No snapshots yet</div>
   </div>
 </div>
 
