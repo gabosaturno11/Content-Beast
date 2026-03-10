@@ -864,6 +864,25 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .toggle.on::after{transform:translateX(20px)}
   /* --- Preset grid single column at mobile --- */
   .preset-grid{grid-template-columns:1fr}
+  /* --- Enforce 10px floor on elements with inline font-size (JS-generated) --- */
+  .ctrl-body [style*="font-size:7px"],
+  .ctrl-body [style*="font-size:8px"],
+  .ctrl-body [style*="font-size:9px"],
+  .preview-body [style*="font-size:7px"],
+  .preview-body [style*="font-size:8px"],
+  .preview-body [style*="font-size:9px"],
+  .brain-body [style*="font-size:7px"],
+  .brain-body [style*="font-size:8px"],
+  .brain-body [style*="font-size:9px"],
+  .lib [style*="font-size:7px"],
+  .lib [style*="font-size:8px"],
+  .lib [style*="font-size:9px"],
+  .ver-panel [style*="font-size:9px"]{font-size:10px !important}
+  /* --- Headings: clamp for responsive scaling --- */
+  .hdr-brand h1{font-size:clamp(12px,3vw,14px)}
+  .ctrl-hdr .title{font-size:clamp(10px,2.5vw,12px)}
+  .preview-hdr .title{font-size:clamp(10px,2.5vw,12px)}
+  .brain-title{font-size:clamp(11px,3vw,13px)}
 }
 
 /* === SMALL PHONE (480px) === */
@@ -921,7 +940,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   </div>
   <div class="hdr-right">
     <!-- View switcher removed: split/focus were non-functional with contenteditable -->
-    <span id="save-ind" style="font-size:8px;color:var(--text-muted);opacity:0;transition:opacity 0.3s">Saved</span>
+    <span id="save-ind" style="font-size:var(--text-xs);color:var(--text-muted);opacity:0;transition:opacity 0.3s">Saved</span>
     <span id="status" class="status status-ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
   </div>
 </div>
@@ -935,7 +954,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       <button class="btn btn-outline btn-sm" onclick="importFile()" title="Import .md or .txt">Import</button>
     </div>
     <div style="padding:4px 4px 0">
-      <input type="text" id="lib-search" placeholder="Search docs..." style="padding:5px 8px;font-size:9px;margin-bottom:2px" oninput="filterLibrary()">
+      <input type="text" id="lib-search" placeholder="Search docs..." style="padding:5px 8px;font-size:var(--text-sm);margin-bottom:2px" oninput="filterLibrary()">
     </div>
     <div class="sort-bar">
       <button class="sort-btn active" onclick="sortDocs('recent',this)">Recent</button>
@@ -976,7 +995,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           </div>
         </div>
         <div class="row">
-          <label class="lbl" style="font-size:7px;margin-bottom:3px">Level Badge</label>
+          <label class="lbl" style="font-size:var(--text-xs);margin-bottom:3px">Level Badge</label>
           <div style="display:flex;gap:3px;flex-wrap:wrap">
             <button class="mode-btn active" data-lv="" onclick="setLv(this)">None</button>
             <button class="mode-btn" data-lv="foundation" onclick="setLv(this)" style="color:#4ade80">Foundation</button>
@@ -1011,7 +1030,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <div class="row">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <label class="lbl" style="margin-bottom:0">Content (Markdown)</label>
-            <button class="btn btn-outline btn-sm" onclick="document.getElementById('md-cheat').classList.toggle('open')" style="font-size:7px;padding:2px 6px">Syntax Help</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('md-cheat').classList.toggle('open')" style="font-size:var(--text-xs);padding:2px 6px">Syntax Help</button>
           </div>
           <div class="md-cheat" id="md-cheat">
             <code># H1</code> <code>## H2</code> <code>### H3</code><br>
@@ -1044,7 +1063,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <!-- SUB: LIBRARY -->
         <div id="cap-library">
           <div class="cl-search">
-            <input type="text" id="cl-search" placeholder="Search captions..." style="padding:5px 8px;font-size:9px" oninput="searchCaptions()">
+            <input type="text" id="cl-search" placeholder="Search captions..." style="padding:5px 8px;font-size:var(--text-sm)" oninput="searchCaptions()">
             <button class="btn btn-outline btn-sm" onclick="document.getElementById('cl-file').click()" title="Import captions">Import</button>
             <button class="btn btn-outline btn-sm" onclick="seedGaboCaptions()" title="Load Gabo's full content library" style="color:var(--accent)">Seed</button>
             <button class="btn btn-outline btn-sm" onclick="addCaptionManual()" title="Add new caption">+</button>
@@ -1052,7 +1071,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           <input type="file" id="cl-file" accept=".json,.md,.txt,.csv" style="display:none" multiple onchange="importCaptions(this.files)">
           <div class="cl-filters" id="cl-filters"></div>
           <div class="cl-bulk" id="cl-bulk">
-            <span style="font-size:8px;color:var(--text-muted)"><b id="cl-sel-count">0</b> selected</span>
+            <span style="font-size:var(--text-xs);color:var(--text-muted)"><b id="cl-sel-count">0</b> selected</span>
             <button class="btn btn-primary btn-sm" onclick="clBulkToCanvas()">To PDF</button>
             <button class="btn btn-outline btn-sm" onclick="cvBulkAddFromLibrary()" style="color:var(--accent)">To Board</button>
             <button class="btn btn-outline btn-sm" onclick="clBulkToSeed()">Seed</button>
@@ -1538,7 +1557,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       <span class="brain-title">AI Brain</span>
       <span class="brain-orbit-badge" id="brain-orbit-count">0 orbits</span>
     </div>
-    <button class="btn-icon" onclick="toggleBrain()" style="font-size:10px;">x</button>
+    <button class="btn-icon" onclick="toggleBrain()" style="font-size:var(--text-base);">x</button>
   </div>
   <div class="brain-body">
     <div>
@@ -1591,11 +1610,11 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       <label class="lbl">Collision Pack <span style="color:var(--text-muted);font-weight:400;">(auto from channel, toggle to edit)</span></label>
       <div id="brain-collision-chips" class="brain-collision-chips"></div>
     </div>
-    <button class="btn btn-primary" style="width:100%;font-size:10px;letter-spacing:0.1em;" onclick="runBrain()">RUN ORBIT</button>
+    <button class="btn btn-primary" style="width:100%;font-size:var(--text-base);letter-spacing:0.1em;" onclick="runBrain()">RUN ORBIT</button>
     <div>
       <label class="lbl">Orbit Log — click any to re-seed</label>
       <div id="brain-log" class="brain-log">
-        <div style="color:var(--text-muted);font-size:8px;padding:4px 0;">No orbits yet. Seed the first one.</div>
+        <div style="color:var(--text-muted);font-size:var(--text-xs);padding:4px 0;">No orbits yet. Seed the first one.</div>
       </div>
     </div>
   </div>
