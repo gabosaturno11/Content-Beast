@@ -1,48 +1,48 @@
-Live: content-beast-five.vercel.app                                                                  
-  Repo: github.com/gabosaturno11/Content-Beast
-  Size: 2015 lines, 79 functions, ~101KB single-file HTML                                              
-                                                                                                       
-  Full feature list:                                                                                   
-                                                                                                       
-  Core PDF Engine:                                                                                     
-  - WYSIWYG contenteditable canvas with live preview
-  - 4 templates (Saturno, Dark, Minimal, White)                                                        
-  - 5 presets (Program PDF, Level Guide, Framework, Transcript, Cover Page)                            
-  - Saturno Movement level badges (Foundation/Intermediate/Advanced/Elite)                             
-  - Markdown parser with tables, blockquotes, code, lists                                              
-  - html2pdf.js + jsPDF export with custom settings                                                    
+# CONTENT BEAST v9.0
 
-  Enterprise Features:
-  - Command Palette (Cmd+K) — 37 fuzzy-searchable actions
-  - 3 view modes: Full / Split (md+preview) / Focus (no library)
-  - Export settings modal (paper size, orientation, margins, quality, page numbers)
-  - Batch export all docs as ZIP (JSZip)
-  - JSON backup/restore (full data + versions)
-  - Version history with snapshots and restore
-  - Find & Replace (Cmd+F)
-  - Auto-TOC generator
-  - Document statistics (words, chars, reading time)
+**Live:** [content-beast-five.vercel.app](https://content-beast-five.vercel.app)
+**Repo:** gabosaturno11/Content-Beast
+**Deploy:** `git push origin main` (Vercel auto-deploys)
 
-  Editing Toolbar:
-  - Bold, italic, underline, strikethrough
-  - H1/H2/H3, alignment (L/C/R), lists, blockquote
-  - Font size, text color picker
-  - Insert: image, table (visual grid), link, page break, HR
-  - Quick-insert menu: callout blocks (info/tip/warning/fire), code block, labeled divider, 2-column
-  layout
-  - Indent/outdent, clear formatting
-  - Zoom (50-200%), fullscreen mode
+AI-powered PDF Maker + Content Tools + Epistemic Atomizer. Single-file architecture, dark theme, zero frameworks.
 
-  Library Management:
-  - Document library with localStorage persistence
-  - Search, sort (recent/A-Z/oldest), drag-to-reorder
-  - Duplicate, delete, import .md/.txt, drag-drop files
+## 4 Modes
 
-  Polish:
-  - Keyboard shortcuts (8 shortcuts, help modal Cmd+/)
-  - Markdown syntax cheatsheet
-  - Print stylesheet (clean white for dark templates)
-  - Mobile responsive (768px breakpoint)
-  - Word/char/page count + reading time in status bar
-  - Caption multiplier (6 platforms, 5 voices)
-  - 9 commits, incrementally deployed
+| Mode | What It Does |
+|------|-------------|
+| **PDF Maker** | WYSIWYG editor, 4 templates, 5 presets, html2pdf export |
+| **Captions** | Voice multiplier V3, Collision Matrix dials, 103+ seed captions |
+| **Atomizer** | Document decomposition, VTT/SRT transcript pipeline |
+| **Canvas** | Whiteboard with nodes, connections, groups, PNG/PDF export |
+
+## v9.0 — AI Brain
+
+- Epistemic Atom Model (9 epTypes: claim, story, protocol, pattern, belief, question, feeling, command, unknown)
+- Brain Drawer (right panel, Claude-powered orbit loop)
+- Channel Presets (email, blog, tech, speech, webinar, book)
+- Collision Matrix (100 techniques from PX1 + god-level prompts)
+- Recursive epistemology loop: SAY -> REVEALS -> ROUTE -> VALIDATES -> EXPANDS -> SAY AGAIN
+
+## API
+
+| Endpoint | Purpose |
+|----------|---------|
+| /api/claude-brain | AI synthesis (POST) — epistemic orbit engine |
+
+## Tech
+
+- 1 HTML file (~2000+ lines)
+- Storage: IndexedDB (ContentBeastCaptions v2) + localStorage
+- Fonts: JetBrains Mono + Sora (locked)
+- Theme: Dark only, teal accent (#2dd4bf)
+- Export: html2pdf.js, jsPDF, JSZip
+
+## Part of the Saturno Ecosystem
+
+- **ASTRA** controls everything: astra-command-center-sigma.vercel.app
+- **Supabase** is the backend: 15 tables, shared with Client OS
+- Content Beast → ASTRA Pipeline → Supabase
+
+## License
+
+Private.
