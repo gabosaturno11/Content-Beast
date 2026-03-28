@@ -412,6 +412,15 @@ textarea:disabled,input:disabled,select:disabled{opacity:0.4;cursor:not-allowed}
 .ac-type.t-image{background:rgba(236,72,153,0.12);color:#f472b6}
 .ac-type.t-code{background:rgba(99,102,241,0.12);color:#a5b4fc}
 .ac-type.t-divider{background:rgba(100,116,139,0.08);color:#64748b}
+.ac-ep{display:inline-flex;align-items:center;font-size:var(--text-xs);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;padding:1px var(--sp-2);border-radius:var(--radius-sm);margin-bottom:var(--sp-2);margin-left:4px;font-family:var(--mono);line-height:1;border:1px solid}
+.ep-claim{background:rgba(56,189,248,0.08);color:#38bdf8;border-color:rgba(56,189,248,0.20)}
+.ep-story{background:rgba(236,72,153,0.08);color:#f472b6;border-color:rgba(236,72,153,0.20)}
+.ep-protocol{background:rgba(34,197,94,0.08);color:#4ade80;border-color:rgba(34,197,94,0.20)}
+.ep-pattern{background:rgba(168,85,247,0.08);color:#c084fc;border-color:rgba(168,85,247,0.20)}
+.ep-belief{background:rgba(245,158,11,0.08);color:#fbbf24;border-color:rgba(245,158,11,0.20)}
+.ep-question{background:rgba(45,212,191,0.08);color:#2dd4bf;border-color:rgba(45,212,191,0.20)}
+.ep-feeling{background:rgba(251,113,133,0.08);color:#fb7185;border-color:rgba(251,113,133,0.20)}
+.ep-command{background:rgba(99,102,241,0.08);color:#a5b4fc;border-color:rgba(99,102,241,0.20)}
 .atom-card .ac-text{font-size:var(--text-base);color:var(--text-secondary);line-height:var(--leading-normal);margin-bottom:var(--sp-2);max-height:80px;overflow:hidden}
 .atom-card .ac-text.expanded{max-height:none}
 .atom-card .ac-actions{display:flex;gap:var(--sp-1);flex-wrap:wrap}
@@ -3982,6 +3991,11 @@ function parseAtoms(text, filename) {
     }
   }
 
+  // Classify epistemic type for every atom
+  for (var ri = 0; ri < result.length; ri++) {
+    result[ri].epType = classifyEpistemicType(result[ri].text, result[ri].type);
+  }
+
   return result;
 }
 
@@ -4004,7 +4018,8 @@ function setAtomFilter(f) {
 
 function renderAtoms() {
   const el = document.getElementById('atom-list');
-  const filtered = atomFilter === 'all' ? atoms : atoms.filter(a => a.type === atomFilter);
+  var preFiltered = atomFilter === 'all' ? atoms : atoms.filter(a => a.type === atomFilter);
+  const filtered = (typeof currentEpFilter !== 'undefined' && currentEpFilter !== 'all') ? preFiltered.filter(a => a.epType === currentEpFilter) : preFiltered;
   if (!filtered.length) {
     el.innerHTML = '<div style="padding:16px;text-align:center;font-size:9px;color:var(--text-muted)">No atoms of this type</div>';
     return;
@@ -4015,6 +4030,7 @@ function renderAtoms() {
     '<div class="drag-handle" title="Drag to canvas or seed"><span></span></div>' +
     '<div style="flex:1;min-width:0">' +
     '<span class="ac-type t-' + a.type + '">' + a.type + (a.level ? ' H' + a.level : '') + '</span>' +
+    (a.epType && a.epType !== 'unknown' ? '<span class="ac-ep ep-' + a.epType + '">' + a.epType + '</span>' : '') +
     '<div class="ac-meta">#' + a.id + ' / ' + a.text.split(/\s+/).length + ' words</div>' +
     '<div class="ac-text">' + esc(a.text) + '</div>' +
     '<div class="ac-actions">' +
@@ -4044,7 +4060,10 @@ function renderAtoms() {
   stats.style.display = '';
   const qCount = atoms.filter(a => a.type === 'quote').length;
   const hCount = atoms.filter(a => a.type === 'heading').length;
-  stats.innerHTML = '<span>Total: ' + atoms.length + '</span><span>Quotes: ' + qCount + '</span><span>Headings: ' + hCount + '</span><span>Filter: ' + atomFilter + '</span>';
+  var epCounts = {};
+  atoms.forEach(function(a) { if (a.epType && a.epType !== 'unknown') epCounts[a.epType] = (epCounts[a.epType] || 0) + 1; });
+  var epSummary = Object.keys(epCounts).sort().map(function(k) { return k + ':' + epCounts[k]; }).join(' / ');
+  stats.innerHTML = '<span>Total: ' + atoms.length + '</span><span>Quotes: ' + qCount + '</span><span>Headings: ' + hCount + '</span><span>Filter: ' + atomFilter + '</span>' + (epSummary ? '<span style="color:var(--accent)">' + epSummary + '</span>' : '');
   updateBulkBar();
 }
 
@@ -4285,15 +4304,17 @@ async function clLoadAll() {
 function makeCaptionId() { return 'cap_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6); }
 
 function makeCaption(text, opts) {
+  var trimmed = text.trim();
   return {
     id: makeCaptionId(),
-    text: text.trim(),
+    text: trimmed,
     theme: (opts && opts.theme) || 'general',
     voice: (opts && opts.voice) || '',
     platform: (opts && opts.platform) || [],
     source: (opts && opts.source) || 'manual',
     scale: (opts && opts.scale) || '',
-    words: text.trim().split(/\s+/).length,
+    epType: classifyEpistemicType(trimmed, 'paragraph'),
+    words: trimmed.split(/\s+/).length,
     created: new Date().toISOString(),
     updated: new Date().toISOString()
   };
@@ -6621,7 +6642,7 @@ function setEpFilter(ep) {
   document.querySelectorAll('.ep-filter-btn').forEach(function(b) {
     b.classList.toggle('active', b.getAttribute('data-ep') === ep);
   });
-  if (typeof renderAtomList === 'function') renderAtomList();
+  renderAtoms();
 }
 
 // ============================================================

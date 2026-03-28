@@ -28,7 +28,7 @@ Right-drawer panel powered by Claude. Runs an epistemic orbit loop:
 SEED → ATOMS → COLLISIONS → CHANNEL → ARTIFACT → NEXT QUESTION
 ```
 
-- **Epistemic Types:** claim, story, protocol, pattern, belief, question, feeling, command
+- **Epistemic Types:** claim, story, protocol, pattern, belief, question, feeling, command (wired -- every atom and caption gets classified via `classifyEpistemicType` at creation)
 - **Channel Presets:** email, blog, tech, speech, webinar, book
 - **Aperture Levels:** atom, section, chapter, os
 - **Collision Matrix:** 20 techniques with 3 parametric dials (Intensity, Vulnerability, Abstraction)
