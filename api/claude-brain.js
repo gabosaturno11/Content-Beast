@@ -1,10 +1,43 @@
 // Content Beast v9.0 — AI Brain Endpoint
 // Vercel Serverless Function: /api/claude-brain
 // Requires: ANTHROPIC_API_KEY in Vercel environment variables
+// Auth: Bearer CB_AUTH_TOKEN or ASTRA_ADMIN_PASSWORD, or cookie cb_auth
+// Also allows calls from same-origin (Content Beast frontend) without auth
+
+function checkBrainAuth(req) {
+  // If no auth token configured, allow all (backward compatible)
+  var authToken = process.env.CB_AUTH_TOKEN || process.env.ASTRA_ADMIN_PASSWORD;
+  if (!authToken) return true;
+
+  // Bearer token (API calls from Client OS, ASTRA, etc.)
+  var auth = req.headers.authorization;
+  if (auth && auth === 'Bearer ' + authToken) return true;
+
+  // Cookie (Content Beast frontend after login)
+  var cookieHeader = req.headers.cookie || '';
+  var cookieMatch = cookieHeader.match(/(?:^|; )cb_auth=([^;]*)/);
+  var cookieToken = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+  if (cookieToken === authToken) return true;
+
+  // Same-origin requests (Referer from Content Beast domain)
+  var referer = req.headers.referer || '';
+  if (referer.includes('content-beast-five.vercel.app') || referer.includes('localhost')) return true;
+
+  return false;
+}
 
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POST only' });
+  }
+
+  if (!checkBrainAuth(req)) {
+    return res.status(401).json({ error: 'Unauthorized. Set CB_AUTH_TOKEN or ASTRA_ADMIN_PASSWORD env var and pass as Bearer token.' });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
