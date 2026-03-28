@@ -1,110 +1,97 @@
-# CONTENT BEAST v9.0
+# Content Beast
 
-AI-powered Content OS. PDF Maker + Voice Multiplier + Epistemic Atomizer + Canvas — one app, zero frameworks, single HTML file.
+Premium content creation product. Not just a PDF maker.
 
-**Live:** [content-beast-five.vercel.app](https://content-beast-five.vercel.app)
-**License:** Private
+## Identity
 
----
+Content Beast is a content operating system — a canvas, carousel, asset generator, and content intelligence engine that transforms ideas into multi-format outputs.
 
-## What It Does
+## What it is
 
-Content Beast is a single-page content creation system with four integrated modes and an AI brain.
+- Content pipeline and transformation engine
+- 4 integrated modes: PDF Maker, Captions, Atomizer, Canvas
+- AI Brain v9.0 with epistemic orbit loop
+- Artifact builder for multi-platform output
+- One of the fastest monetizable product surfaces
 
-### 4 Modes
+## What it is not
 
-| Mode | What It Does |
-|------|-------------|
-| **PDF Maker** | WYSIWYG editor, 4 visual templates, 5 content presets, html2pdf export, markdown shortcuts, version history |
-| **Captions** | Voice Multiplier V3, 8 voice modes, Collision Matrix (3 dials, 20 techniques), 103+ seed captions, 6 platform engines |
-| **Atomizer** | Document decomposition for PDF/VTT/SRT/Markdown/text, epistemic type classification, 8 transcript templates |
-| **Canvas** | Infinite whiteboard, 3 node types, connection lines, 6 layout templates, alignment tools, PNG/PDF export |
+- Not just a PDF toy or caption generator
+- Not merely "content support" for ASTRA
+- Not decorative
 
-### AI Brain (v9.0)
+## Role in ecosystem
 
-Right-drawer panel powered by Claude. Runs an epistemic orbit loop:
+- **Upstream:** Receives structured context from ASTRA (prompts, KB entries)
+- **Downstream:** Exports artifacts into Bonus, Client OS, social platforms
+- **Shared services:** Supabase backend (cb_* tables created, wiring pending)
+- **Controlled by:** ASTRA orchestration layer
+- **Part of:** APSIS ENTERPRISE
 
-```
-SEED → ATOMS → COLLISIONS → CHANNEL → ARTIFACT → NEXT QUESTION
-```
+## Live
 
-- **Epistemic Types:** claim, story, protocol, pattern, belief, question, feeling, command (wired -- every atom and caption gets classified via `classifyEpistemicType` at creation)
-- **Channel Presets:** email, blog, tech, speech, webinar, book
-- **Aperture Levels:** atom, section, chapter, os
-- **Collision Matrix:** 20 techniques with 3 parametric dials (Intensity, Vulnerability, Abstraction)
-- **Recursive Loop:** Each orbit generates the next question → re-seed → deeper orbit
+- **URL:** [content-beast-five.vercel.app](https://content-beast-five.vercel.app)
+- **Repo:** [gabosaturno11/Content-Beast](https://github.com/gabosaturno11/Content-Beast)
+- **Deploy:** `git push origin main` (Vercel auto-deploy)
 
-### Cross-Mode Workflows
+## Source of truth
 
-- **Transcript → Published Content:** Atomizer (import VTT) → select atoms → To PDF → format → export
-- **Idea → Six Platforms:** Captions (type seed) → select voice + platforms → Multiply → copy variants
-- **Content Calendar:** Canvas (Social Calendar template) → drag captions from library → connect → export PNG
-- **Long Doc → Atomic Content:** Atomizer (import PDF) → filter quotes → To Seed → Multiplier → platform-ready
+- **Durable (future):** Supabase — cb_captions, cb_canvas_state, cb_brain_log (tables created, NOT YET WIRED)
+- **Current:** IndexedDB (ContentBeastCaptions) + localStorage (docs, versions, brain log)
+- **Write authority:** Operator + AI Brain
+- **Read authority:** Public (no auth gate)
 
-## API
+## Tech stack
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/claude-brain` | POST | AI synthesis — epistemic orbit engine |
+- Single HTML file (6,692 lines), zero frameworks
+- Anthropic Claude API via /api/claude-brain (claude-sonnet-4-20250514)
+- IndexedDB + localStorage
+- Vercel serverless
+- html2pdf for PDF export
 
-**Request:** `{ seed, target, aperture, collisionPack, epAtoms, voiceDials, structureTemplate, metaQuestion }`
-**Response:** `{ mode, summary, content, captions[], nodes[], connections[], nextQuestion }`
+## Features
 
-**Requires:** `ANTHROPIC_API_KEY` environment variable on Vercel.
+### PDF Maker
+4 visual templates, 5 content presets, markdown shortcuts, version history (40+ versions)
 
-## Architecture
+### Captions v3
+Collision Matrix (20 techniques), 3 voice dials (Intensity, Vulnerability, Abstraction), 103+ seed captions, 6 platform engines
 
-```
-Content-Beast/
-├── index.html           (369KB — THE ENTIRE APP)
-├── api/
-│   └── claude-brain.js  (Anthropic Claude serverless function)
-├── CLAUDE.md            (Build specs)
-├── USER_MANUAL.md       (User manual)
-├── vercel.json          (Routing)
-└── README.md
-```
+### Atomizer
+PDF/VTT/SRT/MD/text parsing, 8 atom types, epistemic classification (claim, story, protocol, pattern, belief, question, feeling, command)
 
-- **Single-file architecture** — everything lives in `index.html`
-- **Storage:** IndexedDB + localStorage (all data stays in your browser)
-- **Fonts:** JetBrains Mono + Sora (locked)
-- **Theme:** Dark only, teal accent (`#2dd4bf`)
-- **Export:** html2pdf.js, jsPDF, JSZip
-- **Framework:** None. Zero dependencies beyond CDN libraries.
+### Canvas
+Infinite whiteboard, 3 node types, connections, 6 layouts, PNG/PDF export
 
-## Deploy
+### AI Brain v9.0
+Epistemic Orbit Loop: SEED -> ATOMS -> COLLISIONS -> CHANNEL -> ARTIFACT -> NEXT QUESTION
 
-```bash
-# Clone
-git clone https://github.com/gabosaturno11/Content-Beast.git
+## AI policy
 
-# Set environment variable on Vercel
-vercel env add ANTHROPIC_API_KEY
+- AI powers the Brain v9.0 orbit loop via Claude API
+- AI output is advisory — operator curates final artifacts
+- Epistemic type system classifies all content
+- No autonomous mutations without operator trigger
 
-# Deploy (auto-deploys on push to main)
-git push origin main
-```
+## Product laws
 
-## Saturno Ecosystem
+- Premium over clutter
+- Connect to ASTRA, don't flatten into one blob
+- Don't rebuild a working specialized module just because ASTRA exists
+- Single-file architecture — everything in index.html
+- No emojis in UI, dark theme only
 
-Content Beast is one piece of the Saturno Movement infrastructure:
+## Data boundaries
 
-| Layer | Product |
-|-------|---------|
-| **Flagship** | Saturno Movement app |
-| **Bridge** | Vault (bonus.saturnomovement.com) |
-| **Multiplier** | Content Beast |
-| **Infra** | ASTRA command center, titan-forge |
+- Captions and documents belong to the operator
+- Brain orbit results are ephemeral (max 30 in localStorage)
+- No user data collection
+- Future: Supabase persistence for cross-device sync
 
-## What's Coming in v10.0
+## Status
 
-- Voice profile persistence (named presets, survive refresh)
-- Transcript-to-everything pipeline (paste transcript → get all platforms)
-- Branded PDF templates (Lead Magnet, Quick Guide, Workbook)
-- Collision Matrix expansion (20 → 100 techniques)
-- Knowledge context layer (AI gets smarter as you use it)
-- Platform export cards (one-click copy per platform with character counts)
-
-## License
-
-Private. All rights reserved. Gabo Saturno / Saturno Movement.
+- **State:** Live, production
+- **Commits:** 52
+- **Design:** Dark theme, teal accent (#2dd4bf), JetBrains Mono + Sora fonts
+- **Recent:** epType classification wired to atoms and captions (March 28)
+- **Next:** Supabase Phase 2 (replace IndexedDB with cb_* tables)
