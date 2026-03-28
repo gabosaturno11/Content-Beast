@@ -1,4 +1,9 @@
-# CONTENT BEAST v9.0 — ASTRA SATURNO BRAIN SPECS
+# CONTENT BEAST v9.0 — CLAUDE.md
+## Last Updated: March 28, 2026
+## Part of: APSIS ENTERPRISE ecosystem
+
+## Identity
+Content Beast is a premium content creation product. Not just a PDF maker. Part of the APSIS ENTERPRISE connected ecosystem. It is a specialized pipeline module — connect it to ASTRA, don't flatten it into one blob.
 
 ## Current State
 - **Version:** v9.0 — AI Brain / Epistemic Atomizer-Synthesizer
@@ -6,6 +11,8 @@
 - **Deploy:** Vercel auto-deploy from main → content-beast-five.vercel.app
 - **Architecture:** Single HTML file with inline CSS + JS (HARD RULE: stays single file)
 - **Storage:** IndexedDB (ContentBeastCaptions DB, schema v2) + localStorage
+- **Supabase:** cb_captions, cb_canvas_state, cb_brain_log tables CREATED (not yet wired)
+- **epType:** WIRED (March 28) — classifyEpistemicType() now runs on atoms + captions
 - **Font system:** JetBrains Mono + Sora — LOCKED. No changes.
 - **Theme:** Dark only. No emojis. Custom icons only.
 
