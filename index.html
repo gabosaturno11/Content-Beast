@@ -805,12 +805,15 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 /* === TABLET (1024px) === */
 @media (max-width: 1024px) {
   .workspace{grid-template-columns:180px 1fr 1fr}
+  .workspace.sidebar-collapsed{grid-template-columns:var(--sidebar-collapsed) 1fr 1fr}
   .workspace.caption-mode{grid-template-columns:180px 300px 1fr}
   .pdf-canvas{padding:36px 40px}
   .cover-page{padding:60px 40px}
   .brain-panel{width:340px}
   .preset-grid{grid-template-columns:1fr}
   .export-formats{grid-template-columns:repeat(2,1fr)}
+  .theme-grid{grid-template-columns:repeat(5,1fr)}
+  .settings-panel{width:340px}
 }
 
 /* MOBILE */
@@ -852,7 +855,9 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .slider-card{padding:var(--sp-3) var(--sp-4)}
   .cl-act{width:44px;height:44px}
   .toast{bottom:64px;right:var(--sp-4);left:var(--sp-4);text-align:center}
-  .export-panel,.shortcuts-modal{width:calc(100vw - var(--sp-7));max-width:400px}
+  .export-panel,.shortcuts-modal,.settings-panel{width:calc(100vw - var(--sp-7));max-width:400px}
+  .theme-grid{grid-template-columns:repeat(5,1fr);gap:var(--sp-1)}
+  .quick-export-btn{display:none}
   .cmd-palette{top:10%;width:calc(100vw - var(--sp-6));max-width:none}
   .tbl-modal{width:calc(100vw - var(--sp-7));max-width:340px}
   .ver-panel{width:100vw}
@@ -1426,9 +1431,9 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           <div class="pipeline-stage" id="ps-ready"><span class="ps-icon">*</span><span class="ps-label">Ready</span></div>
         </div>
         <div class="atom-import" id="atom-drop" onclick="document.getElementById('atom-file').click()">
-          <div class="ai-icon">/</div>
-          <div class="ai-title">Drop any document to atomize</div>
-          <div class="ai-sub">Extracts quotes, headings, paragraphs, lists, tables, code blocks</div>
+          <div class="ai-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+          <div class="ai-title">Drop file here to atomize</div>
+          <div class="ai-sub">or click to browse. Extracts quotes, headings, paragraphs, lists, tables, code.</div>
           <div class="ai-formats"><span class="ai-fmt">PDF</span><span class="ai-fmt">VTT</span><span class="ai-fmt">SRT</span><span class="ai-fmt">MD</span><span class="ai-fmt">TXT</span><span class="ai-fmt">HTML</span></div>
         </div>
         <input type="file" id="atom-file" accept=".pdf,.md,.txt,.markdown,.text,.html,.vtt,.srt" style="display:none" onchange="atomizeFile(this.files[0])">
@@ -6735,6 +6740,11 @@ function toggleBrain() {
   var panel = document.getElementById('brain-panel');
   var isOpen = panel.classList.contains('open');
   panel.classList.toggle('open', !isOpen);
+  var toggleBtn = document.getElementById('brain-toggle-btn');
+  if (toggleBtn) {
+    if (!isOpen) { toggleBtn.classList.add('btn-primary'); toggleBtn.classList.remove('btn-outline'); }
+    else { toggleBtn.classList.remove('btn-primary'); toggleBtn.classList.add('btn-outline'); }
+  }
   if (!isOpen) {
     renderCollisionChips();
     renderBrainLog();
@@ -7088,10 +7098,11 @@ restoreTheme();
   var hdrRight = document.querySelector('.hdr-right');
   if (!hdrRight) return;
   var btn = document.createElement('button');
+  btn.id = 'brain-toggle-btn';
   btn.className = 'btn btn-outline btn-sm';
   btn.style.cssText = 'font-size:9px;text-transform:uppercase;letter-spacing:0.12em;border-color:rgba(45,212,191,0.25);color:var(--accent);';
   btn.textContent = 'BRAIN';
-  btn.setAttribute('title', 'AI Brain \u2014 Epistemic Atomizer-Synthesizer');
+  btn.setAttribute('title', 'AI Brain — toggle drawer (Epistemic Atomizer-Synthesizer)');
   btn.onclick = toggleBrain;
   hdrRight.insertBefore(btn, hdrRight.firstChild);
   activeCollisions = new Set(CHANNEL_PRESETS.email.collisionPack);
