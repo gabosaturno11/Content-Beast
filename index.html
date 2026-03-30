@@ -321,6 +321,12 @@ body .pdf-canvas.tpl-research{counter-reset:section}
 .fullscreen-mode .workspace{grid-template-columns:0 0 1fr !important}
 .fullscreen-mode .lib,.fullscreen-mode .ctrl{display:none !important}
 .fullscreen-mode .preview-body{padding:32px 10%}
+.zen-mode .hdr,.zen-mode .ftr,.zen-mode .preview-hdr,.zen-mode .wc-bar,.zen-mode .mobile-nav{display:none !important}
+.zen-mode .app{grid-template-rows:0 1fr 0}
+.zen-mode .workspace{grid-template-columns:0 0 1fr !important}
+.zen-mode .lib,.zen-mode .ctrl{display:none !important}
+.zen-mode .preview-body{padding:48px 12%;max-width:100%}
+.zen-mode .preview{background:var(--bg-void)}
 
 /* FOCUS VIEW — immersive writing */
 /* focus-mode removed — was non-functional with contenteditable */
@@ -751,7 +757,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .cvdz-text{font-size:var(--text-xs);color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em}
 
 /* ═══════════════════════════════════════════════
-   BRAIN DRAWER v9.1
+   BRAIN DRAWER v9.2
 ═══════════════════════════════════════════════ */
 .brain-panel{position:fixed;top:0;right:-380px;width:380px;max-width:92vw;height:100vh;background:var(--bg-base);border-left:var(--border-w) solid var(--border);box-shadow:-16px 0 48px rgba(0,0,0,0.65);z-index:1200;display:flex;flex-direction:column;transition:right 0.28s var(--ease);font-family:var(--mono)}
 .brain-panel.open{right:0}
@@ -1098,7 +1104,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   </button>
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v9.1</span>
+    <span class="ver">v9.2</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -1128,6 +1134,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
     <div class="lib-hdr">
       <button class="btn btn-primary btn-sm" style="flex:1" onclick="newDoc()">+ New</button>
       <button class="btn btn-outline btn-sm" onclick="importFile()" title="Import .md or .txt">Import</button>
+      <button class="btn btn-outline btn-sm" onclick="importFromURL()" title="Import from URL" style="color:var(--cyan);border-color:rgba(56,189,248,0.2)">URL</button>
     </div>
     <div class="lib-search-wrap" style="padding:4px 4px 0">
       <input type="text" id="lib-search" placeholder="Search docs..." style="padding:5px 8px;font-size:var(--text-sm);margin-bottom:2px" oninput="filterLibrary()">
@@ -1163,7 +1170,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         </div>
         <div class="section-content">
         <div class="row">
-          <div style="display:flex;gap:3px;flex-wrap:wrap">
+          <div id="tpl-btn-container" style="display:flex;gap:3px;flex-wrap:wrap">
             <button class="mode-btn active" data-tpl="tpl-saturno" onclick="setTpl(this)">Saturno</button>
             <button class="mode-btn" data-tpl="tpl-dark" onclick="setTpl(this)">Dark</button>
             <button class="mode-btn" data-tpl="tpl-minimal" onclick="setTpl(this)">Minimal</button>
@@ -1605,7 +1612,9 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         <button class="btn-icon" onclick="openVersions()" title="Version history">H</button>
         <span class="tb-sep"></span>
         <button class="btn-icon" onclick="execCmd('removeFormat')" title="Clear formatting">Clr</button>
+        <button class="btn-icon" onclick="copyAsMarkdown()" title="Copy as Markdown">MD</button>
         <button class="btn-icon" onclick="toggleFullscreen()" title="Fullscreen" id="fs-btn">FS</button>
+        <button class="btn-icon" onclick="toggleZenMode()" title="Zen mode (no toolbar)" id="zen-btn">ZN</button>
         <div class="zoom-bar">
           <button class="btn-icon" onclick="zoom(-10)" title="Zoom out">-</button>
           <span class="zb" id="zoom-val">100%</span>
@@ -1716,8 +1725,8 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v9.1 — by Saturno Movement</span>
-  <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
+  <span>CONTENT BEAST v9.2 — by Saturno Movement</span>
+  <span>Cmd+K: Commands / Cmd+S: Save / Cmd+M: Copy MD / Cmd+1-3: Headings / Cmd+F: Find</span>
 </div>
 
 </div>
@@ -1732,7 +1741,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 <div class="toast" id="toast"></div>
 <input type="file" id="file-input" accept=".md,.txt,.markdown,.text" style="display:none" onchange="handleFile(this.files[0])">
 
-<!-- ═══ AI BRAIN DRAWER v9.1 ═══ -->
+<!-- ═══ AI BRAIN DRAWER v9.2 ═══ -->
 <div id="brain-panel" class="brain-panel">
   <div class="brain-hdr">
     <div style="display:flex;align-items:center;gap:8px;">
@@ -1858,7 +1867,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       <button class="btn btn-outline btn-sm" onclick="setSidebarMode('hidden')" id="sb-mode-hidden" style="flex:1">Hidden</button>
     </div>
   </div>
-  <div style="font-size:var(--text-xs);color:var(--text-muted);text-align:center;padding-top:var(--sp-3);border-top:1px solid var(--border)">CONTENT BEAST v9.1</div>
+  <div style="font-size:var(--text-xs);color:var(--text-muted);text-align:center;padding-top:var(--sp-3);border-top:1px solid var(--border)">CONTENT BEAST v9.2</div>
 </div>
 
 <!-- EXPORT SETTINGS MODAL -->
@@ -1912,6 +1921,13 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
     <div class="sc-row"><span class="sc-desc">Bold</span><span class="sc-key">Cmd+B</span></div>
     <div class="sc-row"><span class="sc-desc">Italic</span><span class="sc-key">Cmd+I</span></div>
     <div class="sc-row"><span class="sc-desc">Underline</span><span class="sc-key">Cmd+U</span></div>
+    <div class="sc-row"><span class="sc-desc">Heading 1</span><span class="sc-key">Cmd+1</span></div>
+    <div class="sc-row"><span class="sc-desc">Heading 2</span><span class="sc-key">Cmd+2</span></div>
+    <div class="sc-row"><span class="sc-desc">Heading 3</span><span class="sc-key">Cmd+3</span></div>
+    <div class="sc-row"><span class="sc-desc">Blockquote</span><span class="sc-key">Cmd+Shift+></span></div>
+    <div class="sc-row"><span class="sc-desc">Code Block</span><span class="sc-key">Cmd+Shift+C</span></div>
+    <div class="sc-row"><span class="sc-desc">Copy as Markdown</span><span class="sc-key">Cmd+M</span></div>
+    <div class="sc-row"><span class="sc-desc">Zen Mode</span><span class="sc-key">Zen btn / Esc to exit</span></div>
   </div>
   <div style="margin-top:16px">
     <h3 style="margin-bottom:8px">Canvas Whiteboard</h3>
@@ -2237,6 +2253,7 @@ function setTpl(btn) {
   document.querySelectorAll('[data-tpl]').forEach(b => b.classList.toggle('active', b === btn));
   document.getElementById('canvas').className = 'pdf-canvas ' + currentTpl;
   scheduleSave();
+  if (typeof trackTplUsage === 'function') trackTplUsage(currentTpl || 'white');
   toast('Template: ' + (currentTpl || 'white'));
 }
 
@@ -3576,6 +3593,9 @@ const CMD_ACTIONS = [
   { icon: 'V', text: 'Save Snapshot', desc: 'Version history', fn: () => saveVersion() },
   { icon: 'H', text: 'Version History', desc: 'Browse snapshots', fn: () => openVersions() },
   { icon: 'FS', text: 'Fullscreen', desc: 'Toggle fullscreen', fn: () => toggleFullscreen() },
+  { icon: 'ZN', text: 'Zen Mode', desc: 'Distraction-free writing', fn: () => toggleZenMode() },
+  { icon: 'MD', text: 'Copy as Markdown', desc: 'Copy doc to clipboard as MD', key: 'Cmd+M', fn: () => copyAsMarkdown() },
+  { icon: 'URL', text: 'Import from URL', desc: 'Fetch text from a web page', fn: () => importFromURL() },
   { icon: '?', text: 'Keyboard Shortcuts', desc: 'Show help', key: 'Cmd+/', fn: () => openShortcuts() },
   { icon: 'A', text: 'Template: Saturno', fn: () => { document.querySelector('[data-tpl="tpl-saturno"]').click(); } },
   { icon: 'A', text: 'Template: Dark', fn: () => { document.querySelector('[data-tpl="tpl-dark"]').click(); } },
@@ -6433,8 +6453,19 @@ document.addEventListener('keydown', e => {
     if (e.key === 'f') { e.preventDefault(); toggleFind(); return; }
     if (e.key === '/') { e.preventDefault(); openShortcuts(); return; }
     if (e.key === 'p') { e.preventDefault(); window.print(); return; }
+    // Markdown shortcuts: Cmd+1/2/3 for headings
+    if (e.key === '1') { e.preventDefault(); execBlock('h1'); return; }
+    if (e.key === '2') { e.preventDefault(); execBlock('h2'); return; }
+    if (e.key === '3') { e.preventDefault(); execBlock('h3'); return; }
+    // Cmd+Shift+. for blockquote
+    if (e.shiftKey && e.key === '>') { e.preventDefault(); execCmd('formatBlock','blockquote'); return; }
+    // Cmd+Shift+C for code block
+    if (e.shiftKey && e.key === 'c') { e.preventDefault(); insertCodeBlock(); return; }
+    // Cmd+M for copy as markdown
+    if (e.key === 'm') { e.preventDefault(); copyAsMarkdown(); return; }
   }
   if (e.key === 'Escape') {
+    if (document.body.classList.contains('zen-mode')) { toggleZenMode(); return; }
     if (document.body.classList.contains('fullscreen-mode')) toggleFullscreen();
     if (document.getElementById('export-panel').classList.contains('open')) closeExport();
     if (document.getElementById('find-bar').classList.contains('open')) toggleFind();
@@ -6712,7 +6743,7 @@ function setupDropTarget(el, type) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  CONTENT BEAST v9.1 — AI BRAIN / EPISTEMIC ATOMIZER-SYNTHESIZER
+//  CONTENT BEAST v9.2 — AI BRAIN / EPISTEMIC ATOMIZER-SYNTHESIZER
 //  ONE ORBIT: Seed → Atoms → Collisions → Channel → Artifact → Loop
 // ═══════════════════════════════════════════════════════════════
 
@@ -7107,6 +7138,102 @@ document.addEventListener('click', function(e) {
 });
 
 // ============================================================
+// IMPORT FROM URL
+// ============================================================
+function importFromURL() {
+  var url = prompt('Paste a URL to import text content from:');
+  if (!url || !url.trim()) return;
+  url = url.trim();
+  if (!/^https?:\/\//i.test(url)) { toast('Invalid URL — must start with http:// or https://'); return; }
+  setStatus('FETCHING...', 'busy');
+  // Use a CORS proxy for cross-origin pages
+  var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  fetch(proxyUrl).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  }).then(function(html) {
+    // Strip HTML tags, decode entities, clean whitespace
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    // Remove scripts and styles
+    tmp.querySelectorAll('script,style,nav,footer,header,aside').forEach(function(el) { el.remove(); });
+    var text = tmp.innerText || tmp.textContent || '';
+    text = text.replace(/\n{3,}/g, '\n\n').trim();
+    if (!text) { toast('No text content found at URL'); setStatus('READY', 'ok'); return; }
+    // Extract title from page
+    var titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/i);
+    var title = titleMatch ? titleMatch[1].replace(/\s*[-|].*/,'').trim() : 'Imported from URL';
+    var doc = createDoc(title, text, currentTpl, '');
+    switchDoc(doc.id);
+    renderPreview();
+    setStatus('READY', 'ok');
+    toast('Imported from URL: ' + title);
+  }).catch(function(err) {
+    setStatus('READY', 'ok');
+    toast('Failed to fetch URL: ' + err.message);
+  });
+}
+
+// ============================================================
+// COPY AS MARKDOWN (to clipboard)
+// ============================================================
+function copyAsMarkdown() {
+  var canvas = document.getElementById('canvas');
+  if (!canvas) return;
+  var md = htmlToMarkdown(canvas.innerHTML);
+  navigator.clipboard.writeText(md).then(function() {
+    toast('Markdown copied to clipboard');
+  }).catch(function() {
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = md;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('Markdown copied to clipboard');
+  });
+}
+
+// ============================================================
+// ZEN MODE (distraction-free writing)
+// ============================================================
+function toggleZenMode() {
+  document.body.classList.toggle('zen-mode');
+  var btn = document.getElementById('zen-btn');
+  if (document.body.classList.contains('zen-mode')) {
+    if (btn) btn.classList.add('active');
+    toast('Zen mode — press Escape to exit');
+  } else {
+    if (btn) btn.classList.remove('active');
+  }
+}
+
+// ============================================================
+// RECENTLY USED TEMPLATES (sorted by frequency)
+// ============================================================
+var tplUsage = {};
+try { tplUsage = JSON.parse(localStorage.getItem('cb-tpl-usage') || '{}'); } catch(e) { tplUsage = {}; }
+
+function trackTplUsage(tplName) {
+  tplUsage[tplName] = (tplUsage[tplName] || 0) + 1;
+  localStorage.setItem('cb-tpl-usage', JSON.stringify(tplUsage));
+  reorderTemplateButtons();
+}
+
+function reorderTemplateButtons() {
+  var container = document.getElementById('tpl-btn-container');
+  if (!container) return;
+  var btns = Array.from(container.querySelectorAll('[data-tpl]'));
+  btns.sort(function(a, b) {
+    var aCount = tplUsage[a.dataset.tpl || 'white'] || 0;
+    var bCount = tplUsage[b.dataset.tpl || 'white'] || 0;
+    return bCount - aCount;
+  });
+  btns.forEach(function(btn) { container.appendChild(btn); });
+}
+
+// ============================================================
 // INIT
 // ============================================================
 loadDocs();
@@ -7166,6 +7293,8 @@ cvInitEvents();
 })();
 // Restore theme
 restoreTheme();
+// Reorder templates by usage frequency
+reorderTemplateButtons();
 // Brain button injection + init
 (function initBrain() {
   var hdrRight = document.querySelector('.hdr-right');
