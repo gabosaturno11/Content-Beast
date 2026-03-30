@@ -224,6 +224,69 @@ textarea:disabled,input:disabled,select:disabled{opacity:0.4;cursor:not-allowed}
 .pdf-canvas.tpl-minimal h2{font-size:11px;color:#aaa;border-bottom:1px solid #eee;font-weight:400}
 .pdf-canvas.tpl-minimal h3{font-size:13px;font-weight:400;text-transform:none;color:#555}
 
+/* TRAINING GUIDE */
+.pdf-canvas.tpl-training{background:#050711;color:#cbd5e1;padding:48px 52px}
+.pdf-canvas.tpl-training h1{color:#fff;font-size:32px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px}
+.pdf-canvas.tpl-training h2{color:#2dd4bf;font-size:18px;border-bottom:2px solid rgba(45,212,191,0.3);padding-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em}
+.pdf-canvas.tpl-training h3{color:#06b6d4;font-size:14px;font-weight:600}
+.pdf-canvas.tpl-training h4{color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:0.08em}
+.pdf-canvas.tpl-training p,.pdf-canvas.tpl-training li{color:#94a3b8}
+.pdf-canvas.tpl-training strong{color:#e2e8f0}
+.pdf-canvas.tpl-training blockquote{background:rgba(45,212,191,0.06);border-left:3px solid #2dd4bf;color:#5eead4;padding:12px 16px}
+.pdf-canvas.tpl-training table{width:100%;border-collapse:collapse;margin:12px 0}
+.pdf-canvas.tpl-training th{background:rgba(45,212,191,0.12);border:1px solid #1e293b;color:#2dd4bf;padding:8px 12px;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;text-align:left}
+.pdf-canvas.tpl-training td{border:1px solid #1e293b;color:#94a3b8;padding:8px 12px;font-size:11px}
+.pdf-canvas.tpl-training tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
+.pdf-canvas.tpl-training hr{border-top-color:#1e293b}
+.pdf-canvas.tpl-training .pdf-footer{color:#334155;border-top-color:#1e293b}
+
+/* RESEARCH REPORT */
+.pdf-canvas.tpl-research{background:#0a0a0e;color:#cbd5e1;padding:52px 56px}
+.pdf-canvas.tpl-research h1{color:#fff;font-size:26px;font-weight:600;letter-spacing:-0.01em;border-bottom:2px solid rgba(56,189,248,0.3);padding-bottom:8px}
+.pdf-canvas.tpl-research h2{color:#38bdf8;font-size:15px;font-weight:600;counter-increment:section;border-bottom:1px solid rgba(56,189,248,0.15);padding-bottom:4px}
+.pdf-canvas.tpl-research h2::before{content:counter(section) ". ";color:#64748b}
+.pdf-canvas.tpl-research h3{color:#94a3b8;font-size:12px;font-weight:600}
+.pdf-canvas.tpl-research h4{color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:0.06em}
+.pdf-canvas.tpl-research p,.pdf-canvas.tpl-research li{color:#94a3b8;line-height:1.7}
+.pdf-canvas.tpl-research strong{color:#e2e8f0}
+.pdf-canvas.tpl-research blockquote{background:rgba(56,189,248,0.05);border-left:3px solid #38bdf8;color:#7dd3fc;padding:16px 20px;font-size:12px;margin:16px 0}
+.pdf-canvas.tpl-research th{background:rgba(56,189,248,0.08);border:1px solid #1e293b;color:#38bdf8;padding:6px 10px;font-size:10px;text-transform:uppercase}
+.pdf-canvas.tpl-research td{border:1px solid #1e293b;color:#94a3b8;padding:6px 10px}
+.pdf-canvas.tpl-research hr{border-top-color:#1e293b}
+.pdf-canvas.tpl-research .pdf-footer{color:#334155;border-top-color:#1e293b}
+body .pdf-canvas.tpl-research{counter-reset:section}
+
+/* RANT COMPILATION */
+.pdf-canvas.tpl-rant{background:#0a0a0a;color:#e2e8f0;padding:40px 48px}
+.pdf-canvas.tpl-rant h1{color:#fff;font-size:28px;font-weight:700;letter-spacing:-0.02em}
+.pdf-canvas.tpl-rant h2{color:#f87171;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;border-bottom:none;margin-top:24px}
+.pdf-canvas.tpl-rant h3{color:#fbbf24;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em}
+.pdf-canvas.tpl-rant h4{color:#64748b;font-size:9px;text-transform:uppercase;letter-spacing:0.08em}
+.pdf-canvas.tpl-rant p,.pdf-canvas.tpl-rant li{color:#cbd5e1;line-height:1.6}
+.pdf-canvas.tpl-rant blockquote{background:rgba(248,113,113,0.06);border-left:3px solid #f87171;color:#fca5a5;padding:16px 20px;margin:12px 0;border-radius:0 6px 6px 0}
+.pdf-canvas.tpl-rant strong{color:#fff}
+.pdf-canvas.tpl-rant th{background:rgba(248,113,113,0.08);border:1px solid #222;color:#f87171}
+.pdf-canvas.tpl-rant td{border:1px solid #1a1a1a;color:#94a3b8}
+.pdf-canvas.tpl-rant hr{border-top:1px dashed #333;margin:20px 0}
+.pdf-canvas.tpl-rant .pdf-footer{color:#334155;border-top-color:#222}
+
+/* PROMPT LIBRARY */
+.pdf-canvas.tpl-prompt{background:#0c0c10;color:#cbd5e1;padding:44px 48px;font-family:var(--mono)}
+.pdf-canvas.tpl-prompt h1{color:#fff;font-size:24px;font-weight:700;letter-spacing:-0.01em;font-family:var(--sans)}
+.pdf-canvas.tpl-prompt h2{color:#4ade80;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;border-bottom:1px solid rgba(74,222,128,0.2);padding-bottom:4px;font-family:var(--sans)}
+.pdf-canvas.tpl-prompt h3{color:#2dd4bf;font-size:11px;font-weight:600;font-family:var(--sans)}
+.pdf-canvas.tpl-prompt h4{color:#64748b;font-size:9px;text-transform:uppercase;letter-spacing:0.06em;font-family:var(--mono)}
+.pdf-canvas.tpl-prompt p{color:#94a3b8;line-height:1.6;font-size:11px}
+.pdf-canvas.tpl-prompt li{color:#94a3b8;font-size:11px}
+.pdf-canvas.tpl-prompt blockquote{background:rgba(74,222,128,0.04);border-left:3px solid #4ade80;color:#86efac;padding:12px 16px;font-family:var(--mono);font-size:11px;white-space:pre-wrap;border-radius:0 4px 4px 0}
+.pdf-canvas.tpl-prompt pre,.pdf-canvas.tpl-prompt code{background:rgba(255,255,255,0.04);color:#86efac;padding:2px 6px;border-radius:3px;font-size:10px;font-family:var(--mono)}
+.pdf-canvas.tpl-prompt pre{padding:12px 16px;border:1px solid rgba(74,222,128,0.12);margin:8px 0;white-space:pre-wrap}
+.pdf-canvas.tpl-prompt strong{color:#e2e8f0}
+.pdf-canvas.tpl-prompt th{background:rgba(74,222,128,0.08);border:1px solid #1e293b;color:#4ade80;font-size:9px;text-transform:uppercase}
+.pdf-canvas.tpl-prompt td{border:1px solid #1e293b;color:#94a3b8;font-size:10px}
+.pdf-canvas.tpl-prompt hr{border-top-color:#1e293b}
+.pdf-canvas.tpl-prompt .pdf-footer{color:#334155;border-top-color:#1e293b}
+
 /* PAGE EST */
 .page-est{font-size:var(--text-xs);color:var(--text-muted);text-align:center;padding:6px;margin-top:8px}
 
@@ -344,10 +407,10 @@ textarea:disabled,input:disabled,select:disabled{opacity:0.4;cursor:not-allowed}
 .pdf-canvas .callout-warning{background:#fffbeb;border-left:3px solid #f59e0b;color:#92400e}
 .pdf-canvas .callout-tip{background:#f0fdf4;border-left:3px solid #22c55e;color:#166534}
 .pdf-canvas .callout-fire{background:#fef2f2;border-left:3px solid #ef4444;color:#991b1b}
-.pdf-canvas.tpl-dark .callout-info,.pdf-canvas.tpl-saturno .callout-info{background:rgba(59,130,246,0.08);color:#93c5fd}
-.pdf-canvas.tpl-dark .callout-warning,.pdf-canvas.tpl-saturno .callout-warning{background:rgba(245,158,11,0.08);color:#fcd34d}
-.pdf-canvas.tpl-dark .callout-tip,.pdf-canvas.tpl-saturno .callout-tip{background:rgba(34,197,94,0.08);color:#86efac}
-.pdf-canvas.tpl-dark .callout-fire,.pdf-canvas.tpl-saturno .callout-fire{background:rgba(239,68,68,0.08);color:#fca5a5}
+.pdf-canvas.tpl-dark .callout-info,.pdf-canvas.tpl-saturno .callout-info,.pdf-canvas.tpl-training .callout-info,.pdf-canvas.tpl-research .callout-info,.pdf-canvas.tpl-rant .callout-info,.pdf-canvas.tpl-prompt .callout-info{background:rgba(59,130,246,0.08);color:#93c5fd}
+.pdf-canvas.tpl-dark .callout-warning,.pdf-canvas.tpl-saturno .callout-warning,.pdf-canvas.tpl-training .callout-warning,.pdf-canvas.tpl-research .callout-warning,.pdf-canvas.tpl-rant .callout-warning,.pdf-canvas.tpl-prompt .callout-warning{background:rgba(245,158,11,0.08);color:#fcd34d}
+.pdf-canvas.tpl-dark .callout-tip,.pdf-canvas.tpl-saturno .callout-tip,.pdf-canvas.tpl-training .callout-tip,.pdf-canvas.tpl-research .callout-tip,.pdf-canvas.tpl-rant .callout-tip,.pdf-canvas.tpl-prompt .callout-tip{background:rgba(34,197,94,0.08);color:#86efac}
+.pdf-canvas.tpl-dark .callout-fire,.pdf-canvas.tpl-saturno .callout-fire,.pdf-canvas.tpl-training .callout-fire,.pdf-canvas.tpl-research .callout-fire,.pdf-canvas.tpl-rant .callout-fire,.pdf-canvas.tpl-prompt .callout-fire{background:rgba(239,68,68,0.08);color:#fca5a5}
 
 /* QUICK INSERT DROPDOWN */
 .qi-menu{position:absolute;background:var(--bg-elevated);border:1px solid var(--border-hover);border-radius:8px;padding:4px;width:200px;z-index:100;display:none;box-shadow:var(--shadow-lg)}
@@ -891,11 +954,11 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .preview{display:block !important;overflow:visible !important}
   .preview-body{overflow:visible !important;padding:0 !important;background:#fff !important}
   .pdf-canvas{box-shadow:none !important;border-radius:0 !important;transform:none !important}
-  .pdf-canvas.tpl-saturno,.pdf-canvas.tpl-dark{background:#fff !important;color:#1a1a1a !important}
-  .pdf-canvas.tpl-saturno h1,.pdf-canvas.tpl-dark h1{color:#111 !important}
-  .pdf-canvas.tpl-saturno h2,.pdf-canvas.tpl-dark h2{color:#666 !important}
-  .pdf-canvas.tpl-saturno h3,.pdf-canvas.tpl-dark h3{color:#333 !important}
-  .pdf-canvas.tpl-saturno p,.pdf-canvas.tpl-dark p,.pdf-canvas.tpl-saturno li,.pdf-canvas.tpl-dark li{color:#333 !important}
+  .pdf-canvas.tpl-saturno,.pdf-canvas.tpl-dark,.pdf-canvas.tpl-training,.pdf-canvas.tpl-research,.pdf-canvas.tpl-rant,.pdf-canvas.tpl-prompt{background:#fff !important;color:#1a1a1a !important}
+  .pdf-canvas.tpl-saturno h1,.pdf-canvas.tpl-dark h1,.pdf-canvas.tpl-training h1,.pdf-canvas.tpl-research h1,.pdf-canvas.tpl-rant h1,.pdf-canvas.tpl-prompt h1{color:#111 !important}
+  .pdf-canvas.tpl-saturno h2,.pdf-canvas.tpl-dark h2,.pdf-canvas.tpl-training h2,.pdf-canvas.tpl-research h2,.pdf-canvas.tpl-rant h2,.pdf-canvas.tpl-prompt h2{color:#666 !important}
+  .pdf-canvas.tpl-saturno h3,.pdf-canvas.tpl-dark h3,.pdf-canvas.tpl-training h3,.pdf-canvas.tpl-research h3,.pdf-canvas.tpl-rant h3,.pdf-canvas.tpl-prompt h3{color:#333 !important}
+  .pdf-canvas.tpl-saturno p,.pdf-canvas.tpl-dark p,.pdf-canvas.tpl-saturno li,.pdf-canvas.tpl-dark li,.pdf-canvas.tpl-training p,.pdf-canvas.tpl-training li,.pdf-canvas.tpl-research p,.pdf-canvas.tpl-research li,.pdf-canvas.tpl-rant p,.pdf-canvas.tpl-rant li,.pdf-canvas.tpl-prompt p,.pdf-canvas.tpl-prompt li{color:#333 !important}
   .page-break{page-break-after:always !important;border:none !important}
   .page-break::after{display:none !important}
 }
@@ -972,6 +1035,10 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
             <button class="mode-btn" data-tpl="tpl-dark" onclick="setTpl(this)">Dark</button>
             <button class="mode-btn" data-tpl="tpl-minimal" onclick="setTpl(this)">Minimal</button>
             <button class="mode-btn" data-tpl="" onclick="setTpl(this)">White</button>
+            <button class="mode-btn" data-tpl="tpl-training" onclick="setTpl(this)">Training</button>
+            <button class="mode-btn" data-tpl="tpl-research" onclick="setTpl(this)">Research</button>
+            <button class="mode-btn" data-tpl="tpl-rant" onclick="setTpl(this)">Rant</button>
+            <button class="mode-btn" data-tpl="tpl-prompt" onclick="setTpl(this)">Prompt Lib</button>
           </div>
         </div>
         <div class="row">
@@ -1554,6 +1621,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
           <option value="speech">Live Speech</option>
           <option value="webinar">Webinar</option>
           <option value="book">Book</option>
+          <option value="harvest">Harvest</option>
         </select>
       </div>
       <div>
@@ -3307,6 +3375,10 @@ const CMD_ACTIONS = [
   { icon: 'A', text: 'Template: Dark', fn: () => { document.querySelector('[data-tpl="tpl-dark"]').click(); } },
   { icon: 'A', text: 'Template: Minimal', fn: () => { document.querySelector('[data-tpl="tpl-minimal"]').click(); } },
   { icon: 'A', text: 'Template: White', fn: () => { document.querySelector('[data-tpl=""]').click(); } },
+  { icon: 'A', text: 'Template: Training Guide', fn: () => { document.querySelector('[data-tpl="tpl-training"]').click(); } },
+  { icon: 'A', text: 'Template: Research Report', fn: () => { document.querySelector('[data-tpl="tpl-research"]').click(); } },
+  { icon: 'A', text: 'Template: Rant Compilation', fn: () => { document.querySelector('[data-tpl="tpl-rant"]').click(); } },
+  { icon: 'A', text: 'Template: Prompt Library', fn: () => { document.querySelector('[data-tpl="tpl-prompt"]').click(); } },
   { icon: 'P', text: 'Preset: Program PDF', fn: () => loadPreset('program') },
   { icon: 'P', text: 'Preset: Level Guide', fn: () => loadPreset('level') },
   { icon: 'P', text: 'Preset: Framework', fn: () => loadPreset('framework') },
@@ -6470,6 +6542,12 @@ const CHANNEL_PRESETS = {
     epBias: ['claim','story','pattern','belief','protocol'],
     collisionPack: ['C003','C009','C017','C011','C004','C012','C015'],
     structureTemplate: '<h1>{BOOK_TITLE}</h1><h2>Part {PART_NUM}: {PART_TITLE}</h2><h3>Chapter {CH_NUM}: {CH_TITLE}</h3><p>{CH_INTRO}</p><h3>Core Argument</h3><p>{ARGUMENT}</p><h3>Evidence</h3><p>{EVIDENCE}</p><h3>Exercise</h3><p>{EXERCISE}</p>'
+  },
+  harvest: {
+    apertureSuggestion: 'os',
+    epBias: ['protocol','command','claim','pattern'],
+    collisionPack: ['C007','C004','C020','C011','C005'],
+    structureTemplate: 'HARVEST PROTOCOL'
   }
 };
 
@@ -6540,7 +6618,21 @@ function buildClaudePayload(seed, target, aperture) {
     vulnerability: parseInt(document.getElementById('dial-vulnerability')?.value || 5),
     abstraction: parseInt(document.getElementById('dial-abstraction')?.value || 5)
   };
-  return { seed: seed, target: target, aperture: aperture, collisionPack: collisionsToUse, epAtoms: epAtoms, voiceDials: voiceDials, structureTemplate: preset.structureTemplate, metaQuestion: BRAIN_SEED_QUESTION };
+  var systemPrompt = null;
+  if (target === 'harvest') {
+    systemPrompt = 'You are a harvest engine. Extract from the provided material:\n' +
+      '1. RANTS — direct operator voice, frustrations, decisions, vision\n' +
+      '2. PROMPTS — reusable prompt templates, system prompts, chains\n' +
+      '3. SPECS — product definitions, what it IS/IS NOT, architecture\n' +
+      '4. PATCHES — behavioral rules, anti-drift rails, naming laws\n' +
+      '5. QUESTIONS — unresolved strategic decisions\n\n' +
+      'For each extraction:\n' +
+      '- Keep the operator\'s exact voice (do not normalize tone)\n' +
+      '- Tag with: type, confidence (DIRECT/ENDORSED/INFERRED), source\n' +
+      '- Mark conflicts as CONFLICT with both versions\n\n' +
+      'Output format:\n## RANTS\n## PROMPTS\n## SPECS\n## PATCHES\n## QUESTIONS\n## CONFLICTS';
+  }
+  return { seed: seed, target: target, aperture: aperture, collisionPack: collisionsToUse, epAtoms: epAtoms, voiceDials: voiceDials, structureTemplate: preset.structureTemplate, metaQuestion: BRAIN_SEED_QUESTION, systemPrompt: systemPrompt };
 }
 
 async function runBrain() {
