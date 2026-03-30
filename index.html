@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>CONTENT BEAST — PDF Maker + Content Tools</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -182,7 +182,8 @@ textarea:disabled,input:disabled,select:disabled{opacity:0.4;cursor:not-allowed}
 .pdf-canvas em{font-style:italic}
 .pdf-canvas hr{border:none;border-top:1px solid #ddd;margin:20px 0}
 .pdf-canvas blockquote{border-left:3px solid #2dd4bf;padding:8px 16px;margin:12px 0;background:#f0fdfa;font-style:italic;color:#555}
-.pdf-canvas code{background:#f4f4f5;padding:1px 4px;border-radius:2px;font-family:var(--mono);font-size:11px}
+.pdf-canvas code{background:#f4f4f5;padding:1px 4px;border-radius:2px;font-family:var(--mono);font-size:11px;word-break:break-word}
+.pdf-canvas pre{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
 .pdf-canvas .pdf-footer{font-size:9px;color:#aaa;margin-top:40px;padding-top:12px;border-top:1px solid #eee;font-family:var(--mono);letter-spacing:0.04em}
 .pdf-canvas table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
 .pdf-canvas th{background:#f8f8f8;font-weight:600;text-align:left;padding:8px 10px;border:1px solid #e5e5e5;font-size:11px;text-transform:uppercase;letter-spacing:0.03em}
@@ -807,33 +808,42 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .workspace{grid-template-columns:180px 1fr 1fr}
   .workspace.sidebar-collapsed{grid-template-columns:var(--sidebar-collapsed) 1fr 1fr}
   .workspace.caption-mode{grid-template-columns:180px 300px 1fr}
-  .pdf-canvas{padding:36px 40px}
+  .pdf-canvas{padding:36px 40px;max-width:100%}
+  .pdf-canvas table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .cover-page{padding:60px 40px}
   .brain-panel{width:340px}
   .preset-grid{grid-template-columns:1fr}
   .export-formats{grid-template-columns:repeat(2,1fr)}
-  .theme-grid{grid-template-columns:repeat(5,1fr)}
+  .theme-grid{grid-template-columns:repeat(3,1fr)}
   .settings-panel{width:340px}
+  /* --- Toolbar scrollable on tablet --- */
+  .cv-toolbar{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:calc(100vw - 400px)}
 }
 
 /* MOBILE */
 @media (max-width: 768px) {
-  /* --- Enforce 10px minimum font size on mobile --- */
+  /* --- Enforce 14px minimum body font on mobile (WCAG/readability) --- */
   :root{
-    --text-xs:10px;--text-sm:11px;--text-base:13px;
-    --text-md:14px;--text-lg:16px;--text-xl:clamp(18px,4.5vw,22px);
+    --text-xs:11px;--text-sm:12px;--text-base:14px;
+    --text-md:15px;--text-lg:17px;--text-xl:clamp(18px,4.5vw,22px);
   }
-  .app{grid-template-rows:44px 1fr 0px}
+  /* --- Safe area insets for notched phones --- */
+  .app{grid-template-rows:calc(44px + env(safe-area-inset-top,0px)) 1fr 0px}
+  .hdr{padding:env(safe-area-inset-top,0px) var(--sp-3) 0;gap:var(--sp-2);height:calc(44px + env(safe-area-inset-top,0px));align-items:flex-end;padding-bottom:0}
+  .mobile-nav{display:flex;padding-bottom:env(safe-area-inset-bottom,0px);height:calc(52px + env(safe-area-inset-bottom,0px))}
   .ftr{display:none}
-  .mobile-nav{display:flex}
   .workspace{display:block !important;overflow:auto}
-  .lib,.ctrl{position:fixed;top:44px;left:0;right:0;bottom:52px;z-index:50;display:none !important;background:var(--bg-base);overflow-y:auto;border:none}
+  /* --- Sidebar: slide-out overlay from left --- */
+  .lib,.ctrl{position:fixed;top:calc(44px + env(safe-area-inset-top,0px));left:0;right:0;bottom:calc(52px + env(safe-area-inset-bottom,0px));z-index:50;display:none !important;background:var(--bg-base);overflow-y:auto;border:none}
   .lib.mobile-show,.ctrl.mobile-show{display:flex !important;animation:fadeSlideUp 0.25s ease}
-  .preview{height:calc(100vh - 44px - 52px);overflow:auto;padding-bottom:60px}
+  .preview{height:calc(100vh - 44px - 52px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow:auto;padding-bottom:60px}
   .preview-body{padding:var(--sp-3);padding-bottom:72px}
   .preview-body>*{max-width:100%}
-  .pdf-canvas{padding:var(--sp-5) var(--sp-4);min-height:auto}
-  .hdr{padding:0 var(--sp-3);gap:var(--sp-2);height:44px}
+  /* --- PDF canvas full-width, fluid padding --- */
+  .pdf-canvas{padding:var(--sp-5) var(--sp-4);min-height:auto;max-width:100%;overflow-x:hidden}
+  .pdf-canvas code{overflow-wrap:break-word;word-break:break-all}
+  .pdf-canvas pre,.pdf-canvas .code-block{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  .pdf-canvas table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
   .hdr-brand h1{font-size:var(--text-base)}
   .hdr .tab-bar{display:none}
   .hdr-right .tab-bar{display:none}
@@ -841,7 +851,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .preview-toolbar{flex-wrap:wrap;gap:2px;padding:var(--sp-2)}
   .preview-toolbar .tb-sep{display:none}
   .preview-toolbar .zoom-bar{display:none}
-  /* 44px touch targets on mobile */
+  /* --- 44px touch targets on mobile (Apple HIG) --- */
   .btn-icon{width:44px;height:44px;font-size:var(--text-md)}
   .wc-bar{font-size:var(--text-xs);gap:var(--sp-2)}
   .wc-bar span:nth-child(n+3){display:none}
@@ -849,23 +859,32 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .btn-sm{min-height:40px;padding:var(--sp-2) var(--sp-3)}
   .mode-btn{min-height:44px;padding:var(--sp-2) var(--sp-3)}
   .preset-card{padding:var(--sp-4);min-height:44px}
-  .atom-card,.cl-item{padding:var(--sp-4)}
+  .atom-card,.cl-item{padding:var(--sp-4);width:100%}
   .lib-item{padding:var(--sp-3) var(--sp-4);min-height:44px}
   .voice-card{padding:var(--sp-3);min-height:44px}
   .slider-card{padding:var(--sp-3) var(--sp-4)}
   .cl-act{width:44px;height:44px}
-  .toast{bottom:64px;right:var(--sp-4);left:var(--sp-4);text-align:center}
-  .export-panel,.shortcuts-modal,.settings-panel{width:calc(100vw - var(--sp-7));max-width:400px}
-  .theme-grid{grid-template-columns:repeat(5,1fr);gap:var(--sp-1)}
+  .toast{bottom:calc(64px + env(safe-area-inset-bottom,0px));right:var(--sp-4);left:var(--sp-4);text-align:center}
+  /* --- Settings panel: full-screen modal on mobile --- */
+  .settings-panel{position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;max-width:100vw;height:100vh;transform:none;border-radius:0;padding:var(--sp-5);padding-top:calc(var(--sp-5) + env(safe-area-inset-top,0px));padding-bottom:calc(var(--sp-5) + env(safe-area-inset-bottom,0px));overflow-y:auto;animation:fadeSlideUp 0.25s var(--ease-out)}
+  .settings-overlay{z-index:1099}
+  .settings-panel{z-index:1100}
+  /* --- Theme grid: 2 columns on mobile --- */
+  .theme-grid{grid-template-columns:repeat(2,1fr);gap:var(--sp-2)}
+  .theme-swatch{min-height:48px}
+  /* --- Export panel: near full-screen on mobile --- */
+  .export-panel{width:calc(100vw - var(--sp-6));max-width:100%;max-height:90vh;overflow-y:auto}
+  .shortcuts-modal{width:calc(100vw - var(--sp-6));max-width:100%;max-height:90vh;overflow-y:auto}
   .quick-export-btn{display:none}
   .cmd-palette{top:10%;width:calc(100vw - var(--sp-6));max-width:none}
   .tbl-modal{width:calc(100vw - var(--sp-7));max-width:340px}
   .ver-panel{width:100vw}
   .ctrl-body{padding:var(--sp-3);padding-bottom:64px}
   .grid2{grid-template-columns:1fr}
-  .cv-container{height:calc(100vh - 44px - 52px)}
-  .cv-toolbar{bottom:58px;padding:var(--sp-1) var(--sp-2);gap:2px}
-  .cv-toolbar button{padding:var(--sp-2);font-size:var(--text-xs);min-height:44px;min-width:44px}
+  /* --- Canvas: full height minus nav bars --- */
+  .cv-container{height:calc(100vh - 44px - 52px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+  .cv-toolbar{bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:var(--sp-1) var(--sp-2);gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:calc(100vw - 20px)}
+  .cv-toolbar button{padding:var(--sp-2);font-size:var(--text-xs);min-height:44px;min-width:44px;flex-shrink:0}
   .cv-toolbar .cv-undo-btn{display:none}
   .cv-toolbar .cv-sep:first-of-type{display:none}
   .cv-node{min-width:140px;max-width:260px;padding:var(--sp-3);padding-left:var(--sp-4)}
@@ -876,20 +895,22 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .cv-empty{padding:0 var(--sp-5)}
   .cv-empty-title{font-size:var(--text-md)}
   .cv-empty-sub{font-size:var(--text-sm)}
+  /* --- Prevent zoom on input focus (16px minimum) --- */
   textarea,input[type="text"],select{min-height:44px;font-size:16px}
   .tab-btn{min-height:44px}
   /* --- Brain panel: full-screen overlay on mobile --- */
   .brain-panel{width:100vw;max-width:100vw;right:-100vw}
   .brain-panel.open{right:0}
-  .brain-hdr{padding:var(--sp-3) var(--sp-4);min-height:48px}
+  .brain-hdr{padding:var(--sp-3) var(--sp-4);min-height:48px;padding-top:calc(var(--sp-3) + env(safe-area-inset-top,0px))}
   .brain-hdr .btn-icon{width:44px;height:44px}
-  .brain-body{padding:var(--sp-3) var(--sp-4) calc(var(--sp-4) + 60px)}
-  .brain-dials{grid-template-columns:1fr 1fr 1fr;gap:var(--sp-3)}
+  .brain-body{padding:var(--sp-3) var(--sp-4) calc(var(--sp-4) + 60px + env(safe-area-inset-bottom,0px))}
+  /* --- Collision matrix dials: stack vertically on mobile --- */
+  .brain-dials{grid-template-columns:1fr;gap:var(--sp-3)}
   .brain-dial-wrap input[type=range]{height:6px;padding:10px 0}
   .brain-chip{padding:var(--sp-1) var(--sp-3);min-height:36px;display:inline-flex;align-items:center}
   .brain-log{max-height:180px}
   .brain-log-entry{padding:var(--sp-2) 0;min-height:44px;display:flex;align-items:center;flex-wrap:wrap}
-  /* --- Mobile touch/spacing overrides for elements now using CSS vars for font-size --- */
+  /* --- Touch/spacing overrides --- */
   .seed-item{padding:var(--sp-2) var(--sp-3);min-height:44px}
   .cl-filter{padding:var(--sp-1) var(--sp-2);min-height:36px}
   .atom-filter{padding:var(--sp-1) var(--sp-2);min-height:36px}
@@ -898,6 +919,20 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .pipeline-stage{min-width:50px;padding:var(--sp-2) var(--sp-1);min-height:44px}
   .level-badge{font-size:var(--text-xs)}
   .cover-page .cover-brand{font-size:var(--text-xs)}
+  /* --- Atomizer drop zone: larger and more prominent on mobile --- */
+  .atom-import{padding:36px 20px;border-width:3px}
+  .atom-import .ai-icon{font-size:28px;margin-bottom:12px}
+  .atom-import .ai-title{font-size:var(--text-base)}
+  .atom-import .ai-sub{font-size:var(--text-sm)}
+  .atom-import .ai-formats{flex-wrap:wrap;gap:6px}
+  .atom-import .ai-fmt{padding:4px 8px;min-height:32px;display:inline-flex;align-items:center}
+  /* --- Caption cards: full width --- */
+  .variant-card{width:100%}
+  .cap-subtabs{gap:1px}
+  .cap-subtab{padding:var(--sp-2) var(--sp-1);font-size:var(--text-xs);min-height:44px}
+  /* --- Platform selector wrap --- */
+  .cl-filters{gap:var(--sp-1)}
+  .atom-filters{gap:var(--sp-1)}
   /* --- Range inputs: larger thumb for touch --- */
   input[type="range"]::-webkit-slider-thumb{width:28px;height:28px}
   input[type="range"]::-moz-range-thumb{width:24px;height:24px}
@@ -914,42 +949,80 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .toggle.on::after{transform:translateX(20px)}
   /* --- Preset grid single column at mobile --- */
   .preset-grid{grid-template-columns:1fr}
-  /* --- Enforce 10px floor on elements with inline font-size (JS-generated) --- */
+  /* --- Voice grid single column at mobile --- */
+  #voice-grid{grid-template-columns:1fr !important}
+  /* --- Drop zones: more prominent for tap --- */
+  .drop-zone{padding:28px 16px;border-width:3px}
+  .drop-zone .dz-text{font-size:var(--text-base)}
+  .cl-import-zone{padding:24px;border-width:3px}
+  /* --- Enforce 11px floor on elements with inline font-size (JS-generated) --- */
   .ctrl-body [style*="font-size:7px"],
   .ctrl-body [style*="font-size:8px"],
   .ctrl-body [style*="font-size:9px"],
+  .ctrl-body [style*="font-size:10px"],
   .preview-body [style*="font-size:7px"],
   .preview-body [style*="font-size:8px"],
   .preview-body [style*="font-size:9px"],
+  .preview-body [style*="font-size:10px"],
   .brain-body [style*="font-size:7px"],
   .brain-body [style*="font-size:8px"],
   .brain-body [style*="font-size:9px"],
+  .brain-body [style*="font-size:10px"],
   .lib [style*="font-size:7px"],
   .lib [style*="font-size:8px"],
   .lib [style*="font-size:9px"],
-  .ver-panel [style*="font-size:9px"]{font-size:10px !important}
+  .lib [style*="font-size:10px"],
+  .ver-panel [style*="font-size:9px"],
+  .ver-panel [style*="font-size:10px"]{font-size:11px !important}
   /* --- Headings: clamp for responsive scaling --- */
   .hdr-brand h1{font-size:clamp(12px,3vw,14px)}
-  .ctrl-hdr .title{font-size:clamp(10px,2.5vw,12px)}
-  .preview-hdr .title{font-size:clamp(10px,2.5vw,12px)}
-  .brain-title{font-size:clamp(11px,3vw,13px)}
+  .ctrl-hdr .title{font-size:clamp(11px,2.5vw,13px)}
+  .preview-hdr .title{font-size:clamp(11px,2.5vw,13px)}
+  .brain-title{font-size:clamp(12px,3vw,14px)}
+  /* --- No horizontal scroll anywhere --- */
+  body{overflow-x:hidden}
+  .workspace{overflow-x:hidden}
+  .preview{overflow-x:hidden}
+  .ctrl-body{overflow-x:hidden}
+  /* --- Cover page responsive --- */
+  .cover-page{padding:40px var(--sp-5);min-height:auto}
+  .cover-page h1{font-size:clamp(24px,7vw,36px)}
+  .cover-page .cover-sub{font-size:clamp(13px,3.5vw,16px)}
 }
 
 /* === SMALL PHONE (480px) === */
 @media (max-width: 480px) {
+  :root{
+    --text-xs:11px;--text-sm:12px;--text-base:14px;
+    --text-md:15px;--text-lg:17px;--text-xl:clamp(18px,5vw,22px);
+  }
   .hdr-brand h1{font-size:12px}
-  .hdr-brand .ver{font-size:10px;padding:1px 6px}
+  .hdr-brand .ver{font-size:11px;padding:1px 6px}
   .preview-body{padding:var(--sp-2);padding-bottom:72px}
   .pdf-canvas{padding:var(--sp-4) var(--sp-3)}
-  .cover-page{padding:40px var(--sp-4);min-height:auto}
-  .cover-page h1{font-size:28px}
-  .cover-page .cover-sub{font-size:13px}
+  .pdf-canvas h1{font-size:clamp(20px,6vw,28px)}
+  .pdf-canvas h2{font-size:clamp(11px,3vw,13px)}
+  .pdf-canvas h3{font-size:clamp(13px,3.5vw,15px)}
+  .cover-page{padding:32px var(--sp-3);min-height:auto}
+  .cover-page h1{font-size:clamp(22px,6.5vw,28px)}
+  .cover-page .cover-sub{font-size:clamp(12px,3vw,14px)}
   .export-formats{grid-template-columns:repeat(2,1fr)}
-  .brain-body{padding:var(--sp-3)}
+  .brain-body{padding:var(--sp-3);padding-bottom:calc(var(--sp-4) + 60px + env(safe-area-inset-bottom,0px))}
   .brain-dials{grid-template-columns:1fr;gap:var(--sp-3)}
-  .mobile-tab{font-size:10px;letter-spacing:0.02em}
+  .mobile-tab{font-size:11px;letter-spacing:0.02em}
   .pipeline{flex-wrap:wrap}
   .pipeline-stage{min-width:calc(33% - 4px)}
+  /* --- Slider cards: full width stack --- */
+  .slider-card{margin-bottom:var(--sp-3)}
+  /* --- Export row: stack on tiny screens --- */
+  .export-row{flex-direction:column;align-items:stretch;gap:var(--sp-2)}
+  .export-row select,.export-row input[type="number"]{width:100%}
+  /* --- Voice grid: definitely single column --- */
+  #voice-grid{grid-template-columns:1fr !important}
+  /* --- Atom templates grid: single column --- */
+  #atom-tpl-grid{grid-template-columns:1fr !important}
+  /* --- Seed library: more height on small screens --- */
+  #seed-lib{max-height:120px}
 }
 
 /* === COLLAPSIBLE SIDEBAR (icon-only when collapsed) === */
