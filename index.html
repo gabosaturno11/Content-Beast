@@ -50,6 +50,8 @@
   --transition-smooth:all var(--duration-normal) var(--ease);
   /* === LAYOUT === */
   --content-max:70ch;
+  /* === SIDEBAR COLLAPSED WIDTH === */
+  --sidebar-collapsed:44px;
 }
 body{font-family:var(--mono);background:var(--bg-void);color:var(--text-secondary);height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-size:var(--text-base);line-height:var(--leading-normal)}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important}}
@@ -748,7 +750,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 .cvdz-text{font-size:var(--text-xs);color:var(--text-muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em}
 
 /* ═══════════════════════════════════════════════
-   BRAIN DRAWER v9.0
+   BRAIN DRAWER v9.1
 ═══════════════════════════════════════════════ */
 .brain-panel{position:fixed;top:0;right:-380px;width:380px;max-width:92vw;height:100vh;background:var(--bg-base);border-left:var(--border-w) solid var(--border);box-shadow:-16px 0 48px rgba(0,0,0,0.65);z-index:1200;display:flex;flex-direction:column;transition:right 0.28s var(--ease);font-family:var(--mono)}
 .brain-panel.open{right:0}
@@ -945,6 +947,51 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   .pipeline-stage{min-width:calc(33% - 4px)}
 }
 
+/* === COLLAPSIBLE SIDEBAR (icon-only when collapsed) === */
+.workspace.sidebar-collapsed{grid-template-columns:var(--sidebar-collapsed) 1fr 1fr}
+.workspace.sidebar-collapsed .lib-hdr,.workspace.sidebar-collapsed .lib-list,.workspace.sidebar-collapsed .sort-bar,.workspace.sidebar-collapsed .lib-search-wrap{display:none}
+.workspace.sidebar-collapsed .lib{overflow:visible}
+.workspace.sidebar-collapsed .lib .sidebar-icons{display:flex}
+.lib .sidebar-icons{display:none;flex-direction:column;align-items:center;gap:2px;padding:var(--sp-2) 0}
+.lib .sidebar-icons .si-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;border-radius:var(--radius);color:var(--text-muted);cursor:pointer;font-size:var(--text-sm);font-family:var(--mono);transition:var(--transition-fast)}
+.lib .sidebar-icons .si-btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+.lib .sidebar-icons .si-btn.active{color:var(--accent);background:var(--accent-glow)}
+
+/* === SETTINGS PANEL === */
+.settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:999;display:none}
+.settings-overlay.open{display:block}
+.settings-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(160deg,rgba(21,21,24,0.97) 0%,rgba(16,16,19,0.97) 100%);backdrop-filter:blur(20px);border:var(--border-w) solid rgba(255,255,255,0.06);border-radius:var(--radius-lg);padding:var(--sp-5);width:360px;max-width:90vw;z-index:1000;display:none;box-shadow:var(--shadow-xl);animation:modalSlideIn 0.2s var(--ease-out)}
+.settings-panel.open{display:block}
+.settings-panel h3{font-size:var(--text-sm);font-weight:600;color:var(--text-primary);margin-bottom:var(--sp-4);text-transform:uppercase;letter-spacing:0.1em;font-family:var(--mono)}
+.theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2);margin-top:var(--sp-2)}
+.theme-swatch{width:100%;aspect-ratio:1;border-radius:var(--radius);cursor:pointer;border:2px solid transparent;transition:var(--transition-fast);position:relative;overflow:hidden}
+.theme-swatch:hover{transform:scale(1.08)}
+.theme-swatch.active{border-color:var(--text-primary);box-shadow:0 0 12px rgba(255,255,255,0.1)}
+.theme-swatch .ts-bg{position:absolute;inset:0;border-radius:inherit}
+.theme-swatch .ts-accent{position:absolute;bottom:0;left:0;right:0;height:4px}
+.theme-label{font-size:var(--text-xs);color:var(--text-muted);text-align:center;margin-top:var(--sp-1);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* === MODE TRANSITIONS === */
+#pdf-ctrl,#cap-ctrl,#atom-ctrl,#cv-ctrl{transition:opacity 0.2s var(--ease),transform 0.2s var(--ease)}
+.mode-entering{animation:modeFadeIn 0.25s var(--ease-out)}
+@keyframes modeFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* === QUICK EXPORT BUTTON === */
+.quick-export-btn{position:relative;overflow:hidden}
+.quick-export-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);transform:translateX(-100%);transition:transform 0.4s}
+.quick-export-btn:hover::after{transform:translateX(100%)}
+
+/* === TEMPLATES DROPDOWN === */
+.tpl-dropdown{position:relative;display:inline-block}
+.tpl-dropdown-menu{position:absolute;top:100%;left:0;background:var(--bg-elevated);border:1px solid var(--border-hover);border-radius:var(--radius);padding:var(--sp-1);width:180px;z-index:100;display:none;box-shadow:var(--shadow-lg);margin-top:2px}
+.tpl-dropdown-menu.open{display:block}
+.tpl-dropdown-item{padding:var(--sp-1) var(--sp-2);font-size:var(--text-sm);color:var(--text-secondary);cursor:pointer;border-radius:var(--radius-sm);font-family:var(--mono);transition:var(--transition-fast)}
+.tpl-dropdown-item:hover{background:rgba(45,212,191,0.06);color:var(--text-primary)}
+.tpl-dropdown-item.active{color:var(--accent)}
+
+/* === CAPTION PREVIEW FORMAT === */
+.variant-preview-label{font-size:var(--text-xs);color:var(--text-muted);padding:var(--sp-2) 0;border-top:1px solid var(--border);margin-top:var(--sp-2);text-transform:uppercase;letter-spacing:0.08em;font-family:var(--mono)}
+
 /* PRINT */
 @media print {
   body{background:#fff !important;overflow:visible !important}
@@ -973,7 +1020,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
   </button>
   <div class="hdr-brand">
     <h1>CONTENT BEAST</h1>
-    <span class="ver">v9.0</span>
+    <span class="ver">v9.1</span>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" onclick="setMode('pdf')">PDF Maker</button>
@@ -982,8 +1029,11 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
     <button class="tab-btn" onclick="setMode('canvas')">Canvas</button>
   </div>
   <div class="hdr-right">
-    <!-- View switcher removed: split/focus were non-functional with contenteditable -->
+    <button class="btn btn-outline btn-sm quick-export-btn" onclick="quickExport()" title="Quick Export PDF" style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.08em;color:var(--green);border-color:rgba(74,222,128,0.2)">Export</button>
     <span id="save-ind" style="font-size:var(--text-xs);color:var(--text-muted);opacity:0;transition:opacity 0.3s">Saved</span>
+    <button class="btn-icon" onclick="openSettings()" title="Settings" style="font-size:var(--text-sm)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
     <span id="status" class="status status-ok"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span> READY</span>
   </div>
 </div>
@@ -992,11 +1042,16 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 
   <!-- LIBRARY -->
   <div class="lib" id="lib-panel">
+    <div class="sidebar-icons">
+      <button class="si-btn" onclick="newDoc()" title="New document">+</button>
+      <button class="si-btn" onclick="importFile()" title="Import file">/</button>
+      <button class="si-btn" onclick="toggleSidebar()" title="Expand sidebar">></button>
+    </div>
     <div class="lib-hdr">
       <button class="btn btn-primary btn-sm" style="flex:1" onclick="newDoc()">+ New</button>
       <button class="btn btn-outline btn-sm" onclick="importFile()" title="Import .md or .txt">Import</button>
     </div>
-    <div style="padding:4px 4px 0">
+    <div class="lib-search-wrap" style="padding:4px 4px 0">
       <input type="text" id="lib-search" placeholder="Search docs..." style="padding:5px 8px;font-size:var(--text-sm);margin-bottom:2px" oninput="filterLibrary()">
     </div>
     <div class="sort-bar">
@@ -1053,20 +1108,18 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
         </div>
         </div>
 
-        <div class="section-toggle" onclick="toggleSection(this)">
-          <label class="lbl">Presets</label>
-          <span class="section-arrow">v</span>
-        </div>
-        <div class="section-content">
         <div class="row">
-          <div class="preset-grid">
-            <div class="preset-card" onclick="loadPreset('program',this)"><div class="pn">Program PDF</div><div class="pd">Workout with exercises, sets, reps</div></div>
-            <div class="preset-card" onclick="loadPreset('level',this)"><div class="pn">Level Guide</div><div class="pd">Foundation to Elite progression</div></div>
-            <div class="preset-card" onclick="loadPreset('framework',this)"><div class="pn">Framework</div><div class="pd">Training methodology breakdown</div></div>
-            <div class="preset-card" onclick="loadPreset('transcript',this)"><div class="pn">Transcript</div><div class="pd">Video key points + actions</div></div>
-            <div class="preset-card" onclick="loadPreset('cover',this)"><div class="pn">Cover Page</div><div class="pd">Branded title page</div></div>
+          <label class="lbl">Preset</label>
+          <div class="tpl-dropdown">
+            <button class="btn btn-outline btn-sm" onclick="this.nextElementSibling.classList.toggle('open')" style="width:100%;justify-content:space-between" id="preset-dropdown-btn">Select Preset... <span style="opacity:0.4">v</span></button>
+            <div class="tpl-dropdown-menu" id="preset-dropdown">
+              <div class="tpl-dropdown-item" onclick="loadPreset('program',this);closePresetDD()">Program PDF <span style="font-size:var(--text-xs);color:var(--text-muted);margin-left:auto">workout</span></div>
+              <div class="tpl-dropdown-item" onclick="loadPreset('level',this);closePresetDD()">Level Guide <span style="font-size:var(--text-xs);color:var(--text-muted);margin-left:auto">progression</span></div>
+              <div class="tpl-dropdown-item" onclick="loadPreset('framework',this);closePresetDD()">Framework <span style="font-size:var(--text-xs);color:var(--text-muted);margin-left:auto">methodology</span></div>
+              <div class="tpl-dropdown-item" onclick="loadPreset('transcript',this);closePresetDD()">Transcript <span style="font-size:var(--text-xs);color:var(--text-muted);margin-left:auto">video notes</span></div>
+              <div class="tpl-dropdown-item" onclick="loadPreset('cover',this);closePresetDD()">Cover Page <span style="font-size:var(--text-xs);color:var(--text-muted);margin-left:auto">branded</span></div>
+            </div>
           </div>
-        </div>
         </div>
 
         <div class="section-toggle" onclick="toggleSection(this)">
@@ -1258,6 +1311,10 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
               <label class="chk"><input type="checkbox" data-pl="linkedin"><span>LinkedIn</span></label>
               <label class="chk"><input type="checkbox" data-pl="tiktok"><span>TikTok</span></label>
             </div>
+          </div>
+          <div id="multiply-preview" style="display:none;margin-bottom:var(--sp-2)">
+            <div class="variant-preview-label">Output Preview</div>
+            <div id="multiply-preview-text" style="font-size:var(--text-xs);color:var(--text-secondary);padding:var(--sp-2);background:var(--bg-elevated);border-radius:var(--radius-sm);max-height:60px;overflow:hidden;line-height:1.5"></div>
           </div>
           <div style="display:flex;gap:4px">
             <button onclick="multiply()" class="btn btn-cyan" style="flex:1">Multiply Variants</button>
@@ -1581,7 +1638,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 </div>
 
 <div class="ftr">
-  <span>CONTENT BEAST v9.0 — by Saturno Movement</span>
+  <span>CONTENT BEAST v9.1 — by Saturno Movement</span>
   <span>Cmd+K: Commands / Cmd+S: Save / Cmd+Shift+S: Export / Cmd+N: New / Cmd+F: Find</span>
 </div>
 
@@ -1597,7 +1654,7 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
 <div class="toast" id="toast"></div>
 <input type="file" id="file-input" accept=".md,.txt,.markdown,.text" style="display:none" onchange="handleFile(this.files[0])">
 
-<!-- ═══ AI BRAIN DRAWER v9.0 ═══ -->
+<!-- ═══ AI BRAIN DRAWER v9.1 ═══ -->
 <div id="brain-panel" class="brain-panel">
   <div class="brain-hdr">
     <div style="display:flex;align-items:center;gap:8px;">
@@ -1666,6 +1723,64 @@ input[type="range"]::-webkit-slider-runnable-track{height:6px;border-radius:3px}
       </div>
     </div>
   </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-overlay" id="settings-overlay" onclick="closeSettings()"></div>
+<div class="settings-panel" id="settings-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-4)">
+    <h3 style="margin-bottom:0">Settings</h3>
+    <button class="btn-icon" onclick="closeSettings()" style="font-size:var(--text-xs)">x</button>
+  </div>
+  <div style="margin-bottom:var(--sp-4)">
+    <label class="lbl">Accent Theme</label>
+    <div class="theme-grid" id="theme-grid">
+      <div>
+        <div class="theme-swatch active" data-theme="cosmic-dark" onclick="applyTheme('cosmic-dark',this)" title="Cosmic Dark">
+          <div class="ts-bg" style="background:#050508"></div>
+          <div class="ts-accent" style="background:#2dd4bf"></div>
+        </div>
+        <div class="theme-label">Cosmic</div>
+      </div>
+      <div>
+        <div class="theme-swatch" data-theme="astra-mint" onclick="applyTheme('astra-mint',this)" title="ASTRA Mint">
+          <div class="ts-bg" style="background:#050508"></div>
+          <div class="ts-accent" style="background:#4ade80"></div>
+        </div>
+        <div class="theme-label">ASTRA</div>
+      </div>
+      <div>
+        <div class="theme-swatch" data-theme="bonus-teal" onclick="applyTheme('bonus-teal',this)" title="Bonus Teal">
+          <div class="ts-bg" style="background:#050711"></div>
+          <div class="ts-accent" style="background:#06b6d4"></div>
+        </div>
+        <div class="theme-label">Bonus</div>
+      </div>
+      <div>
+        <div class="theme-swatch" data-theme="deep-purple" onclick="applyTheme('deep-purple',this)" title="Deep Purple">
+          <div class="ts-bg" style="background:#0a0a12"></div>
+          <div class="ts-accent" style="background:#8b5cf6"></div>
+        </div>
+        <div class="theme-label">Purple</div>
+      </div>
+      <div>
+        <div class="theme-swatch" data-theme="gold-standard" onclick="applyTheme('gold-standard',this)" title="Gold Standard">
+          <div class="ts-bg" style="background:#0a0a0c"></div>
+          <div class="ts-accent" style="background:#ffaa00"></div>
+        </div>
+        <div class="theme-label">Gold</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:var(--sp-4)">
+    <label class="lbl">Sidebar</label>
+    <div style="display:flex;gap:var(--sp-2)">
+      <button class="btn btn-outline btn-sm" onclick="setSidebarMode('full')" id="sb-mode-full" style="flex:1">Full</button>
+      <button class="btn btn-outline btn-sm" onclick="setSidebarMode('icons')" id="sb-mode-icons" style="flex:1">Icons</button>
+      <button class="btn btn-outline btn-sm" onclick="setSidebarMode('hidden')" id="sb-mode-hidden" style="flex:1">Hidden</button>
+    </div>
+  </div>
+  <div style="font-size:var(--text-xs);color:var(--text-muted);text-align:center;padding-top:var(--sp-3);border-top:1px solid var(--border)">CONTENT BEAST v9.1</div>
 </div>
 
 <!-- EXPORT SETTINGS MODAL -->
@@ -2758,18 +2873,21 @@ function setMode(mode) {
   ws.classList.remove('caption-mode');
   if (mode === 'caption') ws.classList.add('caption-mode');
 
-  document.getElementById('pdf-ctrl').style.display = mode === 'pdf' ? '' : 'none';
-  document.getElementById('cap-ctrl').style.display = mode === 'caption' ? '' : 'none';
-  document.getElementById('atom-ctrl').style.display = mode === 'atomizer' ? '' : 'none';
-  document.getElementById('cv-ctrl').style.display = mode === 'canvas' ? '' : 'none';
+  // Smooth mode transition: animate the active control panel in
+  var ctrlIds = ['pdf-ctrl','cap-ctrl','atom-ctrl','cv-ctrl'];
+  var modeMap = {pdf:'pdf-ctrl',caption:'cap-ctrl',atomizer:'atom-ctrl',canvas:'cv-ctrl'};
+  ctrlIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (id === modeMap[mode]) { el.style.display = ''; el.classList.add('mode-entering'); setTimeout(function() { el.classList.remove('mode-entering'); }, 260); }
+    else { el.style.display = 'none'; }
+  });
+
   document.getElementById('pdf-wrap').style.display = mode === 'pdf' ? '' : 'none';
   document.getElementById('atom-preview').style.display = mode === 'atomizer' ? '' : 'none';
-  // Canvas mode: swap preview-body for canvas surface
   document.getElementById('preview-body').style.display = mode === 'canvas' ? 'none' : '';
   document.getElementById('cv-container').style.display = mode === 'canvas' ? 'flex' : 'none';
   document.getElementById('wc-bar').style.display = mode === 'canvas' ? 'none' : '';
   if (mode === 'canvas') cvRender();
-  // Caption mode has sub-modes
   if (mode === 'caption') {
     setCapSub(capSubMode);
   } else {
@@ -2781,7 +2899,6 @@ function setMode(mode) {
   document.getElementById('ctrl-title').textContent = titles[mode] || '';
   document.getElementById('preview-title').textContent = ptitles[mode] || '';
   document.getElementById('preview-toolbar').style.display = mode === 'pdf' ? '' : 'none';
-  // Drop zone: visible in caption/atomizer so users can drag to canvas without switching
   const dz = document.getElementById('cv-dropzone');
   if (dz) dz.classList.toggle('visible', mode === 'caption' || mode === 'atomizer');
 }
@@ -2935,6 +3052,14 @@ function exportPDF() {
 
   const worker = html2pdf().set(opt).from(canvas);
 
+  // Inject timestamp footer for export
+  var exportFooter = document.createElement('div');
+  exportFooter.className = 'pdf-footer export-temp-footer';
+  var exportNow = new Date();
+  exportFooter.textContent = 'Created with Content Beast / ' + exportNow.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  exportFooter.style.cssText = 'font-size:8px;color:' + (isDark ? '#334155' : '#aaa') + ';margin-top:32px;padding-top:10px;border-top:1px solid ' + (isDark ? '#1e293b' : '#eee') + ';font-family:var(--mono);letter-spacing:0.04em;text-align:center';
+  canvas.appendChild(exportFooter);
+
   if (pageNum) {
     worker.toPdf().get('pdf').then(function(pdf) {
       const totalPages = pdf.internal.getNumberOfPages();
@@ -2954,6 +3079,9 @@ function exportPDF() {
   function done() {
     toast('Exported: ' + opt.filename);
     setStatus('READY', 'ok');
+    // Remove temp footer
+    var tmpF = canvas.querySelector('.export-temp-footer');
+    if (tmpF) tmpF.remove();
     if (prevZoom !== 100) { zoom(0); zoom(prevZoom - 100); }
   }
 }
@@ -6268,7 +6396,23 @@ function updateSliderUI(key, val) {
   const pct = ((val - 1) / 9) * 100;
   const slider = document.getElementById('sl-' + key);
   slider.style.background = 'linear-gradient(to right, rgba(45,212,191,0.3) ' + pct + '%, rgba(255,255,255,0.06) ' + pct + '%)';
+  updateMultiplyPreview();
 }
+
+function updateMultiplyPreview() {
+  var seed = (document.getElementById('seed-input').value || '').trim();
+  var previewEl = document.getElementById('multiply-preview');
+  var textEl = document.getElementById('multiply-preview-text');
+  if (!seed || !previewEl || !textEl) { if (previewEl) previewEl.style.display = 'none'; return; }
+  previewEl.style.display = '';
+  var pls = [];
+  document.querySelectorAll('[data-pl]:checked').forEach(function(cb) { pls.push(cb.dataset.pl.toUpperCase()); });
+  var voice = (currentVoice || 'teacher').toUpperCase();
+  textEl.textContent = voice + ' voice / ' + (pls.length ? pls.join(', ') : 'No platforms') + ' / "' + seed.substring(0, 80) + (seed.length > 80 ? '...' : '') + '"';
+}
+
+// Wire preview updates to seed input
+document.getElementById('seed-input').addEventListener('input', updateMultiplyPreview);
 
 // ============================================================
 // PIPELINE ANIMATION
@@ -6291,11 +6435,26 @@ function animatePipeline(stages) {
 // SIDEBAR TOGGLE (Astra-style + localStorage)
 // ============================================================
 function toggleSidebar() {
-  const ws = document.getElementById('workspace');
-  const btn = document.getElementById('sidebar-btn');
-  const isHidden = ws.classList.toggle('two-col');
-  if (btn) btn.classList.toggle('active', !isHidden);
-  localStorage.setItem('cb-sidebar', isHidden ? '0' : '1');
+  var ws = document.getElementById('workspace');
+  var btn = document.getElementById('sidebar-btn');
+  // Cycle: full -> icons -> hidden -> full
+  if (!ws.classList.contains('two-col') && !ws.classList.contains('sidebar-collapsed')) {
+    // Currently full -> go to icons
+    ws.classList.add('sidebar-collapsed');
+    if (btn) btn.classList.remove('active');
+    localStorage.setItem('cb-sidebar', 'icons');
+  } else if (ws.classList.contains('sidebar-collapsed')) {
+    // Currently icons -> go to hidden
+    ws.classList.remove('sidebar-collapsed');
+    ws.classList.add('two-col');
+    if (btn) btn.classList.remove('active');
+    localStorage.setItem('cb-sidebar', 'hidden');
+  } else {
+    // Currently hidden -> go to full
+    ws.classList.remove('two-col');
+    if (btn) btn.classList.add('active');
+    localStorage.setItem('cb-sidebar', 'full');
+  }
 }
 
 function togglePanel(panel) {
@@ -6475,7 +6634,7 @@ function setupDropTarget(el, type) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  CONTENT BEAST v9.0 — AI BRAIN / EPISTEMIC ATOMIZER-SYNTHESIZER
+//  CONTENT BEAST v9.1 — AI BRAIN / EPISTEMIC ATOMIZER-SYNTHESIZER
 //  ONE ORBIT: Seed → Atoms → Collisions → Channel → Artifact → Loop
 // ═══════════════════════════════════════════════════════════════
 
@@ -6738,6 +6897,133 @@ function setEpFilter(ep) {
 }
 
 // ============================================================
+// THEME SYSTEM
+// ============================================================
+var THEMES = {
+  'cosmic-dark':  { bg:'#050508', accent:'#2dd4bf', accentHover:'#5eead4', accentGlow:'rgba(45,212,191,0.06)', borderActive:'rgba(45,212,191,0.35)' },
+  'astra-mint':   { bg:'#050508', accent:'#4ade80', accentHover:'#86efac', accentGlow:'rgba(74,222,128,0.06)', borderActive:'rgba(74,222,128,0.35)' },
+  'bonus-teal':   { bg:'#050711', accent:'#06b6d4', accentHover:'#22d3ee', accentGlow:'rgba(6,182,212,0.06)', borderActive:'rgba(6,182,212,0.35)' },
+  'deep-purple':  { bg:'#0a0a12', accent:'#8b5cf6', accentHover:'#a78bfa', accentGlow:'rgba(139,92,246,0.06)', borderActive:'rgba(139,92,246,0.35)' },
+  'gold-standard':{ bg:'#0a0a0c', accent:'#ffaa00', accentHover:'#ffc233', accentGlow:'rgba(255,170,0,0.06)', borderActive:'rgba(255,170,0,0.35)' }
+};
+
+function applyTheme(name, el) {
+  var t = THEMES[name];
+  if (!t) return;
+  var r = document.documentElement.style;
+  r.setProperty('--bg-void', t.bg);
+  r.setProperty('--accent', t.accent);
+  r.setProperty('--accent-hover', t.accentHover);
+  r.setProperty('--accent-glow', t.accentGlow);
+  r.setProperty('--border-active', t.borderActive);
+  r.setProperty('--glow-accent', '0 0 24px ' + t.accentGlow);
+  document.querySelectorAll('.theme-swatch').forEach(function(s) { s.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  localStorage.setItem('cb-theme', name);
+  toast('Theme: ' + name);
+}
+
+function restoreTheme() {
+  var saved = localStorage.getItem('cb-theme');
+  if (saved && THEMES[saved]) {
+    applyTheme(saved, document.querySelector('.theme-swatch[data-theme="' + saved + '"]'));
+  }
+}
+
+// ============================================================
+// SETTINGS PANEL
+// ============================================================
+function openSettings() {
+  document.getElementById('settings-overlay').classList.add('open');
+  document.getElementById('settings-panel').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('open');
+  document.getElementById('settings-panel').classList.remove('open');
+}
+
+function setSidebarMode(mode) {
+  var ws = document.getElementById('workspace');
+  var btn = document.getElementById('sidebar-btn');
+  ws.classList.remove('two-col', 'sidebar-collapsed');
+  if (mode === 'hidden') { ws.classList.add('two-col'); if (btn) btn.classList.remove('active'); }
+  else if (mode === 'icons') { ws.classList.add('sidebar-collapsed'); if (btn) btn.classList.remove('active'); }
+  else { if (btn) btn.classList.add('active'); }
+  localStorage.setItem('cb-sidebar', mode);
+  document.querySelectorAll('[id^="sb-mode-"]').forEach(function(b) { b.classList.remove('btn-primary'); b.classList.add('btn-outline'); });
+  var activeBtn = document.getElementById('sb-mode-' + mode);
+  if (activeBtn) { activeBtn.classList.add('btn-primary'); activeBtn.classList.remove('btn-outline'); }
+}
+
+// ============================================================
+// QUICK EXPORT (PDF with last settings, includes timestamp + footer)
+// ============================================================
+function quickExport() {
+  snapshotActive();
+  var canvas = document.getElementById('canvas');
+  var title = document.getElementById('f-title').value || 'document';
+  var isDark = currentTpl === 'tpl-saturno' || currentTpl === 'tpl-dark' || currentTpl === 'tpl-training' || currentTpl === 'tpl-research' || currentTpl === 'tpl-rant' || currentTpl === 'tpl-prompt';
+
+  setStatus('EXPORTING...', 'busy');
+
+  // Inject timestamp footer temporarily
+  var tsDiv = document.createElement('div');
+  tsDiv.className = 'pdf-footer quick-export-footer';
+  var now = new Date();
+  tsDiv.textContent = 'Created with Content Beast / ' + now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) + ' at ' + now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  tsDiv.style.cssText = 'font-size:8px;color:' + (isDark ? '#334155' : '#aaa') + ';margin-top:32px;padding-top:10px;border-top:1px solid ' + (isDark ? '#1e293b' : '#eee') + ';font-family:var(--mono);letter-spacing:0.04em;text-align:center';
+  canvas.appendChild(tsDiv);
+
+  var prevZoom = zoomLevel;
+  if (zoomLevel !== 100) { canvas.style.transform = 'scale(1)'; }
+
+  var opt = {
+    margin: [12, 12, 18, 12],
+    filename: title.replace(/[^a-zA-Z0-9_\- ]/g, '_').replace(/\s+/g, '_') + '.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: isDark ? '#0a0a0a' : '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(canvas).toPdf().get('pdf').then(function(pdf) {
+    var totalPages = pdf.internal.getNumberOfPages();
+    var pageW = pdf.internal.pageSize.getWidth();
+    var pageH = pdf.internal.pageSize.getHeight();
+    for (var i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(7);
+      pdf.setTextColor(150);
+      pdf.text('Page ' + i + ' of ' + totalPages, pageW / 2, pageH - 5, { align: 'center' });
+    }
+  }).save().then(function() {
+    toast('Quick Export: ' + opt.filename);
+    setStatus('READY', 'ok');
+    // Remove temp footer
+    var tmpF = canvas.querySelector('.quick-export-footer');
+    if (tmpF) tmpF.remove();
+    if (prevZoom !== 100) { zoom(0); zoom(prevZoom - 100); }
+  });
+}
+
+// ============================================================
+// PRESET DROPDOWN CLOSE
+// ============================================================
+function closePresetDD() {
+  var dd = document.getElementById('preset-dropdown');
+  if (dd) dd.classList.remove('open');
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', function(e) {
+  // Preset dropdown
+  var dd = document.getElementById('preset-dropdown');
+  if (dd && dd.classList.contains('open') && !e.target.closest('.tpl-dropdown')) {
+    dd.classList.remove('open');
+  }
+});
+
+// ============================================================
 // INIT
 // ============================================================
 loadDocs();
@@ -6783,8 +7069,20 @@ cvInitEvents();
   });
 })();
 // Restore sidebar state from localStorage
-// Default to 2-panel (sidebar hidden) unless user explicitly opened it
-if(localStorage.getItem('cb-sidebar')!=='1'){document.getElementById('workspace').classList.add('two-col');var sb=document.getElementById('sidebar-btn');if(sb)sb.classList.remove('active');}
+(function restoreSidebar() {
+  var mode = localStorage.getItem('cb-sidebar') || 'hidden';
+  // Migrate old values
+  if (mode === '0') mode = 'hidden';
+  if (mode === '1') mode = 'full';
+  var ws = document.getElementById('workspace');
+  var btn = document.getElementById('sidebar-btn');
+  ws.classList.remove('two-col', 'sidebar-collapsed');
+  if (mode === 'hidden') { ws.classList.add('two-col'); if (btn) btn.classList.remove('active'); }
+  else if (mode === 'icons') { ws.classList.add('sidebar-collapsed'); if (btn) btn.classList.remove('active'); }
+  else { if (btn) btn.classList.add('active'); }
+})();
+// Restore theme
+restoreTheme();
 // Brain button injection + init
 (function initBrain() {
   var hdrRight = document.querySelector('.hdr-right');
